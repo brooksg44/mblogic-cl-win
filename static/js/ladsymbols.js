@@ -339,6 +339,21 @@ const LadSymbols = (function() {
                 <line x1="30" y1="0" x2="30" y2="${centerY}" class="${stateClass}"/>
                 <line x1="30" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>
             `, stateClass, WIDTH, VLINE_HEIGHT);
+        },
+
+        /**
+         * Output branch middle: vertical through + horizontal to right
+         * Used for middle rows in parallel output coils
+         *     |
+         *     +-------
+         *     |
+         */
+        outputBranchMid: (stateClass) => {
+            const centerY = VLINE_HEIGHT / 2;
+            return wrapSvg(`
+                <line x1="30" y1="0" x2="30" y2="${VLINE_HEIGHT}" class="${stateClass}"/>
+                <line x1="30" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>
+            `, stateClass, WIDTH, VLINE_HEIGHT);
         }
     };
 

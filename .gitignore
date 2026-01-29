@@ -1,0 +1,38 @@
+# Compiled files
+*.fasl
+*.fas
+*.lib
+*.x86f
+*.dfsl
+*.o
+*.so
+*.dylib
+
+# ASDF cache
+.fasls/
+*.asd~
+
+# Editor backups
+*~
+*.bak
+.#*
+\#*\#
+
+# OS files
+.DS_Store
+Thumbs.db
+._*
+*Zone.Identifier
+
+# Cache directories
+.clj-kondo/
+.lsp/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build artifacts
+build/

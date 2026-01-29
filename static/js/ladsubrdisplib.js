@@ -193,6 +193,7 @@ const SubrDispControl = (function() {
         const rows = rung.rows || 1;
         const cols = rung.cols || 1;
         const branches = rung.branches || [];
+        const outputBranches = rung.outputBranches || [];
 
         // Build a 2D grid of cells
         const grid = [];
@@ -211,10 +212,14 @@ const SubrDispControl = (function() {
                 if (isBlockSymbol(cell.symbol) || cell.type === 'block') {
                     blockColumns.add(col);
                 }
+                // Debug: log coil placements
+                if (cell.type === 'coil') {
+                    console.log('Coil', cell.addr, 'placed at row', row, 'col', col);
+                }
             }
         });
 
-        // Build a map of merge columns for quick lookup
+        // Build a map of merge columns for input branches (OR logic)
         // mergeColInfo[col] = { rows: [list of branch rows that merge here] }
         const mergeColInfo = {};
         // Also track which row merges at which column
@@ -231,14 +236,40 @@ const SubrDispControl = (function() {
             }
         });
 
+        // Build a map of output branch columns (parallel coils)
+        // outputColInfo[col] = { rows: [list of rows with coils at this column] }
+        const outputColInfo = {};
+        // Track which rows are output branch rows and at which column
+        const rowOutputCol = {};
+        outputBranches.forEach(ob => {
+            const col = ob.col;
+            const obRows = ob.rows || [];
+            console.log('Output branch:', ob, 'col:', col, 'rows:', obRows);
+            if (col !== undefined && obRows.length > 1) {
+                outputColInfo[col] = { rows: obRows };
+                // Mark rows > 0 as output branch rows (they need connectors)
+                obRows.forEach((r, idx) => {
+                    if (idx > 0) {
+                        rowOutputCol[r] = col;
+                        console.log('  rowOutputCol[' + r + '] = ' + col);
+                    }
+                });
+            }
+        });
+        console.log('Rung', rungNum, 'rows:', rows, 'outputBranches:', outputBranches, 'rowOutputCol:', rowOutputCol);
+
         // Render rows
         let rowsHtml = '';
         for (let r = 0; r < rows; r++) {
             const rowClass = r === 0 ? 'ladder-row ladder-row-main' : 'ladder-row ladder-row-branch';
             let rowCellsHtml = '';
 
-            // For branch rows, determine where this row merges
+            // For input branch rows, determine where this row merges
             const thisBranchMergeCol = rowMergeCol[r] || cols;
+
+            // For output branch rows, determine where the coil is
+            const thisOutputCoilCol = rowOutputCol[r];
+            const isOutputBranchRow = thisOutputCoilCol !== undefined;
 
             for (let c = 0; c < cols; c++) {
                 const cell = grid[r][c];
@@ -248,20 +279,66 @@ const SubrDispControl = (function() {
                 const maxBranchRow = branchRowsAtThisCol.length > 0 ? Math.max(...branchRowsAtThisCol) : 0;
                 const isBlockCol = blockColumns.has(c);
 
+                // Check for output branches at this column
+                const outputInfo = outputColInfo[c];
+                const isAtOutputCol = outputInfo && outputInfo.rows.length > 1;
+                const outputRowsAtThisCol = isAtOutputCol ? outputInfo.rows : [];
+                const maxOutputRow = outputRowsAtThisCol.length > 0 ? Math.max(...outputRowsAtThisCol) : 0;
+
                 if (cell) {
                     // Pass forceBlockWidth if this column contains a block anywhere
                     rowCellsHtml += createCellHtml(cell, isBlockCol);
                 } else if (r === 0) {
                     // Main row: check if this is a merge point (need vertical line down)
+                    // Check for output branches: column before coils needs branchDown
+                    const nextColOutputInfo = outputColInfo[c + 1];
+                    const hasOutputBranchNext = nextColOutputInfo && nextColOutputInfo.rows.length > 1;
+
                     if (isAtMergeCol && maxBranchRow > 0) {
-                        // This is where branches connect - show branchDown symbol
+                        // This is where input branches connect - show branchDown symbol
+                        rowCellsHtml += createVlineCellHtml(r, c, 'branchDown', isBlockCol);
+                    } else if (hasOutputBranchNext) {
+                        // Column before output branch coils - show branchDown
                         rowCellsHtml += createVlineCellHtml(r, c, 'branchDown', isBlockCol);
                     } else {
                         // Regular horizontal line
                         rowCellsHtml += createSpacerHtml(r, c, isBlockCol);
                     }
+                } else if (isOutputBranchRow) {
+                    // This is an output branch row (parallel coils)
+                    // Find the output branch info for this row
+                    const outputBranchAtCol = thisOutputCoilCol;
+                    const outputRows = outputColInfo[outputBranchAtCol]?.rows || [];
+                    const maxOutRow = Math.max(...outputRows);
+                    const isLastOutputRow = r === maxOutRow;
+                    const isBeforeCoil = c < thisOutputCoilCol;
+
+                    if (isBeforeCoil) {
+                        // Check if row 0 has branchDown at this column (empty cell before coils)
+                        const row0HasBranchDown = !grid[0][c] && c === thisOutputCoilCol - 1;
+
+                        if (c === thisOutputCoilCol - 1 && row0HasBranchDown) {
+                            // Column immediately before coil, and row 0 has branchDown
+                            if (isLastOutputRow) {
+                                // Last row: vertical from above, horizontal to right
+                                rowCellsHtml += createVlineCellHtml(r, c, 'branchStart', isBlockCol);
+                            } else {
+                                // Middle row: vertical through + horizontal to right
+                                rowCellsHtml += createVlineCellHtml(r, c, 'outputBranchMid', isBlockCol);
+                            }
+                        } else {
+                            // Just horizontal line (row 0 has content, so no vertical connector)
+                            rowCellsHtml += createSpacerHtml(r, c, isBlockCol);
+                        }
+                    } else if (c === thisOutputCoilCol) {
+                        // At coil column but no cell? This shouldn't happen, but handle it
+                        rowCellsHtml += createEmptyHtml(r, c, isBlockCol);
+                    } else {
+                        // After coil: empty
+                        rowCellsHtml += createEmptyHtml(r, c, isBlockCol);
+                    }
                 } else {
-                    // Branch row
+                    // Input branch row
                     const needsVerticalFromAbove = isAtMergeCol && r <= maxBranchRow;
                     const needsVerticalToBelow = isAtMergeCol && r < maxBranchRow;
                     const isBranchMergeRow = branchRowsAtThisCol.includes(r);

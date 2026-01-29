@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sbcl:*)",
+      "Bash(claude mcp add:*)",
+      "Bash(claude mcp:*)",
+      "Bash(echo '{\"\"jsonrpc\"\":\"\"2.0\"\",\"\"id\"\":3,\"\"method\"\":\"\"tools/call\"\",\"\"params\"\":{\"\"name\"\":\"\"evaluate-lisp\"\",\"\"arguments\"\":{\"\"code\"\":\"\"\\(defun factorial \\(n\\) \\(if \\(<= n 1\\) 1 \\(* n \\(factorial \\(1- n\\)\\)\\)\\)\\) \\(mapcar #'\"''\"'factorial \\(loop for i from 1 to 10 collect i\\)\\)\"\"}}}')",
+      "mcp__lisp__evaluate-lisp",
+      "WebFetch(domain:localhost)",
+      "mcp__lisp__describe-symbol",
+      "mcp__lisp__reset-session"
+    ]
+  }
+}

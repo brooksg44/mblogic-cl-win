@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBLogic-CL Ladder Monitor</title>
+    <link rel="stylesheet" href="/css/ladder.css">
+</head>
+<body>
+    <h1>MBLogic-CL Ladder Monitor</h1>
+
+    <!-- Control Panel -->
+    <div class="control-panel">
+        <button id="btn-monitor" class="btn-monitor">Monitor</button>
+        <button id="btn-start" class="btn-start">Start</button>
+        <button id="btn-stop" class="btn-stop">Stop</button>
+        <button id="btn-step" class="btn-step">Single Scan</button>
+
+        <div class="subroutine-selector">
+            <label for="subr-select">Subroutine:</label>
+            <select id="subr-select">
+                <option value="main">main</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Status Panel -->
+    <div class="status-panel">
+        <div class="status-item">
+            <span class="status-label">Status</span>
+            <span id="status-running" class="status-value stopped">Stopped</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Scan Count</span>
+            <span id="status-scan-count" class="status-value">0</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Scan Time</span>
+            <span id="status-scan-time" class="status-value">0.00 ms</span>
+        </div>
+    </div>
+
+    <!-- Ladder Display Container -->
+    <div id="staticrunglist">
+        <div class="loading">Loading program...</div>
+    </div>
+
+    <!-- Hidden SVG Prototypes (for reference) -->
+    <div id="ladderprototypes" style="display: none;">
+        <!-- Normally Open Contact -->
+        <svg id="proto-noc" viewBox="0 0 60 40">
+            <line x1="0" y1="20" x2="15" y2="20" class="MB_ladderoff"/>
+            <line x1="15" y1="8" x2="15" y2="32" class="MB_ladderoff"/>
+            <line x1="45" y1="8" x2="45" y2="32" class="MB_ladderoff"/>
+            <line x1="45" y1="20" x2="60" y2="20" class="MB_ladderoff"/>
+        </svg>
+
+        <!-- Normally Closed Contact -->
+        <svg id="proto-ncc" viewBox="0 0 60 40">
+            <line x1="0" y1="20" x2="15" y2="20" class="MB_ladderoff"/>
+            <line x1="15" y1="8" x2="15" y2="32" class="MB_ladderoff"/>
+            <line x1="45" y1="8" x2="45" y2="32" class="MB_ladderoff"/>
+            <line x1="18" y1="30" x2="42" y2="10" class="MB_ladderoff"/>
+            <line x1="45" y1="20" x2="60" y2="20" class="MB_ladderoff"/>
+        </svg>
+
+        <!-- Output Coil -->
+        <svg id="proto-out" viewBox="0 0 60 40">
+            <line x1="0" y1="20" x2="15" y2="20" class="MB_ladderoff"/>
+            <circle cx="30" cy="20" r="12" class="MB_ladderoff" fill="none"/>
+            <line x1="45" y1="20" x2="60" y2="20" class="MB_ladderoff"/>
+        </svg>
+
+        <!-- Set Coil -->
+        <svg id="proto-set" viewBox="0 0 60 40">
+            <line x1="0" y1="20" x2="15" y2="20" class="MB_ladderoff"/>
+            <circle cx="30" cy="20" r="12" class="MB_ladderoff" fill="none"/>
+            <text x="30" y="24" text-anchor="middle" font-size="10" class="MB_ladderoff">S</text>
+            <line x1="45" y1="20" x2="60" y2="20" class="MB_ladderoff"/>
+        </svg>
+
+        <!-- Reset Coil -->
+        <svg id="proto-rst" viewBox="0 0 60 40">
+            <line x1="0" y1="20" x2="15" y2="20" class="MB_ladderoff"/>
+            <circle cx="30" cy="20" r="12" class="MB_ladderoff" fill="none"/>
+            <text x="30" y="24" text-anchor="middle" font-size="10" class="MB_ladderoff">R</text>
+            <line x1="45" y1="20" x2="60" y2="20" class="MB_ladderoff"/>
+        </svg>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="/js/servercomm.js"></script>
+    <script src="/js/ladsymbols.js"></script>
+    <script src="/js/ladsubrdisplib.js"></script>
+    <script src="/js/ladmonitor.js"></script>
+</body>
+</html>

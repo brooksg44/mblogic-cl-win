@@ -81,7 +81,8 @@
   (addresses nil)       ; All addresses for monitoring
   (comment nil)         ; Associated comment
   (il-fallback nil)     ; If t, display raw IL instead
-  (branches nil))       ; List of (row start-col merge-col) for branch rendering
+  (branches nil)        ; List of (row start-col merge-col) for input branch rendering
+  (output-branches nil)); List of (col rows...) for parallel output coils
 
 (defstruct ladder-program
   "Complete ladder program structure"
@@ -233,32 +234,70 @@
 ;;; Network to Ladder Rung Conversion
 ;;; ============================================================
 
+(defun multi-address-coil-p (opcode params)
+  "Check if this is a coil instruction with multiple output addresses"
+  (and (coil-instruction-p opcode)
+       (> (length params) 1)))
+
+(defun make-coil-cell (opcode addr col row)
+  "Create a single coil cell for one address"
+  (let ((symbol (cond
+                  ((string-equal opcode "OUT") "out")
+                  ((string-equal opcode "SET") "set")
+                  ((string-equal opcode "RST") "rst")
+                  ((string-equal opcode "PD") "pd")
+                  (t "out"))))
+    (make-ladder-cell
+     :type :coil
+     :symbol symbol
+     :address addr
+     :addresses (list addr)
+     :opcode opcode
+     :params (list addr)
+     :row row
+     :col col
+     :monitor-type :bool)))
+
 (defun network-to-ladder-rung (network)
   "Convert a parsed network to a ladder rung structure.
-   Handles simple linear rungs and OR branches.
+   Handles simple linear rungs, OR branches, and parallel output coils.
 
    Branch logic: When OR/ORN is encountered:
    - A new row is created starting from column 0
    - The OR contact is placed at column 0 on the branch row
    - A merge column is reserved for the vertical connector
    - After processing OR contact, we return to main row
-   - ORSTR explicitly merges all branches (handled structurally)"
+   - ORSTR explicitly merges all branches (handled structurally)
+
+   Parallel coils: Consecutive coil instructions are all parallel:
+   - All coils at the end of a rung share the same logic
+   - Each coil address gets its own row at the same column
+   - Vertical connectors link them for parallel output"
   (let ((instructions (mblogic-cl:network-instructions network))
         (cells nil)
         (all-addresses nil)
         (col 0)
         (current-row 0)
         (max-row 0)
-        (branch-info nil))       ; List of (row start-col merge-col) for rendering
+        (branch-info nil)        ; List of (row start-col merge-col) for input branches
+        (output-branch-info nil) ; List of (col row1 row2 ...) for parallel coils
+        (coil-col nil)           ; Column where parallel coils are placed
+        (coil-rows nil))         ; List of rows with coils at coil-col
 
     ;; Process each instruction
     (dolist (instr instructions)
-      (let* ((opcode (mblogic-cl:parsed-opcode instr)))
+      (let* ((opcode (mblogic-cl:parsed-opcode instr))
+             (params (mblogic-cl:parsed-params instr)))
 
         (cond
           ;; OR starts a new branch row - the contact goes at col 0 on new row
           ;; Reserve current column for the vertical merge connector
           ((and (branch-start-p opcode) (> col 0))
+           ;; Finalize any pending coil group
+           (when (and coil-col coil-rows (> (length coil-rows) 1))
+             (push (cons coil-col (nreverse coil-rows)) output-branch-info))
+           (setf coil-col nil coil-rows nil)
+
            (incf max-row)
            (let ((branch-row max-row)
                  (merge-col col))  ; This column is reserved for vertical connector
@@ -277,16 +316,51 @@
 
           ;; ANDSTR/ORSTR merges branches - structural, no cell needed
           ((branch-end-p opcode)
+           ;; Finalize any pending coil group
+           (when (and coil-col coil-rows (> (length coil-rows) 1))
+             (push (cons coil-col (nreverse coil-rows)) output-branch-info))
+           (setf coil-col nil coil-rows nil)
            (setf current-row 0))
+
+          ;; Coil instruction - group consecutive coils as parallel
+          ((coil-instruction-p opcode)
+           ;; Start a new coil group if not already in one
+           (unless coil-col
+             (setf coil-col col)
+             (setf coil-rows nil))
+           ;; Add each address as a separate coil on its own row
+           (dolist (addr params)
+             (when (mblogic-cl:bool-addr-p addr)
+               (let ((cell (make-coil-cell opcode addr coil-col
+                                           (if (null coil-rows)
+                                               current-row
+                                               (incf max-row)))))
+                 (setf (ladder-cell-row cell) (if (null coil-rows) current-row max-row))
+                 (push cell cells)
+                 (pushnew addr all-addresses :test #'string-equal)
+                 (push (ladder-cell-row cell) coil-rows)))))
 
           ;; Regular instruction - place on current row
           (t
+           ;; Finalize any pending coil group before placing non-coil
+           (when (and coil-col coil-rows (> (length coil-rows) 1))
+             (push (cons coil-col (nreverse coil-rows)) output-branch-info))
+           (when coil-col
+             (incf col))  ; Move past the coil column
+           (setf coil-col nil coil-rows nil)
+
            (let ((cell (instruction-to-cell instr col)))
              (setf (ladder-cell-row cell) current-row)
              (dolist (addr (ladder-cell-addresses cell))
                (pushnew addr all-addresses :test #'string-equal))
              (push cell cells)
              (incf col))))))
+
+    ;; Finalize any pending coil group at end
+    (when (and coil-col coil-rows)
+      (when (> (length coil-rows) 1)
+        (push (cons coil-col (nreverse coil-rows)) output-branch-info))
+      (incf col))
 
     ;; Build the rung with branch metadata
     (make-ladder-rung
@@ -296,7 +370,8 @@
      :cols col
      :addresses (nreverse all-addresses)
      :comment (first (mblogic-cl:network-comments network))
-     :branches (nreverse branch-info))))
+     :branches (nreverse branch-info)
+     :output-branches (nreverse output-branch-info))))
 
 ;;; ============================================================
 ;;; Program/Subroutine to Ladder Conversion
@@ -365,7 +440,11 @@
                            (list :row (first b)
                                  :start-col (second b)
                                  :merge-col (third b)))
-                         (ladder-rung-branches rung))))
+                         (ladder-rung-branches rung))
+        :output-branches (mapcar (lambda (ob)
+                                  (list :col (car ob)
+                                        :rows (cdr ob)))
+                                (ladder-rung-output-branches rung))))
 
 (defun ladder-program-to-plist (ladder-prog)
   "Convert a ladder program to a plist for JSON serialization"
