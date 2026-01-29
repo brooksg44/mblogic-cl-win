@@ -237,16 +237,22 @@ const SubrDispControl = (function() {
         });
 
         // Build a map of output branch columns (parallel coils)
-        // outputColInfo[col] = { rows: [list of rows with coils at this column] }
+        // outputColInfo[col] = { rows: [list of rows with coils], minRow, maxRow, connectorCol }
         const outputColInfo = {};
         // Track which rows are output branch rows and at which column
         const rowOutputCol = {};
+        // Track connector columns that need vertical lines through intermediate rows
+        const connectorColInfo = {};
         outputBranches.forEach(ob => {
             const col = ob.col;
             const obRows = ob.rows || [];
             console.log('Output branch:', ob, 'col:', col, 'rows:', obRows);
             if (col !== undefined && obRows.length > 1) {
-                outputColInfo[col] = { rows: obRows };
+                const minRow = Math.min(...obRows);
+                const maxRow = Math.max(...obRows);
+                const connectorCol = col - 1;
+                outputColInfo[col] = { rows: obRows, minRow, maxRow, connectorCol };
+                connectorColInfo[connectorCol] = { minRow, maxRow, coilRows: new Set(obRows) };
                 // Mark rows > 0 as output branch rows (they need connectors)
                 obRows.forEach((r, idx) => {
                     if (idx > 0) {
@@ -306,48 +312,44 @@ const SubrDispControl = (function() {
                     }
                 } else if (isOutputBranchRow) {
                     // This is an output branch row (parallel coils)
-                    // Find the output branch info for this row
+                    // These rows should ONLY show the vertical connector and coil - no horizontal lines from left
                     const outputBranchAtCol = thisOutputCoilCol;
                     const outputRows = outputColInfo[outputBranchAtCol]?.rows || [];
                     const maxOutRow = Math.max(...outputRows);
                     const isLastOutputRow = r === maxOutRow;
-                    const isBeforeCoil = c < thisOutputCoilCol;
+                    const connectorCol = thisOutputCoilCol - 1;
 
-                    if (isBeforeCoil) {
-                        // Check if row 0 has branchDown at this column (empty cell before coils)
-                        const row0HasBranchDown = !grid[0][c] && c === thisOutputCoilCol - 1;
-
-                        if (c === thisOutputCoilCol - 1 && row0HasBranchDown) {
-                            // Column immediately before coil, and row 0 has branchDown
-                            if (isLastOutputRow) {
-                                // Last row: vertical from above, horizontal to right
-                                rowCellsHtml += createVlineCellHtml(r, c, 'branchStart', isBlockCol);
-                            } else {
-                                // Middle row: vertical through + horizontal to right
-                                rowCellsHtml += createVlineCellHtml(r, c, 'outputBranchMid', isBlockCol);
-                            }
+                    if (c === connectorCol) {
+                        // Connector column: vertical line with horizontal going right to coil
+                        if (isLastOutputRow) {
+                            // Last row: vertical from above, horizontal to right
+                            rowCellsHtml += createVlineCellHtml(r, c, 'branchStart', isBlockCol);
                         } else {
-                            // Just horizontal line (row 0 has content, so no vertical connector)
-                            rowCellsHtml += createSpacerHtml(r, c, isBlockCol);
+                            // Middle row: vertical through + horizontal to right
+                            rowCellsHtml += createVlineCellHtml(r, c, 'outputBranchMid', isBlockCol);
                         }
-                    } else if (c === thisOutputCoilCol) {
-                        // At coil column but no cell? This shouldn't happen, but handle it
-                        rowCellsHtml += createEmptyHtml(r, c, isBlockCol);
                     } else {
-                        // After coil: empty
+                        // All other columns (before connector or after coil): empty
                         rowCellsHtml += createEmptyHtml(r, c, isBlockCol);
                     }
                 } else {
-                    // Input branch row
+                    // Input branch row (OR logic) or intermediate row
                     const needsVerticalFromAbove = isAtMergeCol && r <= maxBranchRow;
                     const needsVerticalToBelow = isAtMergeCol && r < maxBranchRow;
                     const isBranchMergeRow = branchRowsAtThisCol.includes(r);
+
+                    // Check if this column is an output branch connector that needs vertical line
+                    const connInfo = connectorColInfo[c];
+                    const needsOutputVline = connInfo && r > connInfo.minRow && r <= connInfo.maxRow && !connInfo.coilRows.has(r);
 
                     // On branch rows, we only render up to and including the merge column
                     const isBeforeMerge = c < thisBranchMergeCol;
                     const isAtMerge = c === thisBranchMergeCol;
 
-                    if (isBranchMergeRow && isAtMerge) {
+                    if (needsOutputVline) {
+                        // This is an intermediate row at the output connector column - draw vertical line
+                        rowCellsHtml += createVlineCellHtml(r, c, 'vline', isBlockCol);
+                    } else if (isBranchMergeRow && isAtMerge) {
                         // This is the merge point for this branch row
                         if (needsVerticalToBelow) {
                             rowCellsHtml += createVlineCellHtml(r, c, 'branchMerge', isBlockCol);

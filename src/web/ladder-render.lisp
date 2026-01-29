@@ -270,8 +270,8 @@
    - ORSTR explicitly merges all branches (handled structurally)
 
    Parallel coils: Consecutive coil instructions are all parallel:
-   - All coils at the end of a rung share the same logic
-   - Each coil address gets its own row at the same column
+   - A connector column is added before the coils
+   - Each coil address gets its own row at the coil column
    - Vertical connectors link them for parallel output"
   (let ((instructions (mblogic-cl:network-instructions network))
         (cells nil)
@@ -282,7 +282,8 @@
         (branch-info nil)        ; List of (row start-col merge-col) for input branches
         (output-branch-info nil) ; List of (col row1 row2 ...) for parallel coils
         (coil-col nil)           ; Column where parallel coils are placed
-        (coil-rows nil))         ; List of rows with coils at coil-col
+        (coil-rows nil)          ; List of rows with coils at coil-col
+        (first-coil-row nil))    ; The row of the first coil (for connector column)
 
     ;; Process each instruction
     (dolist (instr instructions)
@@ -296,7 +297,7 @@
            ;; Finalize any pending coil group
            (when (and coil-col coil-rows (> (length coil-rows) 1))
              (push (cons coil-col (nreverse coil-rows)) output-branch-info))
-           (setf coil-col nil coil-rows nil)
+           (setf coil-col nil coil-rows nil first-coil-row nil)
 
            (incf max-row)
            (let ((branch-row max-row)
@@ -319,26 +320,29 @@
            ;; Finalize any pending coil group
            (when (and coil-col coil-rows (> (length coil-rows) 1))
              (push (cons coil-col (nreverse coil-rows)) output-branch-info))
-           (setf coil-col nil coil-rows nil)
+           (setf coil-col nil coil-rows nil first-coil-row nil)
            (setf current-row 0))
 
           ;; Coil instruction - group consecutive coils as parallel
           ((coil-instruction-p opcode)
            ;; Start a new coil group if not already in one
+           ;; Reserve current column for connector, coils go in next column
            (unless coil-col
-             (setf coil-col col)
-             (setf coil-rows nil))
+             (setf coil-col (1+ col))  ; Coils at col+1, connector at col
+             (setf coil-rows nil)
+             (setf first-coil-row current-row))
            ;; Add each address as a separate coil on its own row
+           ;; Coils stack directly below first coil: row 0, 1, 2, 3, etc.
            (dolist (addr params)
              (when (mblogic-cl:bool-addr-p addr)
-               (let ((cell (make-coil-cell opcode addr coil-col
-                                           (if (null coil-rows)
-                                               current-row
-                                               (incf max-row)))))
-                 (setf (ladder-cell-row cell) (if (null coil-rows) current-row max-row))
+               (let* ((this-row (if (null coil-rows)
+                                    first-coil-row
+                                    (1+ (apply #'max coil-rows))))  ; Next row after highest coil row
+                      (cell (make-coil-cell opcode addr coil-col this-row)))
                  (push cell cells)
                  (pushnew addr all-addresses :test #'string-equal)
-                 (push (ladder-cell-row cell) coil-rows)))))
+                 (push this-row coil-rows)
+                 (setf max-row (max max-row this-row))))))
 
           ;; Regular instruction - place on current row
           (t
@@ -346,8 +350,8 @@
            (when (and coil-col coil-rows (> (length coil-rows) 1))
              (push (cons coil-col (nreverse coil-rows)) output-branch-info))
            (when coil-col
-             (incf col))  ; Move past the coil column
-           (setf coil-col nil coil-rows nil)
+             (setf col (1+ coil-col)))  ; Move past the coil column
+           (setf coil-col nil coil-rows nil first-coil-row nil)
 
            (let ((cell (instruction-to-cell instr col)))
              (setf (ladder-cell-row cell) current-row)
@@ -359,8 +363,9 @@
     ;; Finalize any pending coil group at end
     (when (and coil-col coil-rows)
       (when (> (length coil-rows) 1)
+        ;; Store the coil column; JS will know connector is at coil-col - 1
         (push (cons coil-col (nreverse coil-rows)) output-branch-info))
-      (incf col))
+      (setf col (1+ coil-col)))
 
     ;; Build the rung with branch metadata
     (make-ladder-rung
