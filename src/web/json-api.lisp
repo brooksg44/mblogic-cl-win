@@ -126,9 +126,10 @@
 ;;; Program Structure Response
 ;;; ============================================================
 
-(defun program-response (interpreter subrname)
+(defun program-response (interpreter subrname &key (format :matrixdata))
   "Generate program structure JSON response.
-   Returns ladder diagram matrix for the named subroutine."
+   Returns ladder diagram matrix for the named subroutine.
+   FORMAT can be :matrixdata (Python-compatible, default) or :legacy."
   (if interpreter
       (let* ((program (mblogic-cl:interpreter-program interpreter))
              (source (when program
@@ -136,7 +137,15 @@
         (if source
             (let ((ladder (program-to-ladder source (or subrname "main"))))
               (if ladder
-                  (plist-to-json (ladder-program-to-plist ladder))
+                  (if (eq format :matrixdata)
+                      ;; New Python-compatible format with explicit branch cells
+                      (plist-to-json
+                       (list :subrname (ladder-program-name ladder)
+                             :addresses (ladder-program-addresses ladder)
+                             :subrdata (mapcar #'rung-to-matrixdata
+                                              (ladder-program-rungs ladder))))
+                      ;; Legacy format (kept for backwards compatibility)
+                      (plist-to-json (ladder-program-to-plist ladder)))
                   (plist-to-json
                    (list :error (format nil "Subroutine '~A' not found" subrname)))))
             (plist-to-json (list :error "No program source available"))))

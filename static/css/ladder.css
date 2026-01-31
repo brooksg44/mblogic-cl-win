@@ -271,6 +271,15 @@ h1, h2, h3 {
     height: 80px;
 }
 
+/* Output column container (for matrixdata format) */
+.ladder-outputs {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    gap: 0;
+    margin-left: 10px;
+}
+
 /* Power rails */
 .power-rail {
     width: 4px;
@@ -308,6 +317,12 @@ h1, h2, h3 {
 .ladder-block-cell {
     width: 140px;
     height: 80px;
+}
+
+/* Branch connector cells (Python matrixdata format) */
+.ladder-branch-cell {
+    /* Branch cells use same dimensions as regular cells */
+    /* They contain branch connector SVGs like branchttr, branchl, etc. */
 }
 
 /* Cell symbol container */

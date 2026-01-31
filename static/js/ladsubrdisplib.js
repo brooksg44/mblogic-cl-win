@@ -1,6 +1,10 @@
 /**
  * ladsubrdisplib.js - Ladder Subroutine Display Library
  * Handles rendering ladder diagram rungs from program data
+ *
+ * Supports both legacy format and Python-compatible matrixdata format.
+ * The matrixdata format includes explicit branch connector cells,
+ * eliminating the need for complex branch computation.
  */
 
 const SubrDispControl = (function() {
@@ -25,34 +29,35 @@ const SubrDispControl = (function() {
         currentAddresses = [];
 
         if (programData && programData.addresses) {
-            // Collect addresses from the program-level addresses array
             currentAddresses = programData.addresses.slice();
         }
 
-        // Also collect addresses from all cells in case program.addresses is incomplete
+        // Collect addresses from rungs
         if (programData && programData.subrdata) {
             programData.subrdata.forEach(rung => {
-                if (rung.addrs) {
-                    rung.addrs.forEach(addr => {
-                        if (addr && !currentAddresses.includes(addr)) {
-                            currentAddresses.push(addr);
-                        }
-                    });
-                }
-                if (rung.cells) {
-                    rung.cells.forEach(cell => {
-                        if (cell.addrs) {
-                            cell.addrs.forEach(addr => {
-                                if (addr && !currentAddresses.includes(addr)) {
-                                    currentAddresses.push(addr);
-                                }
-                            });
-                        }
-                        if (cell.addr && !currentAddresses.includes(cell.addr)) {
-                            currentAddresses.push(cell.addr);
-                        }
-                    });
-                }
+                // Handle both legacy (cells) and new (matrixdata) formats
+                const cells = rung.matrixdata || rung.cells || [];
+                cells.forEach(cell => {
+                    // New format: addr is an array
+                    if (cell.addr && Array.isArray(cell.addr)) {
+                        cell.addr.forEach(addr => {
+                            if (addr && !currentAddresses.includes(addr)) {
+                                currentAddresses.push(addr);
+                            }
+                        });
+                    }
+                    // Legacy format: separate addr and addrs
+                    if (cell.addrs && Array.isArray(cell.addrs)) {
+                        cell.addrs.forEach(addr => {
+                            if (addr && !currentAddresses.includes(addr)) {
+                                currentAddresses.push(addr);
+                            }
+                        });
+                    }
+                    if (cell.addr && typeof cell.addr === 'string' && !currentAddresses.includes(cell.addr)) {
+                        currentAddresses.push(cell.addr);
+                    }
+                });
             });
         }
     }
@@ -75,42 +80,82 @@ const SubrDispControl = (function() {
     }
 
     /**
+     * Normalize cell data to a common format
+     * Handles both legacy and Python matrixdata formats
+     * @param {Object} cell - Cell data in either format
+     * @returns {Object} - Normalized cell data
+     */
+    function normalizeCell(cell) {
+        // Determine symbol name (new format uses 'value', legacy uses 'symbol')
+        const symbol = cell.value || cell.symbol || 'il';
+
+        // Determine addresses (new format: addr is array, legacy: addrs array + addr string)
+        let addresses = [];
+        if (cell.addr && Array.isArray(cell.addr)) {
+            addresses = cell.addr;
+        } else if (cell.addrs && Array.isArray(cell.addrs)) {
+            addresses = cell.addrs;
+        } else if (cell.addr && typeof cell.addr === 'string') {
+            addresses = [cell.addr];
+        }
+
+        // Determine cell type
+        let cellType = cell.type || 'unknown';
+        if (cellType === 'inp') cellType = 'input';
+        if (cellType === 'outp') cellType = 'output';
+
+        // Check if this is a branch connector
+        const isBranch = LadSymbols.isBranchSymbol(symbol);
+
+        return {
+            symbol,
+            addresses,
+            type: cellType,
+            row: cell.row || 0,
+            col: cell.col || 0,
+            opcode: cell.opcode || '',
+            params: cell.params || [],
+            monitor: cell.monitor || null,
+            isBranch,
+            isBlock: isBlockSymbol(symbol),
+            isVertical: LadSymbols.isVerticalBranchSymbol(symbol)
+        };
+    }
+
+    /**
      * Create HTML for a single cell
-     * @param {Object} cell - Cell data
-     * @param {boolean} forceBlockWidth - Force block width even for non-block cells
+     * @param {Object} cell - Normalized cell data
+     * @param {boolean} forceBlockWidth - Force block width
      * @returns {string} - HTML string
      */
     function createCellHtml(cell, forceBlockWidth = false) {
-        const symbol = cell.symbol || 'il';
-        const address = cell.addr || '';
-        const addresses = cell.addrs || [];
-        const opcode = cell.opcode || '';
-        const params = cell.params || [];
-        const cellType = cell.type || 'unknown';
-        const isBlock = isBlockSymbol(symbol) || cellType === 'block';
-        const row = cell.row || 0;
-        const col = cell.col || 0;
+        const { symbol, addresses, type, row, col, opcode, params, isBranch, isBlock, isVertical } = cell;
 
         // Create unique ID for monitoring
         const cellId = `cell-${row}-${col}`;
 
-        // Determine cell class and dimensions
-        // Use block width if cell is a block OR if column contains a block (forceBlockWidth)
-        const useBlockWidth = isBlock || forceBlockWidth;
-        const cellClass = useBlockWidth ? 'ladder-cell ladder-block-cell' : 'ladder-cell';
+        // Determine cell class
+        let cellClass = 'ladder-cell';
+        if (isBlock || forceBlockWidth) {
+            cellClass += ' ladder-block-cell';
+        }
+        if (isBranch) {
+            cellClass += ' ladder-branch-cell';
+        }
+        if (isVertical) {
+            cellClass += ' ladder-vline-cell';
+        }
 
         // Get SVG symbol
         const svgHtml = LadSymbols.getSymbol(symbol, 'MB_ladderoff');
 
-        // Create address display
+        // Create address display (not for branch connectors)
         let addressDisplay = '';
-        if (address) {
-            addressDisplay = `<span class="cell-address">${escapeHtml(address)}</span>`;
-        } else if (addresses.length > 0) {
+        if (!isBranch && addresses.length > 0) {
             addressDisplay = `<span class="cell-address">${escapeHtml(addresses[0])}</span>`;
         }
 
-        // For block types, show parameters below the symbol
+        // For block types, show parameters
         let paramsDisplay = '';
         if (isBlock && params.length > 0) {
             const displayParams = params.slice(0, 4).join(' ');
@@ -140,36 +185,6 @@ const SubrDispControl = (function() {
     }
 
     /**
-     * Create an empty spacer cell for alignment
-     * @param {number} row - Row index
-     * @param {number} col - Column index
-     * @param {boolean} isBlockWidth - If true, use block cell width
-     * @returns {string} - HTML string
-     */
-    function createSpacerHtml(row, col, isBlockWidth = false) {
-        const widthClass = isBlockWidth ? 'ladder-spacer ladder-spacer-block' : 'ladder-spacer';
-        return `<div class="${widthClass}" data-row="${row}" data-col="${col}">
-            ${LadSymbols.getSymbol('hline', 'MB_ladderoff')}
-        </div>`;
-    }
-
-    /**
-     * Create a vertical line cell for branch connections
-     * @param {number} row - Row index
-     * @param {number} col - Column index
-     * @param {string} symbolType - Symbol type: 'vline', 'branchDown', 'branchUp', 'branchMerge', 'branchStart'
-     * @param {boolean} isBlockWidth - If true, use block cell width
-     * @returns {string} - HTML string
-     */
-    function createVlineCellHtml(row, col, symbolType, isBlockWidth = false) {
-        const svgHtml = LadSymbols.getSymbol(symbolType, 'MB_ladderoff');
-        const widthClass = isBlockWidth ? 'ladder-vline-cell ladder-vline-block' : 'ladder-vline-cell';
-        return `<div class="${widthClass}" data-row="${row}" data-col="${col}" data-symbol="${symbolType}">
-            ${svgHtml}
-        </div>`;
-    }
-
-    /**
      * Create an empty placeholder cell
      * @param {number} row - Row index
      * @param {number} col - Column index
@@ -182,11 +197,121 @@ const SubrDispControl = (function() {
     }
 
     /**
-     * Create HTML for a single rung with proper branch handling
+     * Detect format and check if this is Python-compatible matrixdata
+     * @param {Object} rung - Rung data
+     * @returns {boolean} - True if using new matrixdata format
+     */
+    function isMatrixdataFormat(rung) {
+        return rung.matrixdata && Array.isArray(rung.matrixdata);
+    }
+
+    /**
+     * Create HTML for a rung using Python-compatible matrixdata format
+     * This is much simpler since branch connectors are explicit cells.
+     * @param {Object} rung - Rung data with matrixdata
+     * @returns {string} - HTML string
+     */
+    function createRungHtmlMatrixdata(rung) {
+        const rungNum = rung.rungnum || 0;
+        const comment = rung.comment || '';
+        const matrixdata = rung.matrixdata || [];
+
+        // Separate inputs and outputs
+        const inputs = matrixdata.filter(c => c.type === 'inp');
+        const outputs = matrixdata.filter(c => c.type === 'outp');
+
+        // Determine grid dimensions from inputs
+        let maxRow = 0;
+        let maxCol = 0;
+        inputs.forEach(cell => {
+            maxRow = Math.max(maxRow, cell.row || 0);
+            maxCol = Math.max(maxCol, cell.col || 0);
+        });
+        const rows = maxRow + 1;
+        const cols = maxCol + 1;
+
+        // Build a 2D grid from inputs
+        const grid = [];
+        for (let r = 0; r < rows; r++) {
+            grid[r] = new Array(cols).fill(null);
+        }
+
+        // Track which columns have block cells
+        const blockColumns = new Set();
+        inputs.forEach(cell => {
+            const normalized = normalizeCell(cell);
+            const r = normalized.row;
+            const c = normalized.col;
+            if (r < rows && c < cols) {
+                grid[r][c] = normalized;
+                if (normalized.isBlock) {
+                    blockColumns.add(c);
+                }
+            }
+        });
+
+        // Render input rows
+        let rowsHtml = '';
+        for (let r = 0; r < rows; r++) {
+            const rowClass = r === 0 ? 'ladder-row ladder-row-main' : 'ladder-row ladder-row-branch';
+            let rowCellsHtml = '';
+
+            for (let c = 0; c < cols; c++) {
+                const cell = grid[r][c];
+                const isBlockCol = blockColumns.has(c);
+
+                if (cell) {
+                    rowCellsHtml += createCellHtml(cell, isBlockCol);
+                } else {
+                    rowCellsHtml += createEmptyHtml(r, c, isBlockCol);
+                }
+            }
+
+            rowsHtml += `<div class="${rowClass}" data-row="${r}">${rowCellsHtml}</div>`;
+        }
+
+        // Render outputs (in a separate column area)
+        let outputsHtml = '';
+        if (outputs.length > 0) {
+            const outputRows = Math.max(...outputs.map(c => (c.row || 0) + 1), 1);
+            for (let r = 0; r < outputRows; r++) {
+                const outputCell = outputs.find(c => (c.row || 0) === r);
+                if (outputCell) {
+                    const normalized = normalizeCell(outputCell);
+                    outputsHtml += createCellHtml(normalized, false);
+                } else if (r > 0) {
+                    // Empty row in output area - could add vertical connector if needed
+                    outputsHtml += createEmptyHtml(r, cols, false);
+                }
+            }
+        }
+
+        return `
+            <div class="ladder-rung" id="rung-${rungNum}" data-rungnum="${rungNum}" data-rows="${rows}" data-cols="${cols}">
+                <div class="rung-header">
+                    <span class="rung-number">Network ${rungNum}</span>
+                    ${comment ? `<span class="rung-comment">${escapeHtml(comment)}</span>` : ''}
+                </div>
+                <div class="ladder-grid" style="--cols: ${cols}; --rows: ${rows};">
+                    <div class="power-rail left"></div>
+                    <div class="ladder-content">
+                        ${rowsHtml}
+                    </div>
+                    <div class="ladder-outputs">
+                        ${outputsHtml}
+                    </div>
+                    <div class="power-rail right"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Create HTML for a single rung (legacy format with branch computation)
      * @param {Object} rung - Rung data
      * @returns {string} - HTML string
      */
-    function createRungHtml(rung) {
+    function createRungHtmlLegacy(rung) {
         const rungNum = rung.rungnum;
         const cells = rung.cells || [];
         const comment = rung.comment || '';
@@ -204,28 +329,22 @@ const SubrDispControl = (function() {
         // Place cells in grid and track which columns have blocks
         const blockColumns = new Set();
         cells.forEach(cell => {
-            const row = cell.row || 0;
-            const col = cell.col || 0;
+            const normalized = normalizeCell(cell);
+            const row = normalized.row;
+            const col = normalized.col;
             if (row < rows && col < cols) {
-                grid[row][col] = cell;
-                // Track columns that contain block-type cells
-                if (isBlockSymbol(cell.symbol) || cell.type === 'block') {
+                grid[row][col] = normalized;
+                if (normalized.isBlock) {
                     blockColumns.add(col);
-                }
-                // Debug: log coil placements
-                if (cell.type === 'coil') {
-                    console.log('Coil', cell.addr, 'placed at row', row, 'col', col);
                 }
             }
         });
 
-        // Build a map of merge columns for input branches (OR logic)
-        // mergeColInfo[col] = { rows: [list of branch rows that merge here] }
+        // Build branch merge info
         const mergeColInfo = {};
-        // Also track which row merges at which column
         const rowMergeCol = {};
         branches.forEach(branch => {
-            const mergeCol = branch.mergeCol;  // JSON uses camelCase
+            const mergeCol = branch.mergeCol;
             const branchRow = branch.row;
             if (mergeCol !== undefined) {
                 if (!mergeColInfo[mergeCol]) {
@@ -236,46 +355,12 @@ const SubrDispControl = (function() {
             }
         });
 
-        // Build a map of output branch columns (parallel coils)
-        // outputColInfo[col] = { rows: [list of rows with coils], minRow, maxRow, connectorCol }
-        const outputColInfo = {};
-        // Track which rows are output branch rows and at which column
-        const rowOutputCol = {};
-        // Track connector columns that need vertical lines through intermediate rows
-        const connectorColInfo = {};
-        outputBranches.forEach(ob => {
-            const col = ob.col;
-            const obRows = ob.rows || [];
-            console.log('Output branch:', ob, 'col:', col, 'rows:', obRows);
-            if (col !== undefined && obRows.length > 1) {
-                const minRow = Math.min(...obRows);
-                const maxRow = Math.max(...obRows);
-                const connectorCol = col - 1;
-                outputColInfo[col] = { rows: obRows, minRow, maxRow, connectorCol };
-                connectorColInfo[connectorCol] = { minRow, maxRow, coilRows: new Set(obRows) };
-                // Mark rows > 0 as output branch rows (they need connectors)
-                obRows.forEach((r, idx) => {
-                    if (idx > 0) {
-                        rowOutputCol[r] = col;
-                        console.log('  rowOutputCol[' + r + '] = ' + col);
-                    }
-                });
-            }
-        });
-        console.log('Rung', rungNum, 'rows:', rows, 'outputBranches:', outputBranches, 'rowOutputCol:', rowOutputCol);
-
         // Render rows
         let rowsHtml = '';
         for (let r = 0; r < rows; r++) {
             const rowClass = r === 0 ? 'ladder-row ladder-row-main' : 'ladder-row ladder-row-branch';
             let rowCellsHtml = '';
-
-            // For input branch rows, determine where this row merges
             const thisBranchMergeCol = rowMergeCol[r] || cols;
-
-            // For output branch rows, determine where the coil is
-            const thisOutputCoilCol = rowOutputCol[r];
-            const isOutputBranchRow = thisOutputCoilCol !== undefined;
 
             for (let c = 0; c < cols; c++) {
                 const cell = grid[r][c];
@@ -284,86 +369,33 @@ const SubrDispControl = (function() {
                 const branchRowsAtThisCol = isAtMergeCol ? mergeInfo.rows : [];
                 const maxBranchRow = branchRowsAtThisCol.length > 0 ? Math.max(...branchRowsAtThisCol) : 0;
                 const isBlockCol = blockColumns.has(c);
-
-                // Check for output branches at this column
-                const outputInfo = outputColInfo[c];
-                const isAtOutputCol = outputInfo && outputInfo.rows.length > 1;
-                const outputRowsAtThisCol = isAtOutputCol ? outputInfo.rows : [];
-                const maxOutputRow = outputRowsAtThisCol.length > 0 ? Math.max(...outputRowsAtThisCol) : 0;
+                const isBeforeMerge = c < thisBranchMergeCol;
+                const isAtMerge = c === thisBranchMergeCol;
 
                 if (cell) {
-                    // Pass forceBlockWidth if this column contains a block anywhere
                     rowCellsHtml += createCellHtml(cell, isBlockCol);
                 } else if (r === 0) {
-                    // Main row: check if this is a merge point (need vertical line down)
-                    // Check for output branches: column before coils needs branchDown
-                    const nextColOutputInfo = outputColInfo[c + 1];
-                    const hasOutputBranchNext = nextColOutputInfo && nextColOutputInfo.rows.length > 1;
-
                     if (isAtMergeCol && maxBranchRow > 0) {
-                        // This is where input branches connect - show branchDown symbol
-                        rowCellsHtml += createVlineCellHtml(r, c, 'branchDown', isBlockCol);
-                    } else if (hasOutputBranchNext) {
-                        // Column before output branch coils - show branchDown
-                        rowCellsHtml += createVlineCellHtml(r, c, 'branchDown', isBlockCol);
+                        rowCellsHtml += createBranchCellHtml(r, c, 'branchDown', isBlockCol);
                     } else {
-                        // Regular horizontal line
                         rowCellsHtml += createSpacerHtml(r, c, isBlockCol);
                     }
-                } else if (isOutputBranchRow) {
-                    // This is an output branch row (parallel coils)
-                    // These rows should ONLY show the vertical connector and coil - no horizontal lines from left
-                    const outputBranchAtCol = thisOutputCoilCol;
-                    const outputRows = outputColInfo[outputBranchAtCol]?.rows || [];
-                    const maxOutRow = Math.max(...outputRows);
-                    const isLastOutputRow = r === maxOutRow;
-                    const connectorCol = thisOutputCoilCol - 1;
-
-                    if (c === connectorCol) {
-                        // Connector column: vertical line with horizontal going right to coil
-                        if (isLastOutputRow) {
-                            // Last row: vertical from above, horizontal to right
-                            rowCellsHtml += createVlineCellHtml(r, c, 'branchStart', isBlockCol);
-                        } else {
-                            // Middle row: vertical through + horizontal to right
-                            rowCellsHtml += createVlineCellHtml(r, c, 'outputBranchMid', isBlockCol);
-                        }
-                    } else {
-                        // All other columns (before connector or after coil): empty
-                        rowCellsHtml += createEmptyHtml(r, c, isBlockCol);
-                    }
                 } else {
-                    // Input branch row (OR logic) or intermediate row
                     const needsVerticalFromAbove = isAtMergeCol && r <= maxBranchRow;
                     const needsVerticalToBelow = isAtMergeCol && r < maxBranchRow;
                     const isBranchMergeRow = branchRowsAtThisCol.includes(r);
 
-                    // Check if this column is an output branch connector that needs vertical line
-                    const connInfo = connectorColInfo[c];
-                    const needsOutputVline = connInfo && r > connInfo.minRow && r <= connInfo.maxRow && !connInfo.coilRows.has(r);
-
-                    // On branch rows, we only render up to and including the merge column
-                    const isBeforeMerge = c < thisBranchMergeCol;
-                    const isAtMerge = c === thisBranchMergeCol;
-
-                    if (needsOutputVline) {
-                        // This is an intermediate row at the output connector column - draw vertical line
-                        rowCellsHtml += createVlineCellHtml(r, c, 'vline', isBlockCol);
-                    } else if (isBranchMergeRow && isAtMerge) {
-                        // This is the merge point for this branch row
+                    if (isBranchMergeRow && isAtMerge) {
                         if (needsVerticalToBelow) {
-                            rowCellsHtml += createVlineCellHtml(r, c, 'branchMerge', isBlockCol);
+                            rowCellsHtml += createBranchCellHtml(r, c, 'branchMerge', isBlockCol);
                         } else {
-                            rowCellsHtml += createVlineCellHtml(r, c, 'branchUp', isBlockCol);
+                            rowCellsHtml += createBranchCellHtml(r, c, 'branchUp', isBlockCol);
                         }
                     } else if (needsVerticalFromAbove && needsVerticalToBelow && !isBeforeMerge) {
-                        // Vertical pass-through for branches below this one
-                        rowCellsHtml += createVlineCellHtml(r, c, 'vline', isBlockCol);
+                        rowCellsHtml += createBranchCellHtml(r, c, 'vline', isBlockCol);
                     } else if (isBeforeMerge) {
-                        // Before merge point: show horizontal line to connect contact to merge
                         rowCellsHtml += createSpacerHtml(r, c, isBlockCol);
                     } else {
-                        // After merge point on branch row: empty (branch has ended)
                         rowCellsHtml += createEmptyHtml(r, c, isBlockCol);
                     }
                 }
@@ -372,7 +404,6 @@ const SubrDispControl = (function() {
             rowsHtml += `<div class="${rowClass}" data-row="${r}">${rowCellsHtml}</div>`;
         }
 
-        // Build complete rung HTML (no CSS branch connectors needed anymore)
         return `
             <div class="ladder-rung" id="rung-${rungNum}" data-rungnum="${rungNum}" data-rows="${rows}" data-cols="${cols}">
                 <div class="rung-header">
@@ -388,6 +419,40 @@ const SubrDispControl = (function() {
                 </div>
             </div>
         `;
+    }
+
+    /**
+     * Create a branch/vline cell HTML (for legacy format)
+     */
+    function createBranchCellHtml(row, col, symbolType, isBlockWidth = false) {
+        const svgHtml = LadSymbols.getSymbol(symbolType, 'MB_ladderoff');
+        const widthClass = isBlockWidth ? 'ladder-vline-cell ladder-vline-block' : 'ladder-vline-cell';
+        return `<div class="${widthClass}" data-row="${row}" data-col="${col}" data-symbol="${symbolType}">
+            ${svgHtml}
+        </div>`;
+    }
+
+    /**
+     * Create a horizontal spacer cell (for legacy format)
+     */
+    function createSpacerHtml(row, col, isBlockWidth = false) {
+        const widthClass = isBlockWidth ? 'ladder-spacer ladder-spacer-block' : 'ladder-spacer';
+        return `<div class="${widthClass}" data-row="${row}" data-col="${col}">
+            ${LadSymbols.getSymbol('hline', 'MB_ladderoff')}
+        </div>`;
+    }
+
+    /**
+     * Create HTML for a rung (auto-detects format)
+     * @param {Object} rung - Rung data
+     * @returns {string} - HTML string
+     */
+    function createRungHtml(rung) {
+        if (isMatrixdataFormat(rung)) {
+            return createRungHtmlMatrixdata(rung);
+        } else {
+            return createRungHtmlLegacy(rung);
+        }
     }
 
     /**
@@ -451,7 +516,6 @@ const SubrDispControl = (function() {
             svg.classList.remove(removeClass);
             svg.classList.add(stateClass);
 
-            // Update all child elements (lines, circles, rects, text)
             svg.querySelectorAll('line, circle, rect, text').forEach(el => {
                 el.classList.remove(removeClass);
                 el.classList.add(stateClass);
@@ -468,7 +532,6 @@ const SubrDispControl = (function() {
             return;
         }
 
-        // Find all cells with monitored addresses
         document.querySelectorAll('.ladder-cell').forEach(cell => {
             const addressesStr = cell.getAttribute('data-addresses');
             if (!addressesStr) return;
@@ -476,12 +539,10 @@ const SubrDispControl = (function() {
             const addresses = addressesStr.split(',').filter(a => a.trim());
             if (addresses.length === 0) return;
 
-            // Check if any address is "on"
             let isOn = false;
             let displayValue = null;
 
             addresses.forEach(addr => {
-                // Handle both direct property access and potential JSON key issues
                 const value = dataValues[addr];
                 if (value !== undefined) {
                     if (typeof value === 'boolean') {
@@ -497,14 +558,11 @@ const SubrDispControl = (function() {
                 }
             });
 
-            // Update CSS class on the cell
             cell.classList.remove('MB_ladderoff', 'MB_ladderon');
             cell.classList.add(isOn ? 'MB_ladderon' : 'MB_ladderoff');
 
-            // Update SVG elements inside
             updateSvgClasses(cell, isOn);
 
-            // Update value display if applicable
             const valueEl = cell.querySelector('.cell-value');
             if (valueEl) {
                 if (displayValue !== null) {
@@ -515,9 +573,6 @@ const SubrDispControl = (function() {
                 }
             }
         });
-
-        // Also update vline cells for branch visualization
-        // For now, vline cells stay in their default state since they don't have addresses
     }
 
     /**

@@ -354,7 +354,120 @@ const LadSymbols = (function() {
                 <line x1="30" y1="0" x2="30" y2="${VLINE_HEIGHT}" class="${stateClass}"/>
                 <line x1="30" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>
             `, stateClass, WIDTH, VLINE_HEIGHT);
-        }
+        },
+
+        // ============================================================
+        // Python-compatible branch connector symbols (matrixdata format)
+        // These match the Python MBLogic PLCLadder.py output
+        // ============================================================
+
+        /**
+         * Horizontal bar - wire segment
+         * ─────────
+         */
+        hbar: (stateClass) => wrapSvg(`
+            <line x1="0" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>
+        `, stateClass),
+
+        /**
+         * Branch Top-To-Right (branchttr): Top of branch fork
+         * ────┐
+         *     │
+         */
+        branchttr: (stateClass) => {
+            const centerY = VLINE_HEIGHT / 2;
+            return wrapSvg(`
+                <line x1="0" y1="${centerY}" x2="30" y2="${centerY}" class="${stateClass}"/>
+                <line x1="30" y1="${centerY}" x2="30" y2="${VLINE_HEIGHT}" class="${stateClass}"/>
+            `, stateClass, WIDTH, VLINE_HEIGHT);
+        },
+
+        /**
+         * Branch Middle-Right (branchtr): Middle rows of branch fork
+         *     │
+         * ────┤
+         *     │
+         */
+        branchtr: (stateClass) => {
+            const centerY = VLINE_HEIGHT / 2;
+            return wrapSvg(`
+                <line x1="30" y1="0" x2="30" y2="${VLINE_HEIGHT}" class="${stateClass}"/>
+                <line x1="0" y1="${centerY}" x2="30" y2="${centerY}" class="${stateClass}"/>
+            `, stateClass, WIDTH, VLINE_HEIGHT);
+        },
+
+        /**
+         * Branch Bottom-Right (branchr): Bottom of branch fork
+         *     │
+         * ────┘
+         */
+        branchr: (stateClass) => {
+            const centerY = VLINE_HEIGHT / 2;
+            return wrapSvg(`
+                <line x1="30" y1="0" x2="30" y2="${centerY}" class="${stateClass}"/>
+                <line x1="0" y1="${centerY}" x2="30" y2="${centerY}" class="${stateClass}"/>
+            `, stateClass, WIDTH, VLINE_HEIGHT);
+        },
+
+        /**
+         * Vertical bar right (vbarr): Vertical line, no junction
+         *     │
+         *     │
+         *     │
+         */
+        vbarr: (stateClass) => wrapSvg(`
+            <line x1="30" y1="0" x2="30" y2="${VLINE_HEIGHT}" class="${stateClass}"/>
+        `, stateClass, WIDTH, VLINE_HEIGHT),
+
+        /**
+         * Branch Top-To-Left (branchttl): Top of merge
+         *     ┌────
+         *     │
+         */
+        branchttl: (stateClass) => {
+            const centerY = VLINE_HEIGHT / 2;
+            return wrapSvg(`
+                <line x1="30" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>
+                <line x1="30" y1="${centerY}" x2="30" y2="${VLINE_HEIGHT}" class="${stateClass}"/>
+            `, stateClass, WIDTH, VLINE_HEIGHT);
+        },
+
+        /**
+         * Branch Middle-Left (branchtl): Middle rows of merge
+         *     │
+         *     ├────
+         *     │
+         */
+        branchtl: (stateClass) => {
+            const centerY = VLINE_HEIGHT / 2;
+            return wrapSvg(`
+                <line x1="30" y1="0" x2="30" y2="${VLINE_HEIGHT}" class="${stateClass}"/>
+                <line x1="30" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>
+            `, stateClass, WIDTH, VLINE_HEIGHT);
+        },
+
+        /**
+         * Branch Bottom-Left (branchl): Bottom of merge
+         *     │
+         *     └────
+         */
+        branchl: (stateClass) => {
+            const centerY = VLINE_HEIGHT / 2;
+            return wrapSvg(`
+                <line x1="30" y1="0" x2="30" y2="${centerY}" class="${stateClass}"/>
+                <line x1="30" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>
+            `, stateClass, WIDTH, VLINE_HEIGHT);
+        },
+
+        /**
+         * Vertical bar left (vbarl): Vertical line, no junction (left side)
+         *     │
+         *     │
+         *     │
+         */
+        vbarl: (stateClass) => wrapSvg(`
+            <line x1="30" y1="0" x2="30" y2="${VLINE_HEIGHT}" class="${stateClass}"/>
+        `, stateClass, WIDTH, VLINE_HEIGHT)
     };
 
     /**
@@ -393,14 +506,46 @@ const LadSymbols = (function() {
         return blockSymbols.includes(symbolName);
     }
 
+    /**
+     * Check if a symbol is a branch connector (Python matrixdata format)
+     * @param {string} symbolName - Symbol name
+     * @returns {boolean}
+     */
+    function isBranchSymbol(symbolName) {
+        const branchSymbols = [
+            'branchttr', 'branchtr', 'branchr', 'vbarr',
+            'branchttl', 'branchtl', 'branchl', 'vbarl',
+            'hbar'
+        ];
+        return branchSymbols.includes(symbolName);
+    }
+
+    /**
+     * Check if a symbol is a vertical branch connector (needs taller cell)
+     * @param {string} symbolName - Symbol name
+     * @returns {boolean}
+     */
+    function isVerticalBranchSymbol(symbolName) {
+        const verticalSymbols = [
+            'branchttr', 'branchtr', 'branchr', 'vbarr',
+            'branchttl', 'branchtl', 'branchl', 'vbarl',
+            'vline', 'branchDown', 'branchUp', 'branchMerge',
+            'branchStart', 'outputBranchMid'
+        ];
+        return verticalSymbols.includes(symbolName);
+    }
+
     // Public API
     return {
         getSymbol,
         getSymbolNames,
         isBlockSymbol,
+        isBranchSymbol,
+        isVerticalBranchSymbol,
         WIDTH,
         HEIGHT,
         BLOCK_WIDTH,
-        BLOCK_HEIGHT
+        BLOCK_HEIGHT,
+        VLINE_HEIGHT
     };
 })();
