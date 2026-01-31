@@ -91,6 +91,91 @@
   (addresses nil))      ; All unique addresses
 
 ;;; ============================================================
+;;; Branch Connector Types (Python-compatible)
+;;; ============================================================
+;;; These match the Python MBLogic matrixdata format exactly.
+;;; Branch connectors are explicit cells in the matrix, not computed at render time.
+
+;; Branch connector symbol names
+(defparameter *branch-ttr* "branchttr"   "Top-right corner: ┐ - top of branch fork")
+(defparameter *branch-tr*  "branchtr"    "Middle-right T: ┤ - middle rows of branch fork")
+(defparameter *branch-r*   "branchr"     "Bottom-right corner: ┘ - bottom of branch fork")
+(defparameter *vbar-r*     "vbarr"       "Vertical bar right: │ - no junction (right side)")
+(defparameter *branch-ttl* "branchttl"   "Top-left corner: ┌ - top of merge")
+(defparameter *branch-tl*  "branchtl"    "Middle-left T: ├ - middle rows of merge")
+(defparameter *branch-l*   "branchl"     "Bottom-left corner: └ - bottom of merge")
+(defparameter *vbar-l*     "vbarl"       "Vertical bar left: │ - no junction (left side)")
+(defparameter *hbar*       "hbar"        "Horizontal bar: ─ - wire segment")
+
+;; List of all branch/connector symbols for identification
+(defparameter *branch-symbols*
+  (list *branch-ttr* *branch-tr* *branch-r* *vbar-r*
+        *branch-ttl* *branch-tl* *branch-l* *vbar-l* *hbar*)
+  "All branch connector symbol names")
+
+;; Vertical branch symbols (excludes horizontal)
+(defparameter *vertical-branch-symbols*
+  (list *branch-ttr* *branch-tr* *branch-r* *vbar-r*
+        *branch-ttl* *branch-tl* *branch-l* *vbar-l*)
+  "Vertical branch connector symbols")
+
+(defun branch-symbol-p (symbol)
+  "Check if SYMBOL is a branch connector symbol"
+  (member symbol *branch-symbols* :test #'string-equal))
+
+(defun vertical-branch-symbol-p (symbol)
+  "Check if SYMBOL is a vertical branch connector symbol"
+  (member symbol *vertical-branch-symbols* :test #'string-equal))
+
+;;; ============================================================
+;;; Branch Cell Constructors
+;;; ============================================================
+
+(defun make-branch-cell (symbol &key (row 0) (col 0))
+  "Create a branch connector cell with the given SYMBOL at ROW, COL.
+   Branch cells have no address and monitor type 'none'."
+  (make-ladder-cell
+   :type :branch
+   :symbol symbol
+   :address nil
+   :addresses nil
+   :row row
+   :col col
+   :monitor-type nil))
+
+(defun make-hbar-cell (&key (row 0) (col 0))
+  "Create a horizontal bar cell"
+  (make-branch-cell *hbar* :row row :col col))
+
+(defun make-vbar-l-cell (&key (row 0) (col 0))
+  "Create a vertical bar (left side) cell"
+  (make-branch-cell *vbar-l* :row row :col col))
+
+(defun make-branch-l-cell (&key (row 0) (col 0))
+  "Create a bottom-left corner cell: └"
+  (make-branch-cell *branch-l* :row row :col col))
+
+(defun make-branch-tl-cell (&key (row 0) (col 0))
+  "Create a middle-left T cell: ├"
+  (make-branch-cell *branch-tl* :row row :col col))
+
+(defun make-branch-ttl-cell (&key (row 0) (col 0))
+  "Create a top-left corner cell: ┌"
+  (make-branch-cell *branch-ttl* :row row :col col))
+
+(defun make-branch-tr-cell (&key (row 0) (col 0))
+  "Create a middle-right T cell: ┤"
+  (make-branch-cell *branch-tr* :row row :col col))
+
+(defun make-branch-ttr-cell (&key (row 0) (col 0))
+  "Create a top-right corner cell: ┐"
+  (make-branch-cell *branch-ttr* :row row :col col))
+
+(defun make-branch-r-cell (&key (row 0) (col 0))
+  "Create a bottom-right corner cell: ┘"
+  (make-branch-cell *branch-r* :row row :col col))
+
+;;; ============================================================
 ;;; Instruction Classification
 ;;; ============================================================
 
@@ -99,6 +184,32 @@
   (member opcode '("STR" "STRN" "AND" "ANDN" "OR" "ORN"
                    "STRPD" "STRND" "ANDPD" "ANDND" "ORPD" "ORND")
           :test #'string-equal))
+
+(defun store-instruction-p (opcode)
+  "Check if opcode is a STR (store/start new logic block) instruction"
+  (member opcode '("STR" "STRN" "STRPD" "STRND"
+                   "STRE" "STRNE" "STRGT" "STRLT" "STRGE" "STRLE")
+          :test #'string-equal))
+
+(defun and-instruction-p (opcode)
+  "Check if opcode is an AND instruction (continues current row)"
+  (member opcode '("AND" "ANDN" "ANDPD" "ANDND"
+                   "ANDE" "ANDNE" "ANDGT" "ANDLT" "ANDGE" "ANDLE")
+          :test #'string-equal))
+
+(defun or-instruction-p (opcode)
+  "Check if opcode is an OR instruction (creates parallel branch)"
+  (member opcode '("OR" "ORN" "ORPD" "ORND"
+                   "ORE" "ORNE" "ORGT" "ORLT" "ORGE" "ORLE")
+          :test #'string-equal))
+
+(defun orstr-instruction-p (opcode)
+  "Check if opcode is ORSTR (merge parallel blocks)"
+  (string-equal opcode "ORSTR"))
+
+(defun andstr-instruction-p (opcode)
+  "Check if opcode is ANDSTR (merge series blocks)"
+  (string-equal opcode "ANDSTR"))
 
 (defun coil-instruction-p (opcode)
   "Check if opcode is a coil (output) instruction"
@@ -231,6 +342,192 @@
      :monitor-type (get-monitor-type instruction))))
 
 ;;; ============================================================
+;;; Matrix Operations (Python-compatible algorithm)
+;;; ============================================================
+;;; The ladder matrix is stored as a list of rows: ((row0-cells) (row1-cells) ...)
+;;; Each row is a list of cells (or nil for empty positions).
+;;; This matches the Python PLCLadder.py implementation.
+
+(defun matrix-width (matrix)
+  "Return the width (max column count) of the matrix"
+  (if (null matrix)
+      0
+      (reduce #'max matrix :key #'length :initial-value 0)))
+
+(defun matrix-height (matrix)
+  "Return the height (row count) of the matrix"
+  (length matrix))
+
+(defun copy-cell (cell)
+  "Create a shallow copy of a ladder cell"
+  (when cell
+    (make-ladder-cell
+     :type (ladder-cell-type cell)
+     :symbol (ladder-cell-symbol cell)
+     :address (ladder-cell-address cell)
+     :addresses (copy-list (ladder-cell-addresses cell))
+     :value (ladder-cell-value cell)
+     :opcode (ladder-cell-opcode cell)
+     :params (copy-list (ladder-cell-params cell))
+     :row (ladder-cell-row cell)
+     :col (ladder-cell-col cell)
+     :monitor-type (ladder-cell-monitor-type cell))))
+
+(defun append-cell-to-matrix (cell matrix)
+  "Append CELL to the first row of MATRIX, padding other rows with nil.
+   Returns the modified matrix."
+  (let ((cell-copy (copy-cell cell)))
+    ;; Add to first row
+    (setf (first matrix) (append (first matrix) (list cell-copy)))
+    ;; Pad other rows with nil to keep rectangular
+    (dolist (row (rest matrix))
+      (nconc row (list nil)))
+    matrix))
+
+(defun merge-matrix-below (original-matrix new-matrix)
+  "Merge NEW-MATRIX below ORIGINAL-MATRIX (for OR/ORSTR parallel connections).
+   Pads the narrower matrix with hbar cells to keep rectangular.
+   Returns the merged matrix."
+  (let ((original-width (matrix-width original-matrix))
+        (new-width (matrix-width new-matrix)))
+
+    ;; Pad the narrower matrix
+    (cond
+      ;; Original is wider - pad new matrix
+      ((> original-width new-width)
+       (dolist (row new-matrix)
+         (let ((row-width (length row)))
+           (dotimes (i (- original-width row-width))
+             (let ((last-cell (car (last row))))
+               ;; If last cell is nil or vertical branch, pad with nil
+               ;; Otherwise pad with hbar (horizontal wire)
+               (if (or (null last-cell)
+                       (and last-cell
+                            (vertical-branch-symbol-p (ladder-cell-symbol last-cell))))
+                   (nconc row (list nil))
+                   (nconc row (list (make-hbar-cell)))))))))
+
+      ;; New is wider - pad original matrix
+      ((> new-width original-width)
+       (dolist (row original-matrix)
+         (let ((row-width (length row)))
+           (dotimes (i (- new-width row-width))
+             (let ((last-cell (car (last row))))
+               (if (or (null last-cell)
+                       (and last-cell
+                            (vertical-branch-symbol-p (ladder-cell-symbol last-cell))))
+                   (nconc row (list nil))
+                   (nconc row (list (make-hbar-cell))))))))))
+
+    ;; Merge: append new-matrix rows to original-matrix
+    (nconc original-matrix new-matrix)
+    original-matrix))
+
+(defun merge-matrix-right (original-matrix new-matrix)
+  "Merge NEW-MATRIX to the right of ORIGINAL-MATRIX (for ANDSTR series connection).
+   Inserts left-side branch connectors on the new matrix if it has multiple rows.
+   Returns the merged matrix."
+  (let ((original-height (matrix-height original-matrix))
+        (new-height (matrix-height new-matrix)))
+
+    ;; Add left-side branch connectors if new matrix has multiple rows
+    (when (> new-height 1)
+      (loop for row in new-matrix
+            for i from 0
+            do (push (make-branch-tr-cell) row)  ; Default: middle connector
+               (setf (nth i new-matrix) row))
+      ;; Fix top and bottom corners
+      (setf (ladder-cell-symbol (first (first new-matrix))) *branch-ttr*)  ; Top: ┐
+      (setf (ladder-cell-symbol (first (car (last new-matrix)))) *branch-r*))  ; Bottom: ┘
+
+    ;; Pad to same height
+    (cond
+      ;; Original is taller - pad new matrix with nil rows
+      ((> original-height new-height)
+       (dotimes (i (- original-height new-height))
+         (let ((empty-row (make-list (matrix-width new-matrix) :initial-element nil)))
+           (nconc new-matrix (list empty-row)))))
+
+      ;; New is taller - pad original matrix with nil rows
+      ((> new-height original-height)
+       (dotimes (i (- new-height original-height))
+         (let ((empty-row (make-list (matrix-width original-matrix) :initial-element nil)))
+           (nconc original-matrix (list empty-row))))))
+
+    ;; Merge: append each new row to corresponding original row
+    (loop for orig-row in original-matrix
+          for new-row in new-matrix
+          do (nconc orig-row new-row))
+
+    original-matrix))
+
+(defun close-branch-block (matrix)
+  "Add right-side branch connectors after merging rows (for OR/ORSTR).
+   Adds branchttl at top, branchtl in middle, branchl at bottom.
+   Returns the modified matrix."
+  (let* ((height (matrix-height matrix))
+         (width (matrix-width matrix))
+         (last-row-with-content 0)
+         (widest-row-has-instruction nil))
+
+    ;; Find the last row with content and check if widest row has an instruction
+    (loop for row in matrix
+          for i from 0
+          do (let ((last-cell (car (last row))))
+               (when last-cell
+                 (setf last-row-with-content i)
+                 (when (and (= (length row) width)
+                            (not (branch-symbol-p (ladder-cell-symbol last-cell))))
+                   (setf widest-row-has-instruction t)))))
+
+    ;; Add right-side connectors to each row
+    (loop for row in matrix
+          for i from 0
+          do (cond
+               ;; Past the last row with content - pad with nil if needed
+               ((> i last-row-with-content)
+                (when widest-row-has-instruction
+                  (nconc row (list nil))))
+
+               ;; Empty cell - add vertical bar
+               ((null (car (last row)))
+                (unless widest-row-has-instruction
+                  (setf (cdr (last row 2)) nil))  ; Remove last nil
+                (nconc row (list (make-vbar-l-cell))))
+
+               ;; Has hbar - add T connector
+               ((string-equal (ladder-cell-symbol (car (last row))) *hbar*)
+                (when widest-row-has-instruction
+                  (nconc row (list (make-branch-tl-cell)))))
+
+               ;; Has instruction (not a branch) - add T connector
+               ((not (branch-symbol-p (ladder-cell-symbol (car (last row)))))
+                (if widest-row-has-instruction
+                    (nconc row (list (make-branch-tl-cell)))
+                    (progn
+                      (setf (cdr (last row 2)) nil)  ; Remove last
+                      (nconc row (list (make-branch-tl-cell))))))
+
+               ;; Already has a branch symbol - may need adjustment
+               (t
+                (when (and (not widest-row-has-instruction)
+                           (string-equal (ladder-cell-symbol (car (last row))) *branch-ttl*))
+                  (setf (cdr (last row 2)) nil)
+                  (nconc row (list (make-branch-tl-cell)))))))
+
+    ;; Fix top row - always branchttl
+    (let ((top-row (first matrix)))
+      (setf (cdr (last top-row 2)) nil)  ; Remove last cell
+      (nconc top-row (list (make-branch-ttl-cell))))
+
+    ;; Fix bottom row - always branchl
+    (let ((bottom-row (nth last-row-with-content matrix)))
+      (setf (cdr (last bottom-row 2)) nil)  ; Remove last cell
+      (nconc bottom-row (list (make-branch-l-cell))))
+
+    matrix))
+
+;;; ============================================================
 ;;; Network to Ladder Rung Conversion
 ;;; ============================================================
 
@@ -259,124 +556,139 @@
      :monitor-type :bool)))
 
 (defun network-to-ladder-rung (network)
-  "Convert a parsed network to a ladder rung structure.
-   Handles simple linear rungs, OR branches, and parallel output coils.
+  "Convert a parsed network to a ladder rung structure using matrix-based algorithm.
+   This produces Python-compatible matrixdata with explicit branch connector cells.
 
-   Branch logic: When OR/ORN is encountered:
-   - A new row is created starting from column 0
-   - The OR contact is placed at column 0 on the branch row
-   - A merge column is reserved for the vertical connector
-   - After processing OR contact, we return to main row
-   - ORSTR explicitly merges all branches (handled structurally)
-
-   Parallel coils: Consecutive coil instructions are all parallel:
-   - A connector column is added before the coils
-   - Each coil address gets its own row at the coil column
-   - Vertical connectors link them for parallel output"
+   Algorithm (matches Python PLCLadder.py):
+   - Matrix is a list of rows: ((row0-cells) (row1-cells) ...)
+   - matrixstack holds matrices for nested blocks
+   - STR: push current matrix, start new
+   - AND: append cell to current row
+   - OR: create new row matrix, merge below, close block (add right connectors)
+   - ORSTR: pop stack, merge below, close block
+   - ANDSTR: pop stack, merge right (add left connectors)
+   - Outputs are handled separately after inputs"
   (let ((instructions (mblogic-cl:network-instructions network))
-        (cells nil)
         (all-addresses nil)
-        (col 0)
-        (current-row 0)
-        (max-row 0)
-        (branch-info nil)        ; List of (row start-col merge-col) for input branches
-        (output-branch-info nil) ; List of (col row1 row2 ...) for parallel coils
-        (coil-col nil)           ; Column where parallel coils are placed
-        (coil-rows nil)          ; List of rows with coils at coil-col
-        (first-coil-row nil))    ; The row of the first coil (for connector column)
+        ;; Input matrix processing
+        (current-matrix (list (list)))  ; Start with one empty row
+        (matrix-stack (list))           ; Stack for STR blocks
+        ;; Output collection
+        (output-cells nil)
+        ;; First STR flag - don't push empty matrix on first STR
+        (first-store t))
 
-    ;; Process each instruction
-    (dolist (instr instructions)
-      (let* ((opcode (mblogic-cl:parsed-opcode instr))
-             (params (mblogic-cl:parsed-params instr)))
+    ;; Separate inputs from outputs
+    (let ((inputs nil)
+          (outputs nil))
+      (dolist (instr instructions)
+        (let ((opcode (mblogic-cl:parsed-opcode instr)))
+          (cond
+            ((coil-instruction-p opcode)
+             (push instr outputs))
+            ((control-instruction-p opcode)
+             (push instr outputs))
+            (t
+             (push instr inputs)))))
+      (setf inputs (nreverse inputs))
+      (setf outputs (nreverse outputs))
 
-        (cond
-          ;; OR starts a new branch row - the contact goes at col 0 on new row
-          ;; Reserve current column for the vertical merge connector
-          ((and (branch-start-p opcode) (> col 0))
-           ;; Finalize any pending coil group
-           (when (and coil-col coil-rows (> (length coil-rows) 1))
-             (push (cons coil-col (nreverse coil-rows)) output-branch-info))
-           (setf coil-col nil coil-rows nil first-coil-row nil)
+      ;; Process input instructions using matrix algorithm
+      (dolist (instr inputs)
+        (let* ((opcode (mblogic-cl:parsed-opcode instr))
+               (cell (instruction-to-cell instr 0)))
 
-           (incf max-row)
-           (let ((branch-row max-row)
-                 (merge-col col))  ; This column is reserved for vertical connector
-             ;; Record branch info for rendering vertical connectors
-             (push (list branch-row 0 merge-col) branch-info)
-             ;; Create cell at column 0 on the branch row
+          ;; Collect addresses
+          (dolist (addr (ladder-cell-addresses cell))
+            (pushnew addr all-addresses :test #'string-equal))
+
+          (cond
+            ;; STR instruction - start new logic block
+            ((store-instruction-p opcode)
+             (if first-store
+                 ;; First STR - just add to current matrix
+                 (progn
+                   (setf first-store nil)
+                   (setf current-matrix (append-cell-to-matrix cell current-matrix)))
+                 ;; Subsequent STR - push current and start new
+                 (progn
+                   (push current-matrix matrix-stack)
+                   (setf current-matrix (list (list)))
+                   (setf current-matrix (append-cell-to-matrix cell current-matrix)))))
+
+            ;; AND instruction - append to current row
+            ((and-instruction-p opcode)
+             (setf current-matrix (append-cell-to-matrix cell current-matrix)))
+
+            ;; OR instruction - create parallel branch below, then close
+            ((or-instruction-p opcode)
+             (let ((new-matrix (list (list))))
+               (setf new-matrix (append-cell-to-matrix cell new-matrix))
+               (setf current-matrix (merge-matrix-below current-matrix new-matrix))
+               (setf current-matrix (close-branch-block current-matrix))))
+
+            ;; ORSTR - pop and merge below with closing connectors
+            ((orstr-instruction-p opcode)
+             (when matrix-stack
+               (let ((old-matrix (pop matrix-stack)))
+                 (setf current-matrix (merge-matrix-below old-matrix current-matrix))
+                 (setf current-matrix (close-branch-block current-matrix)))))
+
+            ;; ANDSTR - pop and merge right with left-side connectors
+            ((andstr-instruction-p opcode)
+             (when matrix-stack
+               (let ((old-matrix (pop matrix-stack)))
+                 (setf current-matrix (merge-matrix-right old-matrix current-matrix)))))
+
+            ;; Other instructions (comparisons, etc.) - treat as AND
+            (t
+             (setf current-matrix (append-cell-to-matrix cell current-matrix))))))
+
+      ;; Process output instructions
+      (dolist (instr outputs)
+        (let* ((opcode (mblogic-cl:parsed-opcode instr))
+               (params (mblogic-cl:parsed-params instr)))
+          (cond
+            ;; Coil with potentially multiple addresses
+            ((coil-instruction-p opcode)
+             (let ((row 0))
+               (dolist (addr params)
+                 (when (mblogic-cl:bool-addr-p addr)
+                   (let ((cell (make-coil-cell opcode addr 0 row)))
+                     (push cell output-cells)
+                     (pushnew addr all-addresses :test #'string-equal)
+                     (incf row))))))
+            ;; Control instructions (END, RT, etc.)
+            (t
              (let ((cell (instruction-to-cell instr 0)))
-               (setf (ladder-cell-row cell) branch-row)
+               (setf (ladder-cell-row cell) 0)
+               (push cell output-cells)
                (dolist (addr (ladder-cell-addresses cell))
-                 (pushnew addr all-addresses :test #'string-equal))
-               (push cell cells))
-             ;; Advance past the merge column so next instruction doesn't overlap
-             (incf col))
-           ;; Return to main row for subsequent instructions
-           (setf current-row 0))
+                 (pushnew addr all-addresses :test #'string-equal)))))))
 
-          ;; ANDSTR/ORSTR merges branches - structural, no cell needed
-          ((branch-end-p opcode)
-           ;; Finalize any pending coil group
-           (when (and coil-col coil-rows (> (length coil-rows) 1))
-             (push (cons coil-col (nreverse coil-rows)) output-branch-info))
-           (setf coil-col nil coil-rows nil first-coil-row nil)
-           (setf current-row 0))
+      ;; Convert matrix to flat cell list with correct row/col positions
+      (let ((input-cells nil)
+            (matrix-height (matrix-height current-matrix))
+            (matrix-width (matrix-width current-matrix)))
+        (loop for row in current-matrix
+              for row-idx from 0
+              do (loop for cell in row
+                       for col-idx from 0
+                       when cell
+                       do (setf (ladder-cell-row cell) row-idx)
+                          (setf (ladder-cell-col cell) col-idx)
+                          (push cell input-cells)))
 
-          ;; Coil instruction - group consecutive coils as parallel
-          ((coil-instruction-p opcode)
-           ;; Start a new coil group if not already in one
-           ;; Reserve current column for connector, coils go in next column
-           (unless coil-col
-             (setf coil-col (1+ col))  ; Coils at col+1, connector at col
-             (setf coil-rows nil)
-             (setf first-coil-row current-row))
-           ;; Add each address as a separate coil on its own row
-           ;; Coils stack directly below first coil: row 0, 1, 2, 3, etc.
-           (dolist (addr params)
-             (when (mblogic-cl:bool-addr-p addr)
-               (let* ((this-row (if (null coil-rows)
-                                    first-coil-row
-                                    (1+ (apply #'max coil-rows))))  ; Next row after highest coil row
-                      (cell (make-coil-cell opcode addr coil-col this-row)))
-                 (push cell cells)
-                 (pushnew addr all-addresses :test #'string-equal)
-                 (push this-row coil-rows)
-                 (setf max-row (max max-row this-row))))))
-
-          ;; Regular instruction - place on current row
-          (t
-           ;; Finalize any pending coil group before placing non-coil
-           (when (and coil-col coil-rows (> (length coil-rows) 1))
-             (push (cons coil-col (nreverse coil-rows)) output-branch-info))
-           (when coil-col
-             (setf col (1+ coil-col)))  ; Move past the coil column
-           (setf coil-col nil coil-rows nil first-coil-row nil)
-
-           (let ((cell (instruction-to-cell instr col)))
-             (setf (ladder-cell-row cell) current-row)
-             (dolist (addr (ladder-cell-addresses cell))
-               (pushnew addr all-addresses :test #'string-equal))
-             (push cell cells)
-             (incf col))))))
-
-    ;; Finalize any pending coil group at end
-    (when (and coil-col coil-rows)
-      (when (> (length coil-rows) 1)
-        ;; Store the coil column; JS will know connector is at coil-col - 1
-        (push (cons coil-col (nreverse coil-rows)) output-branch-info))
-      (setf col (1+ coil-col)))
-
-    ;; Build the rung with branch metadata
-    (make-ladder-rung
-     :number (mblogic-cl:network-number network)
-     :cells (nreverse cells)
-     :rows (1+ max-row)
-     :cols col
-     :addresses (nreverse all-addresses)
-     :comment (first (mblogic-cl:network-comments network))
-     :branches (nreverse branch-info)
-     :output-branches (nreverse output-branch-info))))
+        ;; Build the rung (no longer needs branch metadata - it's in the cells)
+        (make-ladder-rung
+         :number (mblogic-cl:network-number network)
+         :cells (append (nreverse input-cells) (nreverse output-cells))
+         :rows (max matrix-height (length output-cells) 1)
+         :cols matrix-width
+         :addresses (nreverse all-addresses)
+         :comment (first (mblogic-cl:network-comments network))
+         :branches nil           ; No longer needed - explicit cells
+         :output-branches nil))))) ; No longer needed - explicit cells
 
 ;;; ============================================================
 ;;; Program/Subroutine to Ladder Conversion
@@ -417,11 +729,35 @@
     (sort names #'string<)))
 
 ;;; ============================================================
-;;; Cell to JSON-ready Plist Conversion
+;;; Cell to JSON-ready Plist Conversion (Python-compatible matrixdata format)
 ;;; ============================================================
 
+(defun format-monitor-info (cell)
+  "Format monitor info for a cell in Python-compatible format.
+   Returns a list like (\"bool\" \"X1\") or (\"none\")."
+  (let ((monitor-type (ladder-cell-monitor-type cell))
+        (addr (ladder-cell-address cell)))
+    (cond
+      ;; Boolean monitoring
+      ((and (eq monitor-type :bool) addr)
+       (list "bool" addr))
+      ;; No monitoring (for branch connectors, etc.)
+      (t
+       (list "none")))))
+
+(defun cell-to-matrixdata (cell)
+  "Convert a ladder cell to Python-compatible matrixdata format.
+   Format: {type, row, col, addr, value, monitor}"
+  (list :type (if (eq (ladder-cell-type cell) :coil) "outp" "inp")
+        :row (ladder-cell-row cell)
+        :col (ladder-cell-col cell)
+        :addr (or (ladder-cell-addresses cell) #())  ; Empty vector for no addresses
+        :value (ladder-cell-symbol cell)
+        :monitor (format-monitor-info cell)))
+
+;; Keep old function for backwards compatibility during transition
 (defun cell-to-plist (cell)
-  "Convert a ladder cell to a plist for JSON serialization"
+  "Convert a ladder cell to a plist for JSON serialization (legacy format)"
   (list :type (string-downcase (symbol-name (ladder-cell-type cell)))
         :symbol (ladder-cell-symbol cell)
         :addr (ladder-cell-address cell)
@@ -433,26 +769,40 @@
         :monitor (when (ladder-cell-monitor-type cell)
                    (string-downcase (symbol-name (ladder-cell-monitor-type cell))))))
 
+(defun rung-to-matrixdata (rung)
+  "Convert a ladder rung to Python-compatible format.
+   Format: {rungtype, comment, ildata, matrixdata}"
+  (let ((rungtype (cond
+                    ((null (ladder-rung-cells rung)) "empty")
+                    ((> (ladder-rung-rows rung) 1) "single")  ; Has branches
+                    (t "single"))))
+    (list :rungtype rungtype
+          :comment (or (ladder-rung-comment rung) "")
+          :ildata #()  ; TODO: capture original IL if needed
+          :matrixdata (mapcar #'cell-to-matrixdata (ladder-rung-cells rung)))))
+
+;; Keep old function for backwards compatibility
 (defun rung-to-plist (rung)
-  "Convert a ladder rung to a plist for JSON serialization"
+  "Convert a ladder rung to a plist for JSON serialization (legacy format)"
   (list :rungnum (ladder-rung-number rung)
         :rows (ladder-rung-rows rung)
         :cols (ladder-rung-cols rung)
         :comment (ladder-rung-comment rung)
         :addrs (ladder-rung-addresses rung)
         :cells (mapcar #'cell-to-plist (ladder-rung-cells rung))
-        :branches (mapcar (lambda (b)
-                           (list :row (first b)
-                                 :start-col (second b)
-                                 :merge-col (third b)))
-                         (ladder-rung-branches rung))
-        :output-branches (mapcar (lambda (ob)
-                                  (list :col (car ob)
-                                        :rows (cdr ob)))
-                                (ladder-rung-output-branches rung))))
+        :branches nil    ; No longer used
+        :output-branches nil))  ; No longer used
 
+(defun ladder-program-to-matrixdata (ladder-prog)
+  "Convert a ladder program to Python-compatible format.
+   Format: {subrname: {subrdata, subrcomments, signature}}"
+  (list :subrdata (mapcar #'rung-to-matrixdata (ladder-program-rungs ladder-prog))
+        :subrcomments ""
+        :signature ""))  ; TODO: compute MD5 hash if needed
+
+;; Keep old function for backwards compatibility
 (defun ladder-program-to-plist (ladder-prog)
-  "Convert a ladder program to a plist for JSON serialization"
+  "Convert a ladder program to a plist for JSON serialization (legacy format)"
   (list :subrname (ladder-program-name ladder-prog)
         :addresses (ladder-program-addresses ladder-prog)
         :subrdata (mapcar #'rung-to-plist (ladder-program-rungs ladder-prog))))
