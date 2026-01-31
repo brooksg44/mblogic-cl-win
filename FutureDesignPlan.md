@@ -131,7 +131,7 @@ Modify the Common Lisp compiler to generate Python-style `matrixdata` with expli
 
 ## Reference Files
 
-- Python source: `D:\Python\pySoftPLC\` (original MBLogic)
+- Python source: `D:\Python\pySoftPLC\` (is a simplified version of the original MBLogic https://mblogic.sourceforge.net)
 - Example Python JSON: `D:\Python\pySoftPLC\simpleconveyor_subr.txt.json`
 - Current CL JSON: `D:\common-lisp\mblogic-cl\LadderDemo_v2.json`
 - Ladder generator: `D:\common-lisp\mblogic-cl\src\il-to-ladder.lisp`

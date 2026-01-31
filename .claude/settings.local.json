@@ -8,7 +8,13 @@
       "mcp__lisp__evaluate-lisp",
       "WebFetch(domain:localhost)",
       "mcp__lisp__describe-symbol",
-      "mcp__lisp__reset-session"
+      "mcp__lisp__reset-session",
+      "mcp__lisp__apropos-search",
+      "mcp__lisp__class-info",
+      "Bash(curl:*)",
+      "Bash(python:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
