@@ -6,14 +6,14 @@
 const LadSymbols = (function() {
     'use strict';
 
-    // Symbol dimensions
-    const WIDTH = 60;
-    const HEIGHT = 40;
-    const CENTER_Y = HEIGHT / 2;
+    // Symbol dimensions - use actual display size for 1:1 mapping
+    const WIDTH = 80;
+    const HEIGHT = 80;
+    const CENTER_Y = HEIGHT / 2;  // 40
 
     // Block dimensions (wider for instructions with parameters)
-    const BLOCK_WIDTH = 120;
-    const BLOCK_HEIGHT = 60;
+    const BLOCK_WIDTH = 140;
+    const BLOCK_HEIGHT = 80;
 
     /**
      * Create an SVG wrapper with the given content
@@ -25,9 +25,7 @@ const LadSymbols = (function() {
      */
     function wrapSvg(content, stateClass = 'MB_ladderoff', width = WIDTH, height = HEIGHT) {
         // Use preserveAspectRatio="none" so lines stretch to fill cell edges
-        return `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" class="ladder-symbol ${stateClass}">
-            ${content}
-        </svg>`;
+        return `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" class="ladder-symbol ${stateClass}">${content}</svg>`;
     }
 
     // Vertical line cell height (matches CSS .ladder-vline-cell height)
@@ -40,12 +38,14 @@ const LadSymbols = (function() {
      * @returns {string} - SVG element string
      */
     function createBlockSvg(label, stateClass = 'MB_ladderoff') {
-        const centerY = BLOCK_HEIGHT / 2;
+        const centerY = BLOCK_HEIGHT / 2;  // 40
+        // Rectangle centered vertically: height=50 means y = centerY - 25 = 15
+        // Rectangle spans from y=15 to y=65
         return wrapSvg(`
             <line x1="0" y1="${centerY}" x2="10" y2="${centerY}" class="${stateClass}"/>
-            <rect x="10" y="5" width="100" height="50" class="${stateClass}" fill="none" rx="3" ry="3"/>
-            <text x="60" y="35" text-anchor="middle" font-size="11" font-weight="bold" class="${stateClass}">${label}</text>
-            <line x1="110" y1="${centerY}" x2="${BLOCK_WIDTH}" y2="${centerY}" class="${stateClass}"/>
+            <rect x="10" y="15" width="120" height="50" class="${stateClass}" fill="none" rx="3" ry="3"/>
+            <text x="70" y="45" text-anchor="middle" font-size="11" font-weight="bold" class="${stateClass}">${label}</text>
+            <line x1="130" y1="${centerY}" x2="${BLOCK_WIDTH}" y2="${centerY}" class="${stateClass}"/>
         `, stateClass, BLOCK_WIDTH, BLOCK_HEIGHT);
     }
 
@@ -55,91 +55,49 @@ const LadSymbols = (function() {
          * Normally Open Contact (NO)
          * --| |--
          */
-        noc: (stateClass) => wrapSvg(`
-            <line x1="0" y1="${CENTER_Y}" x2="15" y2="${CENTER_Y}" class="${stateClass}"/>
-            <line x1="15" y1="8" x2="15" y2="32" class="${stateClass}"/>
-            <line x1="45" y1="8" x2="45" y2="32" class="${stateClass}"/>
-            <line x1="45" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>
-        `, stateClass),
+        noc: (stateClass) => wrapSvg(`<line x1="0" y1="${CENTER_Y}" x2="25" y2="${CENTER_Y}" class="${stateClass}"/><line x1="25" y1="16" x2="25" y2="64" class="${stateClass}"/><line x1="55" y1="16" x2="55" y2="64" class="${stateClass}"/><line x1="55" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>`, stateClass),
 
         /**
          * Normally Closed Contact (NC)
          * --|/|--
          */
-        ncc: (stateClass) => wrapSvg(`
-            <line x1="0" y1="${CENTER_Y}" x2="15" y2="${CENTER_Y}" class="${stateClass}"/>
-            <line x1="15" y1="8" x2="15" y2="32" class="${stateClass}"/>
-            <line x1="45" y1="8" x2="45" y2="32" class="${stateClass}"/>
-            <line x1="18" y1="30" x2="42" y2="10" class="${stateClass}"/>
-            <line x1="45" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>
-        `, stateClass),
+        ncc: (stateClass) => wrapSvg(`<line x1="0" y1="${CENTER_Y}" x2="25" y2="${CENTER_Y}" class="${stateClass}"/><line x1="25" y1="16" x2="25" y2="64" class="${stateClass}"/><line x1="55" y1="16" x2="55" y2="64" class="${stateClass}"/><line x1="28" y1="58" x2="52" y2="22" class="${stateClass}"/><line x1="55" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>`, stateClass),
 
         /**
          * Positive Differential Contact (Rising Edge)
          * --|P|--
          */
-        nocpd: (stateClass) => wrapSvg(`
-            <line x1="0" y1="${CENTER_Y}" x2="15" y2="${CENTER_Y}" class="${stateClass}"/>
-            <line x1="15" y1="8" x2="15" y2="32" class="${stateClass}"/>
-            <line x1="45" y1="8" x2="45" y2="32" class="${stateClass}"/>
-            <text x="30" y="24" text-anchor="middle" font-size="12" font-weight="bold" class="${stateClass}">P</text>
-            <line x1="45" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>
-        `, stateClass),
+        nocpd: (stateClass) => wrapSvg(`<line x1="0" y1="${CENTER_Y}" x2="25" y2="${CENTER_Y}" class="${stateClass}"/><line x1="25" y1="16" x2="25" y2="64" class="${stateClass}"/><line x1="55" y1="16" x2="55" y2="64" class="${stateClass}"/><text x="40" y="45" text-anchor="middle" font-size="14" font-weight="bold" class="${stateClass}">P</text><line x1="55" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>`, stateClass),
 
         /**
          * Negative Differential Contact (Falling Edge)
          * --|N|--
          */
-        nocnd: (stateClass) => wrapSvg(`
-            <line x1="0" y1="${CENTER_Y}" x2="15" y2="${CENTER_Y}" class="${stateClass}"/>
-            <line x1="15" y1="8" x2="15" y2="32" class="${stateClass}"/>
-            <line x1="45" y1="8" x2="45" y2="32" class="${stateClass}"/>
-            <text x="30" y="24" text-anchor="middle" font-size="12" font-weight="bold" class="${stateClass}">N</text>
-            <line x1="45" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>
-        `, stateClass),
+        nocnd: (stateClass) => wrapSvg(`<line x1="0" y1="${CENTER_Y}" x2="25" y2="${CENTER_Y}" class="${stateClass}"/><line x1="25" y1="16" x2="25" y2="64" class="${stateClass}"/><line x1="55" y1="16" x2="55" y2="64" class="${stateClass}"/><text x="40" y="45" text-anchor="middle" font-size="14" font-weight="bold" class="${stateClass}">N</text><line x1="55" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>`, stateClass),
 
         /**
          * Output Coil
          * --( )--
          */
-        out: (stateClass) => wrapSvg(`
-            <line x1="0" y1="${CENTER_Y}" x2="15" y2="${CENTER_Y}" class="${stateClass}"/>
-            <circle cx="30" cy="${CENTER_Y}" r="12" class="${stateClass}" fill="none"/>
-            <line x1="45" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>
-        `, stateClass),
+        out: (stateClass) => wrapSvg(`<line x1="0" y1="${CENTER_Y}" x2="24" y2="${CENTER_Y}" class="${stateClass}"/><circle cx="40" cy="${CENTER_Y}" r="15" class="${stateClass}" fill="none"/><line x1="56" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>`, stateClass),
 
         /**
          * Set (Latch) Coil
          * --(S)--
          */
-        set: (stateClass) => wrapSvg(`
-            <line x1="0" y1="${CENTER_Y}" x2="15" y2="${CENTER_Y}" class="${stateClass}"/>
-            <circle cx="30" cy="${CENTER_Y}" r="12" class="${stateClass}" fill="none"/>
-            <text x="30" y="24" text-anchor="middle" font-size="10" font-weight="bold" class="${stateClass}">S</text>
-            <line x1="45" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>
-        `, stateClass),
+        set: (stateClass) => wrapSvg(`<line x1="0" y1="${CENTER_Y}" x2="24" y2="${CENTER_Y}" class="${stateClass}"/><circle cx="40" cy="${CENTER_Y}" r="15" class="${stateClass}" fill="none"/><text x="40" y="45" text-anchor="middle" font-size="12" font-weight="bold" class="${stateClass}">S</text><line x1="56" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>`, stateClass),
 
         /**
          * Reset (Unlatch) Coil
          * --(R)--
          */
-        rst: (stateClass) => wrapSvg(`
-            <line x1="0" y1="${CENTER_Y}" x2="15" y2="${CENTER_Y}" class="${stateClass}"/>
-            <circle cx="30" cy="${CENTER_Y}" r="12" class="${stateClass}" fill="none"/>
-            <text x="30" y="24" text-anchor="middle" font-size="10" font-weight="bold" class="${stateClass}">R</text>
-            <line x1="45" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>
-        `, stateClass),
+        rst: (stateClass) => wrapSvg(`<line x1="0" y1="${CENTER_Y}" x2="24" y2="${CENTER_Y}" class="${stateClass}"/><circle cx="40" cy="${CENTER_Y}" r="15" class="${stateClass}" fill="none"/><text x="40" y="45" text-anchor="middle" font-size="12" font-weight="bold" class="${stateClass}">R</text><line x1="56" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>`, stateClass),
 
         /**
          * Pulse/Differentiate Coil
          * --(P)--
          */
-        pd: (stateClass) => wrapSvg(`
-            <line x1="0" y1="${CENTER_Y}" x2="15" y2="${CENTER_Y}" class="${stateClass}"/>
-            <circle cx="30" cy="${CENTER_Y}" r="12" class="${stateClass}" fill="none"/>
-            <text x="30" y="24" text-anchor="middle" font-size="10" font-weight="bold" class="${stateClass}">P</text>
-            <line x1="45" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>
-        `, stateClass),
+        pd: (stateClass) => wrapSvg(`<line x1="0" y1="${CENTER_Y}" x2="24" y2="${CENTER_Y}" class="${stateClass}"/><circle cx="40" cy="${CENTER_Y}" r="15" class="${stateClass}" fill="none"/><text x="40" y="45" text-anchor="middle" font-size="12" font-weight="bold" class="${stateClass}">P</text><line x1="56" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>`, stateClass),
 
         /**
          * Comparison Block
@@ -255,9 +213,7 @@ const LadSymbols = (function() {
         /**
          * Horizontal line (for spacing/continuation)
          */
-        hline: (stateClass) => wrapSvg(`
-            <line x1="0" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>
-        `, stateClass),
+        hline: (stateClass) => wrapSvg(`<line x1="0" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>`, stateClass),
 
         /**
          * Empty cell (just horizontal line)
@@ -270,19 +226,17 @@ const LadSymbols = (function() {
          * IL instruction fallback display
          */
         il: (stateClass) => wrapSvg(`
-            <line x1="0" y1="${CENTER_Y}" x2="5" y2="${CENTER_Y}" class="${stateClass}"/>
-            <rect x="5" y="5" width="50" height="30" class="${stateClass}" fill="none" stroke-dasharray="3,2"/>
-            <text x="30" y="24" text-anchor="middle" font-size="8" class="${stateClass}">IL</text>
-            <line x1="55" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>
+            <line x1="0" y1="${CENTER_Y}" x2="10" y2="${CENTER_Y}" class="${stateClass}"/>
+            <rect x="10" y="15" width="60" height="50" class="${stateClass}" fill="none" stroke-dasharray="3,2"/>
+            <text x="40" y="45" text-anchor="middle" font-size="10" class="${stateClass}">IL</text>
+            <line x1="70" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>
         `, stateClass),
 
         /**
          * Vertical line (for branch connections spanning full cell height)
          * Uses VLINE_HEIGHT for proper vertical connection between rows
          */
-        vline: (stateClass) => wrapSvg(`
-            <line x1="30" y1="0" x2="30" y2="${VLINE_HEIGHT}" class="${stateClass}"/>
-        `, stateClass, WIDTH, VLINE_HEIGHT),
+        vline: (stateClass) => wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT),
 
         /**
          * Branch down: horizontal line continuing, then vertical down to next row
@@ -292,10 +246,7 @@ const LadSymbols = (function() {
          */
         branchDown: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`
-                <line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>
-                <line x1="30" y1="${centerY}" x2="30" y2="${VLINE_HEIGHT}" class="${stateClass}"/>
-            `, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><line x1="40" y1="${centerY}" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         /**
@@ -306,10 +257,7 @@ const LadSymbols = (function() {
          */
         branchUp: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`
-                <line x1="30" y1="0" x2="30" y2="${centerY}" class="${stateClass}"/>
-                <line x1="0" y1="${centerY}" x2="30" y2="${centerY}" class="${stateClass}"/>
-            `, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${centerY}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="40" y2="${centerY}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         /**
@@ -321,10 +269,7 @@ const LadSymbols = (function() {
          */
         branchMerge: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`
-                <line x1="30" y1="0" x2="30" y2="${VLINE_HEIGHT}" class="${stateClass}"/>
-                <line x1="0" y1="${centerY}" x2="30" y2="${centerY}" class="${stateClass}"/>
-            `, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="40" y2="${centerY}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         /**
@@ -335,10 +280,7 @@ const LadSymbols = (function() {
          */
         branchStart: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`
-                <line x1="30" y1="0" x2="30" y2="${centerY}" class="${stateClass}"/>
-                <line x1="30" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>
-            `, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${centerY}" class="${stateClass}"/><line x1="40" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         /**
@@ -350,10 +292,7 @@ const LadSymbols = (function() {
          */
         outputBranchMid: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`
-                <line x1="30" y1="0" x2="30" y2="${VLINE_HEIGHT}" class="${stateClass}"/>
-                <line x1="30" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>
-            `, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><line x1="40" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         // ============================================================
@@ -365,48 +304,40 @@ const LadSymbols = (function() {
          * Horizontal bar - wire segment
          * ─────────
          */
-        hbar: (stateClass) => wrapSvg(`
-            <line x1="0" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>
-        `, stateClass),
+        hbar: (stateClass) => wrapSvg(`<line x1="0" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>`, stateClass),
 
         /**
          * Branch Top-To-Right (branchttr): Top of branch fork
-         * ────┐
+         * ────┬────
          *     │
+         * Wire passes through, vertical goes down
          */
         branchttr: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`
-                <line x1="0" y1="${centerY}" x2="30" y2="${centerY}" class="${stateClass}"/>
-                <line x1="30" y1="${centerY}" x2="30" y2="${VLINE_HEIGHT}" class="${stateClass}"/>
-            `, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><line x1="40" y1="${centerY}" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         /**
          * Branch Middle-Right (branchtr): Middle rows of branch fork
          *     │
-         * ────┤
+         * ────┼────
          *     │
+         * Wire passes through, vertical continues
          */
         branchtr: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`
-                <line x1="30" y1="0" x2="30" y2="${VLINE_HEIGHT}" class="${stateClass}"/>
-                <line x1="0" y1="${centerY}" x2="30" y2="${centerY}" class="${stateClass}"/>
-            `, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         /**
          * Branch Bottom-Right (branchr): Bottom of branch fork
          *     │
-         * ────┘
+         * ────┴────
+         * Wire passes through, vertical comes from above
          */
         branchr: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`
-                <line x1="30" y1="0" x2="30" y2="${centerY}" class="${stateClass}"/>
-                <line x1="0" y1="${centerY}" x2="30" y2="${centerY}" class="${stateClass}"/>
-            `, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${centerY}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         /**
@@ -415,48 +346,40 @@ const LadSymbols = (function() {
          *     │
          *     │
          */
-        vbarr: (stateClass) => wrapSvg(`
-            <line x1="30" y1="0" x2="30" y2="${VLINE_HEIGHT}" class="${stateClass}"/>
-        `, stateClass, WIDTH, VLINE_HEIGHT),
+        vbarr: (stateClass) => wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT),
 
         /**
          * Branch Top-To-Left (branchttl): Top of merge
-         *     ┌────
+         * ────┬────
          *     │
+         * Wire passes through, vertical goes down
          */
         branchttl: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`
-                <line x1="30" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>
-                <line x1="30" y1="${centerY}" x2="30" y2="${VLINE_HEIGHT}" class="${stateClass}"/>
-            `, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><line x1="40" y1="${centerY}" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         /**
          * Branch Middle-Left (branchtl): Middle rows of merge
          *     │
-         *     ├────
+         * ────┼────
          *     │
+         * Wire passes through, vertical continues
          */
         branchtl: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`
-                <line x1="30" y1="0" x2="30" y2="${VLINE_HEIGHT}" class="${stateClass}"/>
-                <line x1="30" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>
-            `, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         /**
          * Branch Bottom-Left (branchl): Bottom of merge
          *     │
-         *     └────
+         * ────┴────
+         * Wire passes through, vertical comes from above
          */
         branchl: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`
-                <line x1="30" y1="0" x2="30" y2="${centerY}" class="${stateClass}"/>
-                <line x1="30" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>
-            `, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${centerY}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         /**
@@ -465,9 +388,7 @@ const LadSymbols = (function() {
          *     │
          *     │
          */
-        vbarl: (stateClass) => wrapSvg(`
-            <line x1="30" y1="0" x2="30" y2="${VLINE_HEIGHT}" class="${stateClass}"/>
-        `, stateClass, WIDTH, VLINE_HEIGHT)
+        vbarl: (stateClass) => wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT)
     };
 
     /**

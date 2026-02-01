@@ -167,21 +167,7 @@ const SubrDispControl = (function() {
             ? `data-addresses="${escapeHtml(addresses.join(','))}"`
             : '';
 
-        return `
-            <div id="${cellId}" class="${cellClass} MB_ladderoff"
-                 ${dataAttrs}
-                 data-opcode="${escapeHtml(opcode)}"
-                 data-symbol="${escapeHtml(symbol)}"
-                 data-row="${row}"
-                 data-col="${col}">
-                <div class="cell-symbol">
-                    ${svgHtml}
-                </div>
-                ${paramsDisplay}
-                ${addressDisplay}
-                <span class="cell-value"></span>
-            </div>
-        `;
+        return `<div id="${cellId}" class="${cellClass} MB_ladderoff" ${dataAttrs} data-opcode="${escapeHtml(opcode)}" data-symbol="${escapeHtml(symbol)}" data-row="${row}" data-col="${col}"><div class="cell-symbol">${svgHtml}</div>${paramsDisplay}${addressDisplay}<span class="cell-value"></span></div>`;
     }
 
     /**
@@ -250,6 +236,9 @@ const SubrDispControl = (function() {
             }
         });
 
+        // Determine which rows have outputs (for wire connection)
+        const outputRowSet = new Set(outputs.map(c => c.row || 0));
+
         // Render input rows
         let rowsHtml = '';
         for (let r = 0; r < rows; r++) {
@@ -270,20 +259,56 @@ const SubrDispControl = (function() {
             rowsHtml += `<div class="${rowClass}" data-row="${r}">${rowCellsHtml}</div>`;
         }
 
+        // Calculate output row metrics first (needed for both wire connector and outputs)
+        const outputRowNums = outputs.map(c => c.row || 0);
+        const maxOutputRow = outputs.length > 0 ? Math.max(...outputRowNums) : 0;
+        const minOutputRow = outputs.length > 0 ? Math.min(...outputRowNums) : 0;
+        const hasMultipleOutputs = outputs.length > 1;
+        // Use the greater of input rows or output rows for alignment
+        const totalRows = Math.max(rows, maxOutputRow + 1);
+
         // Render outputs (in a separate column area)
+        // Must match the same number of rows as inputs for alignment
         let outputsHtml = '';
-        if (outputs.length > 0) {
-            const outputRows = Math.max(...outputs.map(c => (c.row || 0) + 1), 1);
-            for (let r = 0; r < outputRows; r++) {
-                const outputCell = outputs.find(c => (c.row || 0) === r);
-                if (outputCell) {
-                    const normalized = normalizeCell(outputCell);
-                    outputsHtml += createCellHtml(normalized, false);
-                } else if (r > 0) {
-                    // Empty row in output area - could add vertical connector if needed
-                    outputsHtml += createEmptyHtml(r, cols, false);
-                }
+        for (let r = 0; r < totalRows; r++) {
+            const outputCell = outputs.find(c => (c.row || 0) === r);
+            if (outputCell) {
+                const normalized = normalizeCell(outputCell);
+                outputsHtml += createCellHtml(normalized, false);
+            } else {
+                // Empty placeholder to maintain row alignment
+                outputsHtml += `<div class="ladder-output-spacer" data-row="${r}"></div>`;
             }
+        }
+
+        // Create wire connector rows to span from inputs to outputs
+        // For parallel outputs, we need vertical connections too
+        let wireConnectorHtml = '';
+
+        for (let r = 0; r < totalRows; r++) {
+            const hasOutput = outputRowNums.includes(r);
+            const needsVerticalDown = hasMultipleOutputs && r < maxOutputRow && r >= minOutputRow;
+            const needsVerticalUp = hasMultipleOutputs && r > minOutputRow && r <= maxOutputRow;
+
+            // Determine wire type based on position
+            let wireType = '';
+            if (hasOutput || r === 0) {
+                if (needsVerticalDown && needsVerticalUp) {
+                    wireType = 'junction-through';  // ─┼─ with vertical through
+                } else if (needsVerticalDown) {
+                    wireType = 'junction-down';     // ─┬─ horizontal with vertical down
+                } else if (needsVerticalUp) {
+                    wireType = 'junction-up';       // ─┴─ horizontal with vertical up
+                } else {
+                    wireType = 'horizontal';        // ─── just horizontal
+                }
+            } else if (needsVerticalUp || needsVerticalDown) {
+                wireType = 'vertical';              // │ just vertical
+            } else {
+                wireType = 'empty';                 // No wire needed
+            }
+
+            wireConnectorHtml += `<div class="ladder-wire-row" data-row="${r}" data-wire-type="${wireType}"></div>`;
         }
 
         return `
@@ -296,6 +321,9 @@ const SubrDispControl = (function() {
                     <div class="power-rail left"></div>
                     <div class="ladder-content">
                         ${rowsHtml}
+                    </div>
+                    <div class="ladder-wire-connector">
+                        ${wireConnectorHtml}
                     </div>
                     <div class="ladder-outputs">
                         ${outputsHtml}

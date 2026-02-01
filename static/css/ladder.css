@@ -179,6 +179,7 @@ h1, h2, h3 {
     position: relative;
     min-height: 60px;
     padding: 10px 0;
+    gap: 0;  /* No gap between power rails, content, and outputs */
 }
 
 /* Ladder content container (holds rows and branch connectors) */
@@ -186,18 +187,32 @@ h1, h2, h3 {
     display: flex;
     flex-direction: column;
     position: relative;
-    flex: 1;
+    flex: 0 0 auto;  /* Don't grow/shrink, fit content */
     gap: 0;  /* No gap between rows */
 }
 
 /* Ladder rows */
 .ladder-row {
     display: flex;
-    align-items: center;
+    align-items: stretch;
     position: relative;
-    margin: 0;
-    padding: 0;
-    line-height: 0;  /* Prevent line-height from adding space */
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 0;
+    gap: 0 !important;
+    font-size: 0;
+    word-spacing: 0;
+    letter-spacing: 0;
+}
+
+/* Restore font-size for cell contents */
+.ladder-row > * {
+    font-size: 10px;
+}
+
+/* Ensure SVGs have no extra space */
+.ladder-row svg {
+    display: block;
 }
 
 .ladder-row-main {
@@ -271,13 +286,149 @@ h1, h2, h3 {
     height: 80px;
 }
 
+/* Connector cell between inputs and outputs */
+.ladder-connector {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;  /* Half width for connector */
+    height: 80px;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.ladder-connector svg {
+    width: 40px;
+    height: 80px;
+}
+
+/* Wire connector between inputs and outputs */
+.ladder-wire-connector {
+    display: flex;
+    flex-direction: column;
+    flex: 1;  /* Expand to fill available space */
+    min-width: 40px;
+    gap: 0;
+}
+
+.ladder-wire-row {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+/* Horizontal wire - runs full width at vertical center */
+.ladder-wire-row[data-wire-type="horizontal"]::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 2px;
+    background: #3498db;
+    transform: translateY(-50%);
+}
+
+/* Junction down - horizontal wire with vertical going down */
+.ladder-wire-row[data-wire-type="junction-down"]::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 2px;
+    background: #3498db;
+    transform: translateY(-50%);
+}
+
+.ladder-wire-row[data-wire-type="junction-down"]::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    bottom: 0;
+    width: 2px;
+    background: #3498db;
+}
+
+/* Junction up - horizontal wire with vertical coming from above */
+.ladder-wire-row[data-wire-type="junction-up"]::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 2px;
+    background: #3498db;
+    transform: translateY(-50%);
+}
+
+.ladder-wire-row[data-wire-type="junction-up"]::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 50%;
+    width: 2px;
+    background: #3498db;
+}
+
+/* Junction through - horizontal wire with vertical through */
+.ladder-wire-row[data-wire-type="junction-through"]::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 2px;
+    background: #3498db;
+    transform: translateY(-50%);
+}
+
+.ladder-wire-row[data-wire-type="junction-through"]::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #3498db;
+}
+
+/* Vertical only - no horizontal, just vertical line through */
+.ladder-wire-row[data-wire-type="vertical"]::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #3498db;
+}
+
+/* Energized wire states */
+.ladder-wire-row.MB_ladderon[data-wire-type]::before,
+.ladder-wire-row.MB_ladderon[data-wire-type]::after {
+    background: #e74c3c;
+}
+
 /* Output column container (for matrixdata format) */
 .ladder-outputs {
     display: flex;
     flex-direction: column;
     position: relative;
+    flex: 0 0 auto;  /* Don't grow/shrink, fit content */
     gap: 0;
-    margin-left: 10px;
+    margin-left: 0;  /* No gap - wire connection handles spacing */
+}
+
+/* Output spacer for row alignment */
+.ladder-output-spacer {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
 }
 
 /* Power rails */
@@ -301,17 +452,14 @@ h1, h2, h3 {
 
 /* Ladder cells - all cells use same height for consistent row alignment */
 .ladder-cell {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: block;
     width: 80px;
     height: 80px;  /* Consistent height for all cells */
     position: relative;
-    vertical-align: top;
     flex-shrink: 0;
-    margin: 0;
-    padding: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
 }
 
 .ladder-block-cell {
@@ -327,18 +475,20 @@ h1, h2, h3 {
 
 /* Cell symbol container */
 .cell-symbol {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: block;
     width: 100%;
     height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 /* SVG symbols - fill full cell to eliminate gaps */
 .ladder-cell svg,
 .cell-symbol svg {
-    width: 80px;
-    height: 80px;
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
 }
 
 /* Spacer SVGs fill cell */
