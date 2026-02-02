@@ -267,47 +267,54 @@ const SubrDispControl = (function() {
         // Use the greater of input rows or output rows for alignment
         const totalRows = Math.max(rows, maxOutputRow + 1);
 
-        // Render outputs (in a separate column area)
-        // Must match the same number of rows as inputs for alignment
+        // Build output grid (similar to input grid)
+        // Outputs may include branch connectors at col 0 and coils at col 1
+        let maxOutputCol = 0;
+        outputs.forEach(cell => {
+            maxOutputCol = Math.max(maxOutputCol, cell.col || 0);
+        });
+        const outputCols = maxOutputCol + 1;
+
+        // Build output grid
+        const outputGrid = [];
+        for (let r = 0; r < totalRows; r++) {
+            outputGrid[r] = new Array(outputCols).fill(null);
+        }
+        outputs.forEach(cell => {
+            const normalized = normalizeCell(cell);
+            const r = normalized.row;
+            const c = normalized.col;
+            if (r < totalRows && c < outputCols) {
+                outputGrid[r][c] = normalized;
+            }
+        });
+
+        // Render outputs as a grid (branch connectors + coils)
         let outputsHtml = '';
         for (let r = 0; r < totalRows; r++) {
-            const outputCell = outputs.find(c => (c.row || 0) === r);
-            if (outputCell) {
-                const normalized = normalizeCell(outputCell);
-                outputsHtml += createCellHtml(normalized, false);
-            } else {
-                // Empty placeholder to maintain row alignment
-                outputsHtml += `<div class="ladder-output-spacer" data-row="${r}"></div>`;
+            let outputRowHtml = '';
+            for (let c = 0; c < outputCols; c++) {
+                const cell = outputGrid[r][c];
+                if (cell) {
+                    outputRowHtml += createCellHtml(cell, false);
+                } else {
+                    // Empty placeholder - use spacer for branch connector column
+                    if (c === 0 && outputCols > 1) {
+                        outputRowHtml += `<div class="ladder-output-spacer ladder-vline-cell" data-row="${r}" data-col="${c}"></div>`;
+                    } else {
+                        outputRowHtml += `<div class="ladder-output-spacer" data-row="${r}" data-col="${c}"></div>`;
+                    }
+                }
             }
+            outputsHtml += `<div class="ladder-output-row" data-row="${r}">${outputRowHtml}</div>`;
         }
 
-        // Create wire connector rows to span from inputs to outputs
-        // For parallel outputs, we need vertical connections too
+        // Create simple wire connector (horizontal line from inputs to outputs)
         let wireConnectorHtml = '';
-
         for (let r = 0; r < totalRows; r++) {
             const hasOutput = outputRowNums.includes(r);
-            const needsVerticalDown = hasMultipleOutputs && r < maxOutputRow && r >= minOutputRow;
-            const needsVerticalUp = hasMultipleOutputs && r > minOutputRow && r <= maxOutputRow;
-
-            // Determine wire type based on position
-            let wireType = '';
-            if (hasOutput || r === 0) {
-                if (needsVerticalDown && needsVerticalUp) {
-                    wireType = 'junction-through';  // ─┼─ with vertical through
-                } else if (needsVerticalDown) {
-                    wireType = 'junction-down';     // ─┬─ horizontal with vertical down
-                } else if (needsVerticalUp) {
-                    wireType = 'junction-up';       // ─┴─ horizontal with vertical up
-                } else {
-                    wireType = 'horizontal';        // ─── just horizontal
-                }
-            } else if (needsVerticalUp || needsVerticalDown) {
-                wireType = 'vertical';              // │ just vertical
-            } else {
-                wireType = 'empty';                 // No wire needed
-            }
-
+            // Only draw horizontal wire for rows that have outputs or row 0
+            const wireType = (hasOutput || r === 0) ? 'horizontal' : 'empty';
             wireConnectorHtml += `<div class="ladder-wire-row" data-row="${r}" data-wire-type="${wireType}"></div>`;
         }
 

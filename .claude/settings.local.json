@@ -14,7 +14,27 @@
       "Bash(curl:*)",
       "Bash(python:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "mcp__lisp__load-system",
+      "Bash(git push)",
+      "Bash(tasklist:*)",
+      "Bash(taskkill:*)",
+      "Bash(cmd //c \"cd /d D:\\\\common-lisp\\\\mblogic-cl && start sbcl --eval \"\"\\(ql:quickload :mblogic-cl-web\\)\"\" --eval \"\"\\(mblogic-cl-web:quick-start \\\\\"\"test/plcprog.txt\\\\\"\" :port 8080\\)\"\"\")",
+      "mcp__lisp__load-file",
+      "mcp__lisp__list-local-systems",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_click",
+      "mcp__plugin_playwright_playwright__browser_wait_for",
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "mcp__plugin_playwright_playwright__browser_console_messages",
+      "mcp__plugin_playwright_playwright__browser_network_requests",
+      "mcp__plugin_playwright_playwright__browser_select_option",
+      "mcp__plugin_playwright_playwright__browser_evaluate",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "mcp__lisp__compile-form",
+      "mcp__plugin_playwright_playwright__browser_close",
+      "WebFetch(domain:mblogic.sourceforge.net)",
+      "mcp__plugin_playwright_playwright__browser_press_key"
     ]
   }
 }

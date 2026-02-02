@@ -384,54 +384,119 @@
       (nconc row (list nil)))
     matrix))
 
+(defun has-fork-column-p (matrix)
+  "Check if matrix already has a fork connector column at column 0.
+   Returns T if the first cell of the first row is a vertical branch connector."
+  (and matrix
+       (first matrix)
+       (first (first matrix))
+       (vertical-branch-symbol-p (ladder-cell-symbol (first (first matrix))))))
+
 (defun merge-matrix-below (original-matrix new-matrix)
   "Merge NEW-MATRIX below ORIGINAL-MATRIX (for OR/ORSTR parallel connections).
+   Adds fork connectors on the LEFT side of the branch point:
+   - Top row: branchttr (┬) - horizontal through with vertical down
+   - Middle rows: branchtr (┼) - horizontal through with vertical both ways
+   - Bottom row: branchr (┴) - horizontal through with vertical up
    Pads the narrower matrix with hbar cells to keep rectangular.
    Returns the merged matrix."
-  (let ((original-width (matrix-width original-matrix))
-        (new-width (matrix-width new-matrix)))
+  (let ((new-height (matrix-height new-matrix))
+        (has-fork (has-fork-column-p original-matrix)))
 
-    ;; Pad the narrower matrix
-    (cond
-      ;; Original is wider - pad new matrix
-      ((> original-width new-width)
-       (dolist (row new-matrix)
-         (let ((row-width (length row)))
-           (dotimes (i (- original-width row-width))
-             (let ((last-cell (car (last row))))
-               ;; If last cell is nil or vertical branch, pad with nil
-               ;; Otherwise pad with hbar (horizontal wire)
-               (if (or (null last-cell)
-                       (and last-cell
-                            (vertical-branch-symbol-p (ladder-cell-symbol last-cell))))
-                   (nconc row (list nil))
-                   (nconc row (list (make-hbar-cell)))))))))
+    ;; Add fork connectors at column 0 (left side of branch)
+    (if has-fork
+        ;; Fork column already exists - extend it for new branch
+        (progn
+          ;; Change bottom row's connector from branchr to branchtr (now middle)
+          (let* ((bottom-row (car (last original-matrix)))
+                 (first-cell (first bottom-row)))
+            (when (and first-cell
+                       (string-equal (ladder-cell-symbol first-cell) *branch-r*))
+              (setf (ladder-cell-symbol first-cell) *branch-tr*)))
+          ;; Add connectors to new matrix rows
+          (loop for row in new-matrix
+                for i from 0
+                do (let ((connector (if (= i (1- new-height))
+                                        (make-branch-r-cell)    ; Bottom: ┴
+                                        (make-branch-tr-cell)))) ; Middle: ┼
+                     (push connector row)
+                     (setf (nth i new-matrix) row))))
+        ;; No fork column yet - create it
+        (progn
+          ;; Add branchttr (top) or branchtr (middle) to original matrix rows
+          (loop for row in original-matrix
+                for i from 0
+                do (let ((connector (if (= i 0)
+                                        (make-branch-ttr-cell)  ; Top: ┬
+                                        (make-branch-tr-cell)))) ; Middle: ┼
+                     (push connector row)
+                     (setf (nth i original-matrix) row)))
+          ;; Add branchr (bottom) to new matrix rows
+          (loop for row in new-matrix
+                for i from 0
+                do (let ((connector (if (= i (1- new-height))
+                                        (make-branch-r-cell)    ; Bottom: ┴
+                                        (make-branch-tr-cell)))) ; Middle: ┼
+                     (push connector row)
+                     (setf (nth i new-matrix) row)))))
 
-      ;; New is wider - pad original matrix
-      ((> new-width original-width)
-       (dolist (row original-matrix)
-         (let ((row-width (length row)))
-           (dotimes (i (- new-width row-width))
-             (let ((last-cell (car (last row))))
-               (if (or (null last-cell)
-                       (and last-cell
-                            (vertical-branch-symbol-p (ladder-cell-symbol last-cell))))
-                   (nconc row (list nil))
-                   (nconc row (list (make-hbar-cell))))))))))
+    ;; Pad the narrower matrix with hbar cells
+    (let ((original-width (matrix-width original-matrix))
+          (new-width (matrix-width new-matrix)))
+      (cond
+        ;; Original is wider - pad new matrix
+        ((> original-width new-width)
+         (dolist (row new-matrix)
+           (let ((row-width (length row)))
+             (dotimes (i (- original-width row-width))
+               (let ((last-cell (car (last row))))
+                 ;; If last cell is nil or vertical branch, pad with nil
+                 ;; Otherwise pad with hbar (horizontal wire)
+                 (if (or (null last-cell)
+                         (and last-cell
+                              (vertical-branch-symbol-p (ladder-cell-symbol last-cell))))
+                     (nconc row (list nil))
+                     (nconc row (list (make-hbar-cell)))))))))
+
+        ;; New is wider - pad original matrix
+        ((> new-width original-width)
+         (dolist (row original-matrix)
+           (let ((row-width (length row)))
+             (dotimes (i (- new-width row-width))
+               (let ((last-cell (car (last row))))
+                 (if (or (null last-cell)
+                         (and last-cell
+                              (vertical-branch-symbol-p (ladder-cell-symbol last-cell))))
+                     (nconc row (list nil))
+                     (nconc row (list (make-hbar-cell)))))))))))
 
     ;; Merge: append new-matrix rows to original-matrix
     (nconc original-matrix new-matrix)
     original-matrix))
 
+(defun matrix-has-right-connectors-p (matrix)
+  "Check if the matrix already has closing branch connectors (ttl/tl/l) on the right side.
+   This happens when a parallel block was closed with close-branch-block."
+  (when (and matrix (first matrix))
+    (let ((last-cell (car (last (first matrix)))))
+      (and last-cell
+           (member (ladder-cell-symbol last-cell)
+                   (list *branch-ttl* *branch-tl* *branch-l* *vbar-l*)
+                   :test #'string-equal)))))
+
 (defun merge-matrix-right (original-matrix new-matrix)
   "Merge NEW-MATRIX to the right of ORIGINAL-MATRIX (for ANDSTR series connection).
-   Inserts left-side branch connectors on the new matrix if it has multiple rows.
+   Only adds left-side branch connectors if the new matrix doesn't already have them
+   (from a previous close-branch-block call).
    Returns the merged matrix."
   (let ((original-height (matrix-height original-matrix))
-        (new-height (matrix-height new-matrix)))
+        (new-height (matrix-height new-matrix))
+        (already-has-connectors (matrix-has-right-connectors-p new-matrix)))
 
-    ;; Add left-side branch connectors if new matrix has multiple rows
-    (when (> new-height 1)
+    ;; Add left-side branch connectors only if:
+    ;; 1. New matrix has multiple rows AND
+    ;; 2. New matrix doesn't already have closing connectors
+    (when (and (> new-height 1) (not already-has-connectors))
       (loop for row in new-matrix
             for i from 0
             do (push (make-branch-tr-cell) row)  ; Default: middle connector
@@ -462,69 +527,33 @@
     original-matrix))
 
 (defun close-branch-block (matrix)
-  "Add right-side branch connectors after merging rows (for OR/ORSTR).
-   Adds branchttl at top, branchtl in middle, branchl at bottom.
-   Returns the modified matrix."
-  (let* ((height (matrix-height matrix))
-         (width (matrix-width matrix))
-         (last-row-with-content 0)
-         (widest-row-has-instruction nil))
+  "Add right-side branch connectors after merging rows (for ORSTR).
+   Adds branchttl at top, vbarl in middle, branchl at bottom.
+   Returns the modified matrix.
 
-    ;; Find the last row with content and check if widest row has an instruction
-    (loop for row in matrix
-          for i from 0
-          do (let ((last-cell (car (last row))))
-               (when last-cell
-                 (setf last-row-with-content i)
-                 (when (and (= (length row) width)
-                            (not (branch-symbol-p (ladder-cell-symbol last-cell))))
-                   (setf widest-row-has-instruction t)))))
-
-    ;; Add right-side connectors to each row
-    (loop for row in matrix
-          for i from 0
-          do (cond
-               ;; Past the last row with content - pad with nil if needed
-               ((> i last-row-with-content)
-                (when widest-row-has-instruction
-                  (nconc row (list nil))))
-
-               ;; Empty cell - add vertical bar
-               ((null (car (last row)))
-                (unless widest-row-has-instruction
-                  (setf (cdr (last row 2)) nil))  ; Remove last nil
-                (nconc row (list (make-vbar-l-cell))))
-
-               ;; Has hbar - add T connector
-               ((string-equal (ladder-cell-symbol (car (last row))) *hbar*)
-                (when widest-row-has-instruction
-                  (nconc row (list (make-branch-tl-cell)))))
-
-               ;; Has instruction (not a branch) - add T connector
-               ((not (branch-symbol-p (ladder-cell-symbol (car (last row)))))
-                (if widest-row-has-instruction
-                    (nconc row (list (make-branch-tl-cell)))
-                    (progn
-                      (setf (cdr (last row 2)) nil)  ; Remove last
-                      (nconc row (list (make-branch-tl-cell))))))
-
-               ;; Already has a branch symbol - may need adjustment
-               (t
-                (when (and (not widest-row-has-instruction)
-                           (string-equal (ladder-cell-symbol (car (last row))) *branch-ttl*))
-                  (setf (cdr (last row 2)) nil)
-                  (nconc row (list (make-branch-tl-cell)))))))
-
-    ;; Fix top row - always branchttl
-    (let ((top-row (first matrix)))
-      (setf (cdr (last top-row 2)) nil)  ; Remove last cell
-      (nconc top-row (list (make-branch-ttl-cell))))
-
-    ;; Fix bottom row - always branchl
-    (let ((bottom-row (nth last-row-with-content matrix)))
-      (setf (cdr (last bottom-row 2)) nil)  ; Remove last cell
-      (nconc bottom-row (list (make-branch-l-cell))))
-
+   Simplified algorithm:
+   - Only add connectors if there are multiple rows
+   - Add ttl to top row, l to bottom row, vbar to middle rows
+   - Don't add connectors if they already exist"
+  (let ((height (matrix-height matrix)))
+    ;; Only process if there are multiple rows (parallel branches)
+    (when (> height 1)
+      (loop for row in matrix
+            for i from 0
+            for last-cell = (car (last row))
+            do
+            ;; Skip if row already ends with a branch connector
+            (unless (and last-cell (branch-symbol-p (ladder-cell-symbol last-cell)))
+              (cond
+                ;; Top row - add branchttl
+                ((= i 0)
+                 (nconc row (list (make-branch-ttl-cell))))
+                ;; Bottom row - add branchl
+                ((= i (1- height))
+                 (nconc row (list (make-branch-l-cell))))
+                ;; Middle rows - add vbarl (vertical bar)
+                (t
+                 (nconc row (list (make-vbar-l-cell))))))))
     matrix))
 
 ;;; ============================================================
@@ -620,12 +649,12 @@
             ((and-instruction-p opcode)
              (setf current-matrix (append-cell-to-matrix cell current-matrix)))
 
-            ;; OR instruction - create parallel branch below, then close
+            ;; OR instruction - create parallel branch below (don't close yet)
+            ;; The branch will be closed by ORSTR or at the end
             ((or-instruction-p opcode)
              (let ((new-matrix (list (list))))
                (setf new-matrix (append-cell-to-matrix cell new-matrix))
-               (setf current-matrix (merge-matrix-below current-matrix new-matrix))
-               (setf current-matrix (close-branch-block current-matrix))))
+               (setf current-matrix (merge-matrix-below current-matrix new-matrix))))
 
             ;; ORSTR - pop and merge below with closing connectors
             ((orstr-instruction-p opcode)
@@ -645,28 +674,45 @@
              (setf current-matrix (append-cell-to-matrix cell current-matrix))))))
 
       ;; Process output instructions
-      (dolist (instr outputs)
-        (let* ((opcode (mblogic-cl:parsed-opcode instr))
-               (params (mblogic-cl:parsed-params instr)))
-          (cond
-            ;; Coil with potentially multiple addresses
-            ((coil-instruction-p opcode)
-             (let ((row 0))
+      ;; First pass: collect all output cells with sequential row numbers
+      (let ((output-row 0))
+        (dolist (instr outputs)
+          (let* ((opcode (mblogic-cl:parsed-opcode instr))
+                 (params (mblogic-cl:parsed-params instr)))
+            (cond
+              ;; Coil with potentially multiple addresses
+              ((coil-instruction-p opcode)
                (dolist (addr params)
                  (when (mblogic-cl:bool-addr-p addr)
-                   (let ((cell (make-coil-cell opcode addr 0 row)))
+                   ;; Column 1 to leave room for branch connector at column 0
+                   (let ((cell (make-coil-cell opcode addr 1 output-row)))
                      (push cell output-cells)
                      (pushnew addr all-addresses :test #'string-equal)
-                     (incf row))))))
-            ;; Control instructions (END, RT, etc.)
-            (t
-             (let ((cell (instruction-to-cell instr 0)))
-               (setf (ladder-cell-row cell) 0)
-               (push cell output-cells)
-               (dolist (addr (ladder-cell-addresses cell))
-                 (pushnew addr all-addresses :test #'string-equal)))))))
+                     (incf output-row)))))
+              ;; Control instructions (END, RT, etc.)
+              (t
+               (let ((cell (instruction-to-cell instr 0)))
+                 (setf (ladder-cell-row cell) output-row)
+                 (setf (ladder-cell-col cell) 1)
+                 (push cell output-cells)
+                 (dolist (addr (ladder-cell-addresses cell))
+                   (pushnew addr all-addresses :test #'string-equal))
+                 (incf output-row))))))
+
+        ;; Second pass: add branch connectors for parallel outputs
+        ;; Mark them as :output-branch type so they render in the output area
+        (when (> output-row 1)
+          (dotimes (r output-row)
+            (let ((connector (cond
+                               ((= r 0) (make-branch-ttl-cell :row r :col 0))
+                               ((= r (1- output-row)) (make-branch-l-cell :row r :col 0))
+                               (t (make-vbar-l-cell :row r :col 0)))))
+              ;; Mark as output branch so it renders in output area
+              (setf (ladder-cell-type connector) :output-branch)
+              (push connector output-cells)))))
 
       ;; Convert matrix to flat cell list with correct row/col positions
+      ;; Fill nil cells with hbar for horizontal wire connections
       (let ((input-cells nil)
             (matrix-height (matrix-height current-matrix))
             (matrix-width (matrix-width current-matrix)))
@@ -674,10 +720,25 @@
               for row-idx from 0
               do (loop for cell in row
                        for col-idx from 0
-                       when cell
-                       do (setf (ladder-cell-row cell) row-idx)
-                          (setf (ladder-cell-col cell) col-idx)
-                          (push cell input-cells)))
+                       do (cond
+                            ;; Real cell - set position
+                            (cell
+                             (setf (ladder-cell-row cell) row-idx)
+                             (setf (ladder-cell-col cell) col-idx)
+                             (push cell input-cells))
+                            ;; Nil in row 0 - fill with hbar for wire continuity
+                            ((= row-idx 0)
+                             (let ((hbar (make-hbar-cell :row row-idx :col col-idx)))
+                               (push hbar input-cells)))
+                            ;; Nil in branch row before first non-nil in that row
+                            ;; Check if there's any cell in this row at a later column
+                            ((let ((has-later-cell nil))
+                               (loop for later-col from (1+ col-idx) below (length row)
+                                     when (nth later-col row)
+                                     do (setf has-later-cell t) (return))
+                               has-later-cell)
+                             (let ((hbar (make-hbar-cell :row row-idx :col col-idx)))
+                               (push hbar input-cells))))))
 
         ;; Build the rung (no longer needs branch metadata - it's in the cells)
         (make-ladder-rung
@@ -748,7 +809,9 @@
 (defun cell-to-matrixdata (cell)
   "Convert a ladder cell to Python-compatible matrixdata format.
    Format: {type, row, col, addr, value, monitor}"
-  (list :type (if (eq (ladder-cell-type cell) :coil) "outp" "inp")
+  (list :type (if (member (ladder-cell-type cell) '(:coil :output-branch :control))
+                  "outp"
+                  "inp")
         :row (ladder-cell-row cell)
         :col (ladder-cell-col cell)
         :addr (or (ladder-cell-addresses cell) #())  ; Empty vector for no addresses
@@ -771,12 +834,13 @@
 
 (defun rung-to-matrixdata (rung)
   "Convert a ladder rung to Python-compatible format.
-   Format: {rungtype, comment, ildata, matrixdata}"
+   Format: {rungnum, rungtype, comment, ildata, matrixdata}"
   (let ((rungtype (cond
                     ((null (ladder-rung-cells rung)) "empty")
                     ((> (ladder-rung-rows rung) 1) "single")  ; Has branches
                     (t "single"))))
-    (list :rungtype rungtype
+    (list :rungnum (ladder-rung-number rung)
+          :rungtype rungtype
           :comment (or (ladder-rung-comment rung) "")
           :ildata #()  ; TODO: capture original IL if needed
           :matrixdata (mapcar #'cell-to-matrixdata (ladder-rung-cells rung)))))

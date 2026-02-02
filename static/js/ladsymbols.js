@@ -241,58 +241,58 @@ const LadSymbols = (function() {
         /**
          * Branch down: horizontal line continuing, then vertical down to next row
          * Used at the top of a branch (main row) - merge point
-         * ----+----
+         * ----●----
          *     |
          */
         branchDown: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><line x1="40" y1="${centerY}" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><line x1="40" y1="${centerY}" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         /**
          * Branch up: vertical line coming from above, then horizontal going LEFT only
          * Used at the bottom of a branch (last branch row at merge point)
          *     |
-         * ----+
+         * ----●
          */
         branchUp: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${centerY}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="40" y2="${centerY}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${centerY}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="40" y2="${centerY}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         /**
          * Branch merge: vertical line through cell with horizontal going LEFT only
          * Used for middle rows in multi-branch setups
          *     |
-         * ----+
+         * ----●
          *     |
          */
         branchMerge: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="40" y2="${centerY}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="40" y2="${centerY}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         /**
          * Branch start: vertical from above connecting to horizontal going right
          * Used at column 0 of branch rows to show connection from power rail
          *     |
-         * +-------
+         * ●-------
          */
         branchStart: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${centerY}" class="${stateClass}"/><line x1="40" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${centerY}" class="${stateClass}"/><line x1="40" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         /**
          * Output branch middle: vertical through + horizontal to right
          * Used for middle rows in parallel output coils
          *     |
-         *     +-------
+         *     ●-------
          *     |
          */
         outputBranchMid: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><line x1="40" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><line x1="40" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         // ============================================================
@@ -310,11 +310,11 @@ const LadSymbols = (function() {
          * Branch Top-To-Right (branchttr): Top of branch fork
          * ────┬────
          *     │
-         * Wire passes through, vertical goes down
+         * Wire passes through, vertical goes down, dot at junction
          */
         branchttr: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><line x1="40" y1="${centerY}" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><line x1="40" y1="${centerY}" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         /**
@@ -322,22 +322,22 @@ const LadSymbols = (function() {
          *     │
          * ────┼────
          *     │
-         * Wire passes through, vertical continues
+         * Wire passes through, vertical continues, dot at junction
          */
         branchtr: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         /**
          * Branch Bottom-Right (branchr): Bottom of branch fork
          *     │
          * ────┴────
-         * Wire passes through, vertical comes from above
+         * Wire passes through, vertical comes from above, dot at junction
          */
         branchr: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${centerY}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${centerY}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         /**
@@ -352,11 +352,11 @@ const LadSymbols = (function() {
          * Branch Top-To-Left (branchttl): Top of merge
          * ────┬────
          *     │
-         * Wire passes through, vertical goes down
+         * Wire passes through, vertical goes down, dot at junction
          */
         branchttl: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><line x1="40" y1="${centerY}" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><line x1="40" y1="${centerY}" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         /**
@@ -364,22 +364,22 @@ const LadSymbols = (function() {
          *     │
          * ────┼────
          *     │
-         * Wire passes through, vertical continues
+         * Wire passes through, vertical continues, dot at junction
          */
         branchtl: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         /**
          * Branch Bottom-Left (branchl): Bottom of merge
          *     │
          * ────┴────
-         * Wire passes through, vertical comes from above
+         * Wire passes through, vertical comes from above, dot at junction
          */
         branchl: (stateClass) => {
             const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${centerY}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT);
+            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${centerY}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
         },
 
         /**

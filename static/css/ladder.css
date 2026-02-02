@@ -424,6 +424,17 @@ h1, h2, h3 {
     margin-left: 0;  /* No gap - wire connection handles spacing */
 }
 
+/* Output row - horizontal layout for branch connectors + coils */
+.ladder-output-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 80px;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+}
+
 /* Output spacer for row alignment */
 .ladder-output-spacer {
     width: 80px;
@@ -565,8 +576,17 @@ h1, h2, h3 {
     vector-effect: non-scaling-stroke;  /* Keep stroke width consistent when scaled */
 }
 
-.MB_ladderoff circle,
 .MB_ladderoff rect {
+    fill: none;
+}
+
+/* Junction dots in branch connectors should be filled */
+.MB_ladderoff circle[fill="currentColor"] {
+    fill: #3498db;
+}
+
+/* Coil circles remain unfilled */
+.MB_ladderoff circle:not([fill="currentColor"]) {
     fill: none;
 }
 
@@ -584,8 +604,17 @@ h1, h2, h3 {
     vector-effect: non-scaling-stroke;  /* Keep stroke width consistent when scaled */
 }
 
-.MB_ladderon circle,
 .MB_ladderon rect {
+    fill: none;
+}
+
+/* Junction dots in branch connectors should be filled */
+.MB_ladderon circle[fill="currentColor"] {
+    fill: #e74c3c;
+}
+
+/* Coil circles remain unfilled */
+.MB_ladderon circle:not([fill="currentColor"]) {
     fill: none;
 }
 
@@ -622,6 +651,17 @@ svg.MB_ladderon rect {
 }
 
 svg.MB_ladderon text {
+    fill: #e74c3c;
+}
+
+/* Junction dots should be filled (branch connectors) */
+svg.MB_ladderoff circle[fill="currentColor"],
+svg circle.junction-dot {
+    fill: #3498db;
+}
+
+svg.MB_ladderon circle[fill="currentColor"],
+svg.MB_ladderon circle.junction-dot {
     fill: #e74c3c;
 }
 
