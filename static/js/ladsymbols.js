@@ -1,472 +1,640 @@
-/**
- * ladsymbols.js - Ladder Diagram SVG Symbol Definitions
- * Provides SVG template strings for all ladder diagram symbols
- */
+/** ##########################################################################
+# Project: 	MBLogic
+# Module: 	ladsymbols.js
+# Purpose: 	MBLogic ladder editor library.
+# Language:	javascript
+# Date:		17-Mar-2010.
+# Ver:		29-Apr-2010
+# Author:	M. Griffin.
+# Copyright:	2010 - Michael Griffin       <m.os.griffin@gmail.com>
+#
+# This file is part of MBLogic.
+# MBLogic is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# MBLogic is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License
+# along with MBLogic. If not, see <http://www.gnu.org/licenses/>.
+#
+# Important:	WHEN EDITING THIS FILE, USE TABS TO INDENT - NOT SPACES!
+##############################################################################
+**/
 
-const LadSymbols = (function() {
-    'use strict';
+/*
+*/
+function LadSymDefs(docref) {
 
-    // Symbol dimensions - use actual display size for 1:1 mapping
-    const WIDTH = 80;
-    const HEIGHT = 80;
-    const CENTER_Y = HEIGHT / 2;  // 40
 
-    // Block dimensions (wider for instructions with parameters)
-    const BLOCK_WIDTH = 140;
-    const BLOCK_HEIGHT = 80;
+	this.docref = docref;
 
-    /**
-     * Create an SVG wrapper with the given content
-     * @param {string} content - SVG content
-     * @param {string} stateClass - State class (MB_ladderoff or MB_ladderon)
-     * @param {number} width - SVG width (default: WIDTH)
-     * @param {number} height - SVG height (default: HEIGHT)
-     * @returns {string} - Complete SVG element string
-     */
-    function wrapSvg(content, stateClass = 'MB_ladderoff', width = WIDTH, height = HEIGHT) {
-        // Use preserveAspectRatio="none" so lines stretch to fill cell edges
-        return `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" class="ladder-symbol ${stateClass}">${content}</svg>`;
-    }
+	// These are used for displaying address in SVG.
+	this.inptext1 = [this.docref.getElementById("inptext1")];
+	this.inptext2 = [this.docref.getElementById("inptext2a"), this.docref.getElementById("inptext2b")];
+	this.coiltext2 = [this.docref.getElementById("coiltext2a"), this.docref.getElementById("coiltext2b")];
+	this.timertext1 = [this.docref.getElementById("timertext1a"), 
+				this.docref.getElementById("timertext1b"),
+				this.docref.getElementById("timertext1c")];
+	this.findtext = [this.docref.getElementById("findtext1a"), this.docref.getElementById("findtext1b"),
+			this.docref.getElementById("findtext1c"), this.docref.getElementById("findtext1d"),
+			this.docref.getElementById("findtext1e"), this.docref.getElementById("findtext1f")];
+	this.mathtext = [this.docref.getElementById("mathtext1a"), 
+				this.docref.getElementById("mathtext1b"), 
+				this.docref.getElementById("mathtext1c")];
+	this.sumtext = [this.docref.getElementById("sumtext1a"), 
+				this.docref.getElementById("sumtext1b"), 
+				this.docref.getElementById("sumtext1c"),
+				this.docref.getElementById("sumtext1d")];
 
-    // Vertical line cell height (matches CSS .ladder-vline-cell height)
-    const VLINE_HEIGHT = 80;
 
-    /**
-     * Create a block instruction SVG
-     * @param {string} label - Block label (opcode)
-     * @param {string} stateClass - State class
-     * @returns {string} - SVG element string
-     */
-    function createBlockSvg(label, stateClass = 'MB_ladderoff') {
-        const centerY = BLOCK_HEIGHT / 2;  // 40
-        // Rectangle centered vertically: height=50 means y = centerY - 25 = 15
-        // Rectangle spans from y=15 to y=65
-        return wrapSvg(`
-            <line x1="0" y1="${centerY}" x2="10" y2="${centerY}" class="${stateClass}"/>
-            <rect x="10" y="15" width="120" height="50" class="${stateClass}" fill="none" rx="3" ry="3"/>
-            <text x="70" y="45" text-anchor="middle" font-size="11" font-weight="bold" class="${stateClass}">${label}</text>
-            <line x1="130" y1="${centerY}" x2="${BLOCK_WIDTH}" y2="${centerY}" class="${stateClass}"/>
-        `, stateClass, BLOCK_WIDTH, BLOCK_HEIGHT);
-    }
+	// These are used for editing addresses. 
+	this.addredit1 = [this.docref.getElementById("addrtext1")];
+	this.addredit2 = [this.docref.getElementById("addrtext2a"), this.docref.getElementById("addrtext2b")];
+	this.addreditcoil1 = [this.docref.getElementById("addreditcoil1a")];
+	this.addreditcoil2 = [this.docref.getElementById("addreditcoil2a"), this.docref.getElementById("addreditcoil2b")];
+	this.addredittimer1 = [this.docref.getElementById("addredittimer1a"), 
+				this.docref.getElementById("addredittimer1b"),
+				this.docref.getElementById("addredittimer1c")];
+	this.addreditfind = [this.docref.getElementById("addreditfind1a"), 
+				this.docref.getElementById("addreditfind1b"),
+				this.docref.getElementById("addreditfind1c"),
+				this.docref.getElementById("addreditfind1d"),
+				this.docref.getElementById("addreditfind1e"),
+				this.docref.getElementById("addreditfind1f")];
+	this.addreditmath = [this.docref.getElementById("addreditmath1a"), 
+				this.docref.getElementById("addreditmath1b"),
+				this.docref.getElementById("addreditmath1c")];
 
-    // Symbol definitions
-    const symbols = {
-        /**
-         * Normally Open Contact (NO)
-         * --| |--
-         */
-        noc: (stateClass) => wrapSvg(`<line x1="0" y1="${CENTER_Y}" x2="25" y2="${CENTER_Y}" class="${stateClass}"/><line x1="25" y1="16" x2="25" y2="64" class="${stateClass}"/><line x1="55" y1="16" x2="55" y2="64" class="${stateClass}"/><line x1="55" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>`, stateClass),
+	/* This is used to determine what sort of address input fields are being used. */
+	this.addressinputs = {
+		"address1" : ["addrtext1"],
+		"address2" : ["addrtext2a", "addrtext2b"],
+		"addreditfor" : ["addrtextfor1a", "addrtextfor1b"],
+		"addreditcall" : ["addrtextcall1"],
+		"addreditcoil1" : ["addreditcoil1a"],
+		"addreditcoil2" : ["addreditcoil2a", "addreditcoil2b"],
+		"addredittimer1" : ["addredittimer1a", "addredittimer1b", "addredittimer1c"],
+		"addreditcounter" : ["addreditcounter1a", "addreditcounter1b"],
+		"addreditcopy" : ["addreditcopy1a", "addreditcopy1b", "addreditcopy1c"],
+		"addreditcpyblk" : ["addreditcpyblk1a", "addreditcpyblk1b", "addreditcpyblk1c", "addreditcpyblk1d"],
+		"addreditfill" : ["addreditfill1a", "addreditfill1b", "addreditfill1c", "addreditfill1d"],
+		"addreditpack" : ["addreditpack1a", "addreditpack1b", "addreditpack1c", "addreditpack1d"],
+		"addreditunpack" : ["addreditunpack1a", "addreditunpack1b", "addreditunpack1c", "addreditunpack1d"],
+		"addreditfind" : ["addreditfind1a", "addreditfind1b", "addreditfind1c", 
+					"addreditfind1d", "addreditfind1e", "addreditfind1f"],
+		"addreditmath" : ["addreditmath1a", "addreditmath1b", "addreditmath1c"],
+		"addreditsum" : ["addreditsum1a", "addreditsum1b", "addreditsum1c", "addreditsum1d"],
+		"addreditshfrg" : ["addreditshfrg1a", "addreditshfrg1b"],
+	};
 
-        /**
-         * Normally Closed Contact (NC)
-         * --|/|--
-         */
-        ncc: (stateClass) => wrapSvg(`<line x1="0" y1="${CENTER_Y}" x2="25" y2="${CENTER_Y}" class="${stateClass}"/><line x1="25" y1="16" x2="25" y2="64" class="${stateClass}"/><line x1="55" y1="16" x2="55" y2="64" class="${stateClass}"/><line x1="28" y1="58" x2="52" y2="22" class="${stateClass}"/><line x1="55" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>`, stateClass),
+	
+	// This is the complete list of all the ids for the address edit forms. 
+	this.addresseditgroups = ["addresseditnone", "addreditcontact1", "addreditcontact2", 
+				"addreditcoil1", "addreditcoil2", "addreditcall", 
+				"addreditfor", "addreditcounter", "addredittimer",    
+				"addreditcopy", "addreditcpyblk", "addreditfill", 
+				"addreditpack", "addreditunpack", "addreditfind", 
+				"addreditmath", "addreditsum", "addreditshfrg"];
 
-        /**
-         * Positive Differential Contact (Rising Edge)
-         * --|P|--
-         */
-        nocpd: (stateClass) => wrapSvg(`<line x1="0" y1="${CENTER_Y}" x2="25" y2="${CENTER_Y}" class="${stateClass}"/><line x1="25" y1="16" x2="25" y2="64" class="${stateClass}"/><line x1="55" y1="16" x2="55" y2="64" class="${stateClass}"/><text x="40" y="45" text-anchor="middle" font-size="14" font-weight="bold" class="${stateClass}">P</text><line x1="55" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>`, stateClass),
 
-        /**
-         * Negative Differential Contact (Falling Edge)
-         * --|N|--
-         */
-        nocnd: (stateClass) => wrapSvg(`<line x1="0" y1="${CENTER_Y}" x2="25" y2="${CENTER_Y}" class="${stateClass}"/><line x1="25" y1="16" x2="25" y2="64" class="${stateClass}"/><line x1="55" y1="16" x2="55" y2="64" class="${stateClass}"/><text x="40" y="45" text-anchor="middle" font-size="14" font-weight="bold" class="${stateClass}">N</text><line x1="55" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>`, stateClass),
+	// Default addresses for FIND instructions.
+	this.FindDefaults = ["1", "DS9998", "DS9999", "DS10000", "C2000", "0"];
 
-        /**
-         * Output Coil
-         * --( )--
-         */
-        out: (stateClass) => wrapSvg(`<line x1="0" y1="${CENTER_Y}" x2="24" y2="${CENTER_Y}" class="${stateClass}"/><circle cx="40" cy="${CENTER_Y}" r="15" class="${stateClass}" fill="none"/><line x1="56" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>`, stateClass),
 
-        /**
-         * Set (Latch) Coil
-         * --(S)--
-         */
-        set: (stateClass) => wrapSvg(`<line x1="0" y1="${CENTER_Y}" x2="24" y2="${CENTER_Y}" class="${stateClass}"/><circle cx="40" cy="${CENTER_Y}" r="15" class="${stateClass}" fill="none"/><text x="40" y="45" text-anchor="middle" font-size="12" font-weight="bold" class="${stateClass}">S</text><line x1="56" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>`, stateClass),
 
-        /**
-         * Reset (Unlatch) Coil
-         * --(R)--
-         */
-        rst: (stateClass) => wrapSvg(`<line x1="0" y1="${CENTER_Y}" x2="24" y2="${CENTER_Y}" class="${stateClass}"/><circle cx="40" cy="${CENTER_Y}" r="15" class="${stateClass}" fill="none"/><text x="40" y="45" text-anchor="middle" font-size="12" font-weight="bold" class="${stateClass}">R</text><line x1="56" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>`, stateClass),
+	// ==================================================================
 
-        /**
-         * Pulse/Differentiate Coil
-         * --(P)--
-         */
-        pd: (stateClass) => wrapSvg(`<line x1="0" y1="${CENTER_Y}" x2="24" y2="${CENTER_Y}" class="${stateClass}"/><circle cx="40" cy="${CENTER_Y}" r="15" class="${stateClass}" fill="none"/><text x="40" y="45" text-anchor="middle" font-size="12" font-weight="bold" class="${stateClass}">P</text><line x1="56" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>`, stateClass),
+	/* This converts the ladder symbol names used in the data matrix
+		to the names used in the page SVG. 
+	symbolref: (ref) = reference to SVG ladder symbol. 
+	addredit: (string) =  Type of address edting to use. This is used in a switch
+		statement in labeditlib.js to select the correct code, and it is also
+		the id of the div in the web page for hide/show.
+	addrref: (ref) = List of references to address display fields.
+	defaultaddr: (list of strings) = List of default address when adding instructions.
+	type: (string) = Instruction type.
+	*/
+	this.LadSymbols = {
+		// Empty cell.
+		"none" : {"symbolref" : this.docref.getElementById("none"),
+				"addredit" : "addresseditnone", 
+				"defaultaddr" : [], "addrref" : [], "type" : "none"},
 
-        /**
-         * Comparison Block
-         * --[CMP]--
-         */
-        compare: (stateClass) => createBlockSvg('CMP', stateClass),
+		// Input contacts.
+		"noc" : {"symbolref" : this.docref.getElementById("inputno"),
+				"addredit" : "addreditcontact1", 
+				"addrref" : this.inptext1,
+				"defaultaddr" : ["C2000"],
+				"type" : "input"},
+		"ncc" : {"symbolref" : this.docref.getElementById("inputnc"),
+				"addredit" : "addreditcontact1", 
+				"addrref" : this.inptext1,
+				"defaultaddr" : ["C2000"],
+				"type" : "input"},
+		"nocpd" : {"symbolref" : this.docref.getElementById("inputnopd"),
+				"addredit" : "addreditcontact1", 
+				"addrref" : this.inptext1,
+				"defaultaddr" : ["C2000"],
+				"type" : "input"},
+		"nocnd" : {"symbolref" : this.docref.getElementById("inputnond"),
+				"addredit" : "addreditcontact1", 
+				"addrref" : this.inptext1,
+				"defaultaddr" : ["C2000"],
+				"type" : "input"},
 
-        /**
-         * Timer On-Delay
-         */
-        tmr: (stateClass) => createBlockSvg('TMR', stateClass),
+		// Compare contacts.
+		"compeq" : {"symbolref" : this.docref.getElementById("inputcompeq"),
+				"addredit" : "addreditcontact2", 
+				"defaultaddr" : ["DS10000", "DS10000"],
+				"addrref" : this.inptext2,
+				"type" : "input"},
+		"compneq" : {"symbolref" : this.docref.getElementById("inputcompneq"),
+				"addredit" : "addreditcontact2",  
+				"defaultaddr" : ["DS10000", "DS10000"],
+				 "addrref" : this.inptext2,
+				"type" : "input"},
+		"compgt" : {"symbolref" : this.docref.getElementById("inputcompgt"),
+				"addredit" : "addreditcontact2",  
+				"defaultaddr" : ["DS10000", "DS10000"],
+				"addrref" : this.inptext2,
+				"type" : "input"},
+		"complt" : {"symbolref" : this.docref.getElementById("inputcomplt"),
+				"addredit" : "addreditcontact2",  
+				"defaultaddr" : ["DS10000", "DS10000"],
+				"addrref" : this.inptext2,
+				"type" : "input"},
+		"compge" : {"symbolref" : this.docref.getElementById("inputcompge"),
+				"addredit" : "addreditcontact2",  
+				"defaultaddr" : ["DS10000", "DS10000"],
+				"addrref" : this.inptext2,
+				"type" : "input"},
+		"comple" : {"symbolref" : this.docref.getElementById("inputcomple"),
+				"addredit" : "addreditcontact2",  
+				"defaultaddr" : ["DS10000", "DS10000"],
+				"addrref" : this.inptext2,
+				"type" : "input"},
 
-        /**
-         * Timer Accumulating
-         */
-        tmra: (stateClass) => createBlockSvg('TMRA', stateClass),
 
-        /**
-         * Timer Off-Delay
-         */
-        tmroff: (stateClass) => createBlockSvg('TMROFF', stateClass),
+		// Input branches.
+		"brancht" : {"symbolref" : this.docref.getElementById("brancht"),
+				"addredit" : "addresseditnone",  
+				"defaultaddr" : [], "addrref" : [], "type" : "input"},
+		"branchl" : {"symbolref" : this.docref.getElementById("branchl"),
+				"addredit" : "addresseditnone", 
+				"defaultaddr" : [], "addrref" : [], "type" : "input"},
+		"branchr" : {"symbolref" : this.docref.getElementById("branchr"),
+				"addredit" : "addresseditnone", 
+				"defaultaddr" : [], "addrref" : [], "type" : "input"},
+		"branchx" : {"symbolref" : this.docref.getElementById("branchx"),
+				"addredit" : "addresseditnone", 
+				"defaultaddr" : [], "addrref" : [], "type" : "input"},
+		"branchtl" : {"symbolref" : this.docref.getElementById("branchtl"),
+				"addredit" : "addresseditnone", 
+				"defaultaddr" : [], "addrref" : [], "type" : "input"},
+		"branchtr" : {"symbolref" : this.docref.getElementById("branchtr"),
+				"addredit" : "addresseditnone", 
+				"defaultaddr" : [], "addrref" : [], "type" : "input"},
+		"branchtu" : {"symbolref" : this.docref.getElementById("branchtu"),
+				"addredit" : "addresseditnone", 
+				"defaultaddr" : [], "addrref" : [], "type" : "input"},
+		"vbar" : {"symbolref" : this.docref.getElementById("vbar"),
+				"addredit" : "addresseditnone", 
+				"defaultaddr" : [], "addrref" : [], "type" : "input"},
+		"hbar" : {"symbolref" : this.docref.getElementById("hbar"),
+				"addredit" : "addresseditnone", 
+				"defaultaddr" : [], "addrref" : [], "type" : "input"},
 
-        /**
-         * Counter Up
-         */
-        cntu: (stateClass) => createBlockSvg('CNTU', stateClass),
+		// Coil outputs with single addresses.
+		"out" : {"symbolref" : this.docref.getElementById("outputout"),
+				"addredit" : "addreditcoil1",
+				"defaultaddr" : ["C2000"],
+				"addrref" : this.inptext1,
+				"type" : "single"},
+		"set" : {"symbolref" : this.docref.getElementById("outputset"),
+				"addredit" : "addreditcoil1",
+				"defaultaddr" : ["C2000"],
+				"addrref" : this.inptext1,
+				"type" : "single"},
+		"rst" : {"symbolref" : this.docref.getElementById("outputreset"),
+				"addredit" : "addreditcoil1",
+				"defaultaddr" : ["C2000"],
+				"addrref" : this.inptext1,
+				"type" : "single"},
+		"pd" : {"symbolref" : this.docref.getElementById("outputpd"),
+				"addredit" : "addreditcoil1",
+				"defaultaddr" : ["C2000"],
+				"addrref" : this.inptext1,
+				"type" : "single"},
 
-        /**
-         * Counter Down
-         */
-        cntd: (stateClass) => createBlockSvg('CNTD', stateClass),
+		// Coil outputs with a range of addresses.
+		"out2" : {"symbolref" : this.docref.getElementById("outputout2"),
+				"addredit" : "addreditcoil2",
+				"defaultaddr" : ["C1999", "C2000"],
+				"addrref" : this.coiltext2,
+				"type" : "single"},
+		"set2" : {"symbolref" : this.docref.getElementById("outputset2"),
+				"addredit" : "addreditcoil2",
+				"defaultaddr" : ["C1999", "C2000"],
+				"addrref" : this.coiltext2,
+				"type" : "single"},
+		"rst2" : {"symbolref" : this.docref.getElementById("outputreset2"),
+				"addredit" : "addreditcoil2",
+				"defaultaddr" : ["C1999", "C2000"],
+				"addrref" : this.coiltext2,
+				"type" : "single"},
+		"pd2" : {"symbolref" : this.docref.getElementById("outputpd2"),
+				"addredit" : "addreditcoil2",
+				"defaultaddr" : ["C1999", "C2000"],
+				"addrref" : this.coiltext2,
+				"type" : "single"},
 
-        /**
-         * Up/Down Counter
-         */
-        udc: (stateClass) => createBlockSvg('UDC', stateClass),
+		// Program control instructions. 
+		"end" : {"symbolref" : this.docref.getElementById("progcontrolend"),
+				"addredit" : "addresseditnone", 
+				"defaultaddr" : [], "addrref" : [], "type" : "single"},
+		"endc" : {"symbolref" : this.docref.getElementById("progcontrolendc"),
+				"addredit" : "addresseditnone", 
+				"defaultaddr" : [], "addrref" : [], "type" : "single"},
+		"rt" : {"symbolref" : this.docref.getElementById("progcontrolrt"),
+				"addredit" : "addresseditnone", 
+				"defaultaddr" : [], "addrref" : [], "type" : "single"},
+		"rtc" : {"symbolref" : this.docref.getElementById("progcontrolrtc"),
+				"addredit" : "addresseditnone", 
+				"defaultaddr" : [], "addrref" : [], "type" : "single"},
+		"call" : {"symbolref" : this.docref.getElementById("progcontrolcall"),
+				"addredit" : "addreditcall", 
+				"defaultaddr" : ["none"], 
+				"addrref" : [this.docref.getElementById("calltext")],
+				"type" : "single"},
+		"for" : {"symbolref" : this.docref.getElementById("progcontrolfor"),
+				"addredit" : "addreditfor", 
+				"defaultaddr" : ["0", "0"], 
+				"addrref" : [this.docref.getElementById("fortext1a"), 
+						this.docref.getElementById("fortext1b")],
+				"type" : "single"},
+		"next" : {"symbolref" : this.docref.getElementById("progcontrolnext"),
+				"addredit" : "addresseditnone", 
+				"defaultaddr" : [], "addrref" : [], "type" : "single"},
 
-        /**
-         * Copy instruction
-         */
-        copy: (stateClass) => createBlockSvg('COPY', stateClass),
 
-        /**
-         * Block Copy
-         */
-        cpyblk: (stateClass) => createBlockSvg('CPYBLK', stateClass),
 
-        /**
-         * Fill instruction
-         */
-        fill: (stateClass) => createBlockSvg('FILL', stateClass),
+		// Counters. 
+		"cntu" : {"symbolref" : this.docref.getElementById("timercntu"),
+				"addredit" : "addreditcounter", 
+				"defaultaddr" : ["CT250", "1"], 
+				"addrref" : [this.docref.getElementById("countertext1a"),
+						this.docref.getElementById("countertext1b")],
+				"type" : "double"},
+		"cntd" : {"symbolref" : this.docref.getElementById("timercntd"),
+				"addredit" : "addreditcounter", 
+				"defaultaddr" : ["CT250", "1"], 
+				"addrref" : [this.docref.getElementById("countertext1a"),
+						this.docref.getElementById("countertext1b")],
+				"type" : "double"},
+		"udc" : {"symbolref" : this.docref.getElementById("timerudc"),
+				"addredit" : "addreditcounter", 
+				"defaultaddr" : ["CT250", "1"], 
+				"addrref" : [this.docref.getElementById("countertext1a"),
+						this.docref.getElementById("countertext1b")],
+				"type" : "triple"},
 
-        /**
-         * Pack bits
-         */
-        pack: (stateClass) => createBlockSvg('PACK', stateClass),
+		// Timers.
+		"tmra" : {"symbolref" : this.docref.getElementById("timertmra"),
+				"addredit" : "addredittimer", 
+				"defaultaddr" : ["T500", "1000", "ms"], 
+				"addrref" : [this.docref.getElementById("tmratext1a"),
+						this.docref.getElementById("tmratext1b"),
+						this.docref.getElementById("tmratext1c")],
+				"type" : "double"},
 
-        /**
-         * Unpack bits
-         */
-        unpack: (stateClass) => createBlockSvg('UNPACK', stateClass),
+		"tmr" : {"symbolref" : this.docref.getElementById("timertmr"),
+				"addredit" : "addredittimer", 
+				"defaultaddr" : ["T500", "1000", "ms"], 
+				"addrref" : this.timertext1,
+				"type" : "single"},
+		"tmroff" : {"symbolref" : this.docref.getElementById("timertmroff"),
+				"addredit" : "addredittimer", 
+				"defaultaddr" : ["T500", "1000", "ms"], 
+				"addrref" : this.timertext1,
+				"type" : "single"},
 
-        /**
-         * Shift Register
-         */
-        shfrg: (stateClass) => createBlockSvg('SHFRG', stateClass),
 
-        /**
-         * Find Equal
-         */
-        findeq: (stateClass) => createBlockSvg('FINDEQ', stateClass),
+		// Copy instructions. 
+		"copy" : {"symbolref" : this.docref.getElementById("copy"),
+				"addredit" : "addreditcopy", 
+				"defaultaddr" : ["0", "DS10000", "0"], 
+				"addrref" : [this.docref.getElementById("copytext1a"),
+						this.docref.getElementById("copytext1b"),
+						this.docref.getElementById("copytext1c")],
+				"type" : "single"},
+		"cpyblk" : {"symbolref" : this.docref.getElementById("cpyblk"),
+				"addredit" : "addreditcpyblk", 
+				"defaultaddr" : ["DS9997", "DS9998", "DS9999", "0"], 
+				"addrref" : [this.docref.getElementById("cpyblktext1a"),
+						this.docref.getElementById("cpyblktext1b"),
+						this.docref.getElementById("cpyblktext1c"),
+						this.docref.getElementById("cpyblktext1d")],
+				"type" : "single"},
+		"fill" : {"symbolref" : this.docref.getElementById("fill"),
+				"addredit" : "addreditfill", 
+				"defaultaddr" : ["DS9997", "DS9998", "DS9999", "0"], 
+				"addrref" : [this.docref.getElementById("filltext1a"),
+						this.docref.getElementById("filltext1b"),
+						this.docref.getElementById("filltext1c"),
+						this.docref.getElementById("filltext1d")],
+				"type" : "single"},
+		"pack" : {"symbolref" : this.docref.getElementById("pack"),
+				"addredit" : "addreditpack", 
+				"defaultaddr" : ["C1999", "C2000", "DS10000", "0"], 
+				"addrref" : [this.docref.getElementById("packtext1a"),
+						this.docref.getElementById("packtext1b"),
+						this.docref.getElementById("packtext1c"),
+						this.docref.getElementById("packtext1d")],
+				"type" : "single"},
+		"unpack" : {"symbolref" : this.docref.getElementById("unpack"),
+				"addredit" : "addreditunpack", 
+				"defaultaddr" : ["DS10000", "C1999", "C2000", "0"], 
+				"addrref" : [this.docref.getElementById("unpacktext1a"),
+						this.docref.getElementById("unpacktext1b"),
+						this.docref.getElementById("unpacktext1c"),
+						this.docref.getElementById("unpacktext1d")],
+				"type" : "single"},
 
-        /**
-         * Math Decimal
-         */
-        mathdec: (stateClass) => createBlockSvg('MATH', stateClass),
+		// Find or search instructions. 
+		"findeq" : {"symbolref" : this.docref.getElementById("findeq"),
+				"addredit" : "addreditfind",
+				"defaultaddr" : this.FindDefaults, 
+				"addrref" : this.findtext,
+				"type" : "single"},
+		"findne" : {"symbolref" : this.docref.getElementById("findne"),
+				"addredit" : "addreditfind",
+				"defaultaddr" : this.FindDefaults, 
+				"addrref" : this.findtext,
+				"type" : "single"},
+		"findgt" : {"symbolref" : this.docref.getElementById("findgt"),
+				"addredit" : "addreditfind",
+				"defaultaddr" : this.FindDefaults, 
+				"addrref" : this.findtext,
+				"type" : "single"},
+		"findge" : {"symbolref" : this.docref.getElementById("findge"),
+				"addredit" : "addreditfind",
+				"defaultaddr" : this.FindDefaults, 
+				"addrref" : this.findtext,
+				"type" : "single"},
+		"findlt" : {"symbolref" : this.docref.getElementById("findlt"),
+				"addredit" : "addreditfind",
+				"defaultaddr" : this.FindDefaults, 
+				"addrref" : this.findtext,
+				"type" : "single"},
+		"findle" : {"symbolref" : this.docref.getElementById("findle"),
+				"addredit" : "addreditfind",
+				"defaultaddr" : this.FindDefaults, 
+				"addrref" : this.findtext,
+				"type" : "single"},
+		"findieq" : {"symbolref" : this.docref.getElementById("findieq"),
+				"addredit" : "addreditfind",
+				"defaultaddr" : this.FindDefaults, 
+				"addrref" : this.findtext,
+				"type" : "single"},
+		"findine" : {"symbolref" : this.docref.getElementById("findine"),
+				"addredit" : "addreditfind",
+				"defaultaddr" : this.FindDefaults, 
+				"addrref" : this.findtext,
+				"type" : "single"},
+		"findigt" : {"symbolref" : this.docref.getElementById("findigt"),
+				"addredit" : "addreditfind",
+				"defaultaddr" : this.FindDefaults, 
+				"addrref" : this.findtext,
+				"type" : "single"},
+		"findige" : {"symbolref" : this.docref.getElementById("findige"),
+				"addredit" : "addreditfind",
+				"defaultaddr" : this.FindDefaults, 
+				"addrref" : this.findtext,
+				"type" : "single"},
+		"findilt" : {"symbolref" : this.docref.getElementById("findilt"),
+				"addredit" : "addreditfind",
+				"defaultaddr" : this.FindDefaults, 
+				"addrref" : this.findtext,
+				"type" : "single"},
+		"findile" : {"symbolref" : this.docref.getElementById("findile"),
+				"addredit" : "addreditfind",
+				"defaultaddr" : this.FindDefaults, 
+				"addrref" : this.findtext,
+				"type" : "single"},
 
-        /**
-         * Math Hex
-         */
-        mathhex: (stateClass) => createBlockSvg('MATHX', stateClass),
 
-        /**
-         * Sum
-         */
-        sum: (stateClass) => createBlockSvg('SUM', stateClass),
+		// Math instructions. 
+		"mathdec" : {"symbolref" : this.docref.getElementById("mathdec"),
+				"addredit" : "addreditmath", 
+				"defaultaddr" : ["DS10000", "1 + 1", "0"], 
+				"addrref" : this.mathtext,
+				"type" : "single"},
+		"mathhex" : {"symbolref" : this.docref.getElementById("mathhex"),
+				"addredit" : "addreditmath", 
+				"defaultaddr" : ["DH2000", "1h + 1h", "0"],
+				 "addrref" : this.mathtext,
+				"type" : "single"},
+		"sum" : {"symbolref" : this.docref.getElementById("sum"),
+				"addredit" : "addreditsum", 
+				"defaultaddr" : ["DS10000", "DS9998", "DS9999", "0"], 
+				"addrref" : this.sumtext,
+				"type" : "single"},
 
-        /**
-         * Subroutine Call
-         */
-        call: (stateClass) => createBlockSvg('CALL', stateClass),
+		// Shift register.
+		"shfrg" : {"symbolref" : this.docref.getElementById("shfrg"),
+				"addredit" : "addreditshfrg", 
+				"defaultaddr" : ["C1999", "C2000"], 
+				"addrref" : [this.docref.getElementById("shfrgtext1a"),
+						this.docref.getElementById("shfrgtext1b")],
+				"type" : "triple"}
+		};
 
-        /**
-         * Return
-         */
-        rt: (stateClass) => createBlockSvg('RT', stateClass),
 
-        /**
-         * End
-         */
-        end: (stateClass) => createBlockSvg('END', stateClass),
 
-        /**
-         * For Loop Start
-         */
-        for: (stateClass) => createBlockSvg('FOR', stateClass),
+	// ==================================================================
 
-        /**
-         * For Loop End (Next)
-         */
-        next: (stateClass) => createBlockSvg('NEXT', stateClass),
 
-        /**
-         * Horizontal line (for spacing/continuation)
-         */
-        hline: (stateClass) => wrapSvg(`<line x1="0" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>`, stateClass),
+	// ##################################################################
 
-        /**
-         * Empty cell (just horizontal line)
-         */
-        empty: (stateClass) => wrapSvg(`
-            <line x1="0" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>
-        `, stateClass),
+	// Get the references to the background edit tabs.
+	this.buttonsinputtabs = this.docref.getElementById("inputtabs");
+	this.buttonsoutputtabs = this.docref.getElementById("outputtabs");
+	
 
-        /**
-         * IL instruction fallback display
-         */
-        il: (stateClass) => wrapSvg(`
-            <line x1="0" y1="${CENTER_Y}" x2="10" y2="${CENTER_Y}" class="${stateClass}"/>
-            <rect x="10" y="15" width="60" height="50" class="${stateClass}" fill="none" stroke-dasharray="3,2"/>
-            <text x="40" y="45" text-anchor="middle" font-size="10" class="${stateClass}">IL</text>
-            <line x1="70" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>
-        `, stateClass),
+	// Get the correct references to the different edit button types.
+	this.buttonsinputs = this.docref.getElementById("inputbuttons");
+	this.buttonscompare = this.docref.getElementById("comparebuttons");
+	this.buttonsbranches = this.docref.getElementById("branchbuttons");
+	this.buttonsinputedit = this.docref.getElementById("inputmatrixeditbuttons");
 
-        /**
-         * Vertical line (for branch connections spanning full cell height)
-         * Uses VLINE_HEIGHT for proper vertical connection between rows
-         */
-        vline: (stateClass) => wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT),
+	this.buttonsoutputs = this.docref.getElementById("outputbuttons");
+	this.buttonsprogcontrol = this.docref.getElementById("progcontrolbuttons");
+	this.buttonstimercounter = this.docref.getElementById("timercounterbuttons");
+	this.buttonscopydata = this.docref.getElementById("copydatabuttons");
+	this.buttonsfind = this.docref.getElementById("findbuttons");
+	this.buttonsmisc = this.docref.getElementById("miscbuttons");
+	this.buttonsoutputedit = this.docref.getElementById("outputmatrixeditbuttons");
 
-        /**
-         * Branch down: horizontal line continuing, then vertical down to next row
-         * Used at the top of a branch (main row) - merge point
-         * ----●----
-         *     |
-         */
-        branchDown: (stateClass) => {
-            const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><line x1="40" y1="${centerY}" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
-        },
+	/* These are the groups of buttons which are used when editing a rung.
+	this is normally used to control when each of these groups is displayed.
+	"buttonref" = The individual groups of buttons, plus the highlighted tab.
+	"tabref" = The tabs used to select the groups of buttons.
+	*/
+	this.buttondefs = {
+		"inputbuttons" : {"buttonref" : this.buttonsinputs, "tabref" : this.buttonsinputtabs},
+		"comparebuttons" : {"buttonref" : this.buttonscompare, "tabref" : this.buttonsinputtabs},
+		"branchbuttons" : {"buttonref" : this.buttonsbranches, "tabref" : this.buttonsinputtabs},
+		"inputmatrixeditbuttons" : {"buttonref" : this.buttonsinputedit, "tabref" : this.buttonsinputtabs},
+		"outputbuttons" : {"buttonref" : this.buttonsoutputs, "tabref" : this.buttonsoutputtabs},
+		"progcontrolbuttons" : {"buttonref" : this.buttonsprogcontrol, "tabref" : this.buttonsoutputtabs},
+		"timercounterbuttons" : {"buttonref" : this.buttonstimercounter, "tabref" : this.buttonsoutputtabs},
+		"copydatabuttons" : {"buttonref" : this.buttonscopydata, "tabref" : this.buttonsoutputtabs},
+		"findbuttons" : {"buttonref" : this.buttonsfind, "tabref" : this.buttonsoutputtabs},
+		"miscbuttons" : {"buttonref" : this.buttonsmisc, "tabref" : this.buttonsoutputtabs},
+		"outputmatrixeditbuttons" : {"buttonref" : this.buttonsoutputedit, "tabref" : this.buttonsoutputtabs},
+	}
 
-        /**
-         * Branch up: vertical line coming from above, then horizontal going LEFT only
-         * Used at the bottom of a branch (last branch row at merge point)
-         *     |
-         * ----●
-         */
-        branchUp: (stateClass) => {
-            const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${centerY}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="40" y2="${centerY}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
-        },
+	// ==================================================================
 
-        /**
-         * Branch merge: vertical line through cell with horizontal going LEFT only
-         * Used for middle rows in multi-branch setups
-         *     |
-         * ----●
-         *     |
-         */
-        branchMerge: (stateClass) => {
-            const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="40" y2="${centerY}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
-        },
 
-        /**
-         * Branch start: vertical from above connecting to horizontal going right
-         * Used at column 0 of branch rows to show connection from power rail
-         *     |
-         * ●-------
-         */
-        branchStart: (stateClass) => {
-            const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${centerY}" class="${stateClass}"/><line x1="40" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
-        },
+	// ##################################################################
 
-        /**
-         * Output branch middle: vertical through + horizontal to right
-         * Used for middle rows in parallel output coils
-         *     |
-         *     ●-------
-         *     |
-         */
-        outputBranchMid: (stateClass) => {
-            const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><line x1="40" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
-        },
+	// The subroutine name go in this.
+	this.subroutinename = this.docref.getElementById("subroutinename");
+	// The subroutine comments go in this.
+	this.subrcomments = this.docref.getElementById("subrcomments");
 
-        // ============================================================
-        // Python-compatible branch connector symbols (matrixdata format)
-        // These match the Python MBLogic PLCLadder.py output
-        // ============================================================
+	// The container for holding SVG items.
+	this.svgcontainer = this.docref.getElementById("ladderdispprototype");
 
-        /**
-         * Horizontal bar - wire segment
-         * ─────────
-         */
-        hbar: (stateClass) => wrapSvg(`<line x1="0" y1="${CENTER_Y}" x2="${WIDTH}" y2="${CENTER_Y}" class="${stateClass}"/>`, stateClass),
+	// This gives the ladder rung display items an offset.
+	this.laddercontainer = this.docref.getElementById("laddercontainer");
 
-        /**
-         * Branch Top-To-Right (branchttr): Top of branch fork
-         * ────┬────
-         *     │
-         * Wire passes through, vertical goes down, dot at junction
-         */
-        branchttr: (stateClass) => {
-            const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><line x1="40" y1="${centerY}" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
-        },
+	// This is a single "empty" container (group) for holding edit items.
+	this.cellcontainer = this.docref.getElementById("cellcontainer");
 
-        /**
-         * Branch Middle-Right (branchtr): Middle rows of branch fork
-         *     │
-         * ────┼────
-         *     │
-         * Wire passes through, vertical continues, dot at junction
-         */
-        branchtr: (stateClass) => {
-            const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
-        },
+	// This is where the instruction buttons are stored when we are not using them.
+	this.instrbuttonstorage = this.docref.getElementById("instrbuttonstorage");
 
-        /**
-         * Branch Bottom-Right (branchr): Bottom of branch fork
-         *     │
-         * ────┴────
-         * Wire passes through, vertical comes from above, dot at junction
-         */
-        branchr: (stateClass) => {
-            const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${centerY}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
-        },
+	// This is where the address edit fields are stored when we are not using them.
+	this.addresseditstorage = this.docref.getElementById("addresseditstorage");
 
-        /**
-         * Vertical bar right (vbarr): Vertical line, no junction
-         *     │
-         *     │
-         *     │
-         */
-        vbarr: (stateClass) => wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT),
+	// The list of static (non-editing) rungs go in here.
+	this.staticladderlist = this.docref.getElementById("staticrunglist");
 
-        /**
-         * Branch Top-To-Left (branchttl): Top of merge
-         * ────┬────
-         *     │
-         * Wire passes through, vertical goes down, dot at junction
-         */
-        branchttl: (stateClass) => {
-            const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><line x1="40" y1="${centerY}" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
-        },
+	// Power rail to join inputs to outputs.
+	this.svginprail = this.docref.getElementById("svginprail1");
+	// Power rail to join inputs to outputs (second optional rail).
+	this.svginprail2 = this.docref.getElementById("svginprail2");
+	// Power rail to join inputs to outputs (third optional rail).
+	this.svginprail3 = this.docref.getElementById("svginprail3");
 
-        /**
-         * Branch Middle-Left (branchtl): Middle rows of merge
-         *     │
-         * ────┼────
-         *     │
-         * Wire passes through, vertical continues, dot at junction
-         */
-        branchtl: (stateClass) => {
-            const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
-        },
+	// Power rail to join outputs together.
+	this.svgoutprail = this.docref.getElementById("svgoutprail");
+	
+	// Decoration for output rail.
+	this.svgoutpraildec = this.docref.getElementById("svgoutraildecoration");
 
-        /**
-         * Branch Bottom-Left (branchl): Bottom of merge
-         *     │
-         * ────┴────
-         * Wire passes through, vertical comes from above, dot at junction
-         */
-        branchl: (stateClass) => {
-            const centerY = VLINE_HEIGHT / 2;
-            return wrapSvg(`<line x1="40" y1="0" x2="40" y2="${centerY}" class="${stateClass}"/><line x1="0" y1="${centerY}" x2="${WIDTH}" y2="${centerY}" class="${stateClass}"/><circle cx="40" cy="${centerY}" r="4" class="${stateClass}" fill="currentColor"/>`, stateClass, WIDTH, VLINE_HEIGHT);
-        },
+	// ##################################################################
 
-        /**
-         * Vertical bar left (vbarl): Vertical line, no junction (left side)
-         *     │
-         *     │
-         *     │
-         */
-        vbarl: (stateClass) => wrapSvg(`<line x1="40" y1="0" x2="40" y2="${VLINE_HEIGHT}" class="${stateClass}"/>`, stateClass, WIDTH, VLINE_HEIGHT)
-    };
+	// The definition for the edit matrix. 
+	this.MatrixDef = {};
 
-    /**
-     * Get SVG for a symbol
-     * @param {string} symbolName - Symbol name
-     * @param {string} stateClass - State class (MB_ladderoff or MB_ladderon)
-     * @returns {string} - SVG element string
-     */
-    function getSymbol(symbolName, stateClass = 'MB_ladderoff') {
-        const symbolFn = symbols[symbolName] || symbols.il;
-        return symbolFn(stateClass);
-    }
+	// Generate the inputs.
+	for (var i = 0; i <= this.MaxInputRow; i++) {
+		for (var j = 0; j <= this.MaxInputCol; j++) {
+			this.MatrixDef["inputedit" + i + j] = {"row" : i, "col" : j, 
+							"type" : "inputs", 
+							"ladder" : "inputladder" + i + j, 
+							"address" : "inputtext" + i + j};
+		}
+	}
 
-    /**
-     * Get list of all symbol names
-     * @returns {string[]} - Array of symbol names
-     */
-    function getSymbolNames() {
-        return Object.keys(symbols);
-    }
+	// Generate the outputs.
+	for (var i = 0; i <= this.MaxOutputRow; i++) {
+		this.MatrixDef["outputedit" + i] = {"row" : i, "col" : 0, 
+						"type" : "outputs", 
+						"ladder" : "outputladder" + i, 
+						"address" : "outputtext" + i};
+	}
 
-    /**
-     * Check if a symbol is a block type (wider)
-     * @param {string} symbolName - Symbol name
-     * @returns {boolean}
-     */
-    function isBlockSymbol(symbolName) {
-        const blockSymbols = [
-            'compare', 'tmr', 'tmra', 'tmroff',
-            'cntu', 'cntd', 'udc',
-            'copy', 'cpyblk', 'fill',
-            'pack', 'unpack', 'shfrg',
-            'findeq', 'mathdec', 'mathhex', 'sum',
-            'call', 'rt', 'end', 'for', 'next'
-        ];
-        return blockSymbols.includes(symbolName);
-    }
 
-    /**
-     * Check if a symbol is a branch connector (Python matrixdata format)
-     * @param {string} symbolName - Symbol name
-     * @returns {boolean}
-     */
-    function isBranchSymbol(symbolName) {
-        const branchSymbols = [
-            'branchttr', 'branchtr', 'branchr', 'vbarr',
-            'branchttl', 'branchtl', 'branchl', 'vbarl',
-            'hbar'
-        ];
-        return branchSymbols.includes(symbolName);
-    }
+	// ==================================================================
 
-    /**
-     * Check if a symbol is a vertical branch connector (needs taller cell)
-     * @param {string} symbolName - Symbol name
-     * @returns {boolean}
-     */
-    function isVerticalBranchSymbol(symbolName) {
-        const verticalSymbols = [
-            'branchttr', 'branchtr', 'branchr', 'vbarr',
-            'branchttl', 'branchtl', 'branchl', 'vbarl',
-            'vline', 'branchDown', 'branchUp', 'branchMerge',
-            'branchStart', 'outputBranchMid'
-        ];
-        return verticalSymbols.includes(symbolName);
-    }
+	// Padding to add to increase the height of the rung.
+	this.RungHeightPad = 15;
 
-    // Public API
-    return {
-        getSymbol,
-        getSymbolNames,
-        isBlockSymbol,
-        isBranchSymbol,
-        isVerticalBranchSymbol,
-        WIDTH,
-        HEIGHT,
-        BLOCK_WIDTH,
-        BLOCK_HEIGHT,
-        VLINE_HEIGHT
-    };
-})();
+
+	// Parameters for SVG matrix coordinates. 
+	this.MatrixParams = {
+		// One logic stack input per rung. Most outputs use this.
+		"single" : {	"maxinputcol" : 7, 	// Maximum input column.
+				"maxinputrow" : 7, 	// Maximum input row.
+				"maxoutputrow" : 7,	// Maximum output row.
+				"inputpitch" : 75,	// Horizontal pitch for input positions.
+				"inputvert" : 75,	// Vertical pitch for inputs.
+				"vertpitch" : 75,	// Vertical pitch for output positions.
+				"outputxpos" : 610	// X coordinate of the output column.
+			},
+
+		// Two logic stack inputs per rung. 
+		"double" : {	"maxinputcol" : 7, 	// Maximum input column.
+				"maxinputrow" : 1, 	// Maximum input row.
+				"maxoutputrow" : 0,	// Maximum output row.
+				"inputpitch" : 75,	// Horizontal pitch for input positions.
+				"inputvert" : 75,	// Vertical pitch for inputs.
+				"vertpitch" : 150,	// Vertical pitch for output positions.
+				"outputxpos" : 610	// X coordinate of the output column.
+			},
+
+		// Three logic stack inputs per rung. 
+		"triple" : {	"maxinputcol" : 7, 	// Maximum input column.
+				"maxinputrow" : 2, 	// Maximum input row.
+				"maxoutputrow" : 0,	// Maximum output row.
+				"inputpitch" : 75,	// Horizontal pitch for input positions.
+				"inputvert" : 75,	// Vertical pitch for inputs.
+				"vertpitch" : 225,	// Vertical pitch for output positions.
+				"outputxpos" : 610	// X coordinate of the output column.
+			},
+
+		// No instructions present in this rung yet. 
+		"empty" : {	"maxinputcol" : 7, 	// Maximum input column.
+				"maxinputrow" : 0, 	// Maximum input row.
+				"maxoutputrow" : 0,	// Maximum output row.
+				"inputpitch" : 75,	// Horizontal pitch for input positions.
+				"inputvert" : 75,	// Vertical pitch for inputs.
+				"vertpitch" : 75,	// Vertical pitch for output positions.
+				"outputxpos" : 610	// X coordinate of the output column.
+			},
+	}
+
+	// The rung types for valid ladder. 
+	this.RungOutputTypes = ["single", "double", "triple"];
+
+	// ==================================================================
+	// ##################################################################
+
+	/* These provide lists of ids for "instruction masks". The instruction
+		masks are used to disable instructions which are not valid for the
+		type of rung currently being displayed. These are used by
+		changing the class of the mask between classes which use
+		the display property to hide or show the mask. 
+	*/
+	this.InstructionMasks = {"single" : ["masktimersingle", "maskcoilssingle", 
+						"maskbranch", "maskprogsingle", 
+						"maskcopysingle", "maskfindsingle", 
+						"maskmiscsingle"],
+				"double" : ["masktimerdouble"],
+				"triple" : ["masktimertriple", "maskmisctriple"]
+				}
+
+// ==================================================================
+
+
+
+}
+
+

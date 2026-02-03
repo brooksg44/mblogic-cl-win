@@ -16,26 +16,53 @@
   (let ((alist (plist-to-alist plist)))
     (cl-json:encode-json-alist-to-string alist)))
 
+(defun string-keyed-alist-p (value)
+  "Check if VALUE is an alist with string keys (e.g., matrixdata)."
+  (and (listp value)
+       (not (null value))
+       (consp (first value))
+       (stringp (car (first value)))))
+
+(defun plist-p (value)
+  "Check if VALUE looks like a plist (keyword followed by value pairs)."
+  (and (listp value)
+       (keywordp (first value))
+       (> (length value) 1)
+       (evenp (length value))))
+
+(defun list-of-plists-p (value)
+  "Check if VALUE is a list of plists."
+  (and (listp value)
+       (not (null value))
+       (listp (first value))
+       (plist-p (first value))))
+
+(defun convert-value-for-json (value)
+  "Convert a value for JSON encoding, handling plists, alists, and nested structures."
+  (cond
+    ;; String-keyed alist (like matrixdata) - convert to alist with converted values
+    ((string-keyed-alist-p value)
+     (mapcar (lambda (pair)
+               (cons (car pair)  ; Keep string key as-is
+                     (convert-value-for-json (cdr pair))))
+             value))
+    ;; Nested plist - recursively convert
+    ((plist-p value)
+     (plist-to-alist value))
+    ;; List of plists - convert each
+    ((list-of-plists-p value)
+     (mapcar #'plist-to-alist value))
+    ;; Plain list or atom - return as-is
+    (t value)))
+
 (defun plist-to-alist (plist)
-  "Convert a plist to an alist recursively."
+  "Convert a plist to an alist recursively.
+   Also handles string-keyed alists (like matrixdata) by converting their values."
   (if (null plist)
       nil
       (loop for (key value) on plist by #'cddr
             collect (cons (intern (string key) :keyword)
-                         (cond
-                           ;; Recursively handle nested plists
-                           ((and (listp value)
-                                 (keywordp (first value))
-                                 (> (length value) 1))
-                            (plist-to-alist value))
-                           ;; Handle list of plists
-                           ((and (listp value)
-                                 (not (null value))
-                                 (listp (first value))
-                                 (keywordp (first (first value))))
-                            (mapcar #'plist-to-alist value))
-                           ;; Handle plain lists
-                           (t value))))))
+                         (convert-value-for-json value)))))
 
 (defun alist-to-json (alist)
   "Convert an alist to JSON string"
@@ -146,6 +173,27 @@
                                               (ladder-program-rungs ladder))))
                       ;; Legacy format (kept for backwards compatibility)
                       (plist-to-json (ladder-program-to-plist ladder)))
+                  (plist-to-json
+                   (list :error (format nil "Subroutine '~A' not found" subrname)))))
+            (plist-to-json (list :error "No program source available"))))
+      (plist-to-json (list :error "No interpreter loaded"))))
+
+;;; ============================================================
+;;; JavaScript-Compatible Program Response (demodata.js format)
+;;; ============================================================
+
+(defun program-js-response (interpreter subrname)
+  "Generate JavaScript-compatible ladder JSON (demodata.js format).
+   This format is expected by the MBLogic ladtest JavaScript files."
+  (if interpreter
+      (let* ((program (mblogic-cl:interpreter-program interpreter))
+             (source (when program (mblogic-cl:program-source program))))
+        (if source
+            (let ((ladder (program-to-ladder source (or subrname "main"))))
+              (if ladder
+                  ;; ladder-program-to-js-format returns an alist, encode directly
+                  (cl-json:encode-json-alist-to-string
+                   (ladder-program-to-js-format ladder))
                   (plist-to-json
                    (list :error (format nil "Subroutine '~A' not found" subrname)))))
             (plist-to-json (list :error "No program source available"))))

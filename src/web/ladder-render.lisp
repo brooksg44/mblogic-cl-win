@@ -44,6 +44,16 @@
   (let ((svg-sym (cdr (assoc ladsymb *ladsymb-to-svg*))))
     ;; Handle special cases where opcode matters
     (cond
+      ;; Comparisons - map to specific JS symbols
+      ((eq ladsymb :compare)
+       (cond
+         ((member opcode '("STRE" "ANDE" "ORE") :test #'string-equal) "compeq")
+         ((member opcode '("STRNE" "ANDNE" "ORNE") :test #'string-equal) "compneq")
+         ((member opcode '("STRGT" "ANDGT" "ORGT") :test #'string-equal) "compgt")
+         ((member opcode '("STRLT" "ANDLT" "ORLT") :test #'string-equal) "complt")
+         ((member opcode '("STRGE" "ANDGE" "ORGE") :test #'string-equal) "compge")
+         ((member opcode '("STRLE" "ANDLE" "ORLE") :test #'string-equal) "comple")
+         (t "compeq")))  ; Default comparison
       ;; Timers
       ((and (eq ladsymb :timer) (string-equal opcode "TMR")) "tmr")
       ((and (eq ladsymb :timer) (string-equal opcode "TMRA")) "tmra")
@@ -52,6 +62,16 @@
       ((and (eq ladsymb :counter) (string-equal opcode "CNTU")) "cntu")
       ((and (eq ladsymb :counter) (string-equal opcode "CNTD")) "cntd")
       ((and (eq ladsymb :counter) (string-equal opcode "UDC")) "udc")
+      ;; Find instructions
+      ((eq ladsymb :find)
+       (cond
+         ((member opcode '("FINDEQ" "FINDIEQ") :test #'string-equal) "findeq")
+         ((member opcode '("FINDNE" "FINDINE") :test #'string-equal) "findne")
+         ((member opcode '("FINDGT" "FINDIGT") :test #'string-equal) "findgt")
+         ((member opcode '("FINDLT" "FINDILT") :test #'string-equal) "findlt")
+         ((member opcode '("FINDGE" "FINDIGE") :test #'string-equal) "findge")
+         ((member opcode '("FINDLE" "FINDILE") :test #'string-equal) "findle")
+         (t "findeq")))
       ;; Default
       (t (or svg-sym "il")))))  ; "il" = raw IL display fallback
 
@@ -394,109 +414,38 @@
 
 (defun merge-matrix-below (original-matrix new-matrix)
   "Merge NEW-MATRIX below ORIGINAL-MATRIX (for OR/ORSTR parallel connections).
-   Adds fork connectors on the LEFT side of the branch point:
-   - Top row: branchttr (┬) - horizontal through with vertical down
-   - Middle rows: branchtr (┼) - horizontal through with vertical both ways
-   - Bottom row: branchr (┴) - horizontal through with vertical up
-   Pads the narrower matrix with hbar cells to keep rectangular.
+   Only pads matrices to same width with hbar cells - does NOT add branch connectors.
+   Branch connectors should be added separately by close-branch-block.
    Returns the merged matrix."
-  (let ((new-height (matrix-height new-matrix))
-        (has-fork (has-fork-column-p original-matrix)))
+  (let* ((original-width (matrix-width original-matrix))
+         (new-width (matrix-width new-matrix))
+         (max-width (max original-width new-width)))
 
-    ;; Add fork connectors at column 0 (left side of branch)
-    (if has-fork
-        ;; Fork column already exists - extend it for new branch
-        (progn
-          ;; Change bottom row's connector from branchr to branchtr (now middle)
-          (let* ((bottom-row (car (last original-matrix)))
-                 (first-cell (first bottom-row)))
-            (when (and first-cell
-                       (string-equal (ladder-cell-symbol first-cell) *branch-r*))
-              (setf (ladder-cell-symbol first-cell) *branch-tr*)))
-          ;; Add connectors to new matrix rows
-          (loop for row in new-matrix
-                for i from 0
-                do (let ((connector (if (= i (1- new-height))
-                                        (make-branch-r-cell)    ; Bottom: ┴
-                                        (make-branch-tr-cell)))) ; Middle: ┼
-                     (push connector row)
-                     (setf (nth i new-matrix) row))))
-        ;; No fork column yet - create it
-        (progn
-          ;; Add branchttr (top) or branchtr (middle) to original matrix rows
-          (loop for row in original-matrix
-                for i from 0
-                do (let ((connector (if (= i 0)
-                                        (make-branch-ttr-cell)  ; Top: ┬
-                                        (make-branch-tr-cell)))) ; Middle: ┼
-                     (push connector row)
-                     (setf (nth i original-matrix) row)))
-          ;; Add branchr (bottom) to new matrix rows
-          (loop for row in new-matrix
-                for i from 0
-                do (let ((connector (if (= i (1- new-height))
-                                        (make-branch-r-cell)    ; Bottom: ┴
-                                        (make-branch-tr-cell)))) ; Middle: ┼
-                     (push connector row)
-                     (setf (nth i new-matrix) row)))))
-
-    ;; Pad the narrower matrix with hbar cells
-    (let ((original-width (matrix-width original-matrix))
-          (new-width (matrix-width new-matrix)))
-      (cond
-        ;; Original is wider - pad new matrix
-        ((> original-width new-width)
-         (dolist (row new-matrix)
-           (let ((row-width (length row)))
-             (dotimes (i (- original-width row-width))
-               (let ((last-cell (car (last row))))
-                 ;; If last cell is nil or vertical branch, pad with nil
-                 ;; Otherwise pad with hbar (horizontal wire)
-                 (if (or (null last-cell)
-                         (and last-cell
-                              (vertical-branch-symbol-p (ladder-cell-symbol last-cell))))
-                     (nconc row (list nil))
-                     (nconc row (list (make-hbar-cell)))))))))
-
-        ;; New is wider - pad original matrix
-        ((> new-width original-width)
-         (dolist (row original-matrix)
-           (let ((row-width (length row)))
-             (dotimes (i (- new-width row-width))
-               (let ((last-cell (car (last row))))
-                 (if (or (null last-cell)
-                         (and last-cell
-                              (vertical-branch-symbol-p (ladder-cell-symbol last-cell))))
-                     (nconc row (list nil))
-                     (nconc row (list (make-hbar-cell)))))))))))
+    ;; Pad both matrices to the same width with hbar cells
+    (dolist (row original-matrix)
+      (let ((row-width (length row)))
+        (dotimes (i (- max-width row-width))
+          (nconc row (list (make-hbar-cell))))))
+    (dolist (row new-matrix)
+      (let ((row-width (length row)))
+        (dotimes (i (- max-width row-width))
+          (nconc row (list (make-hbar-cell))))))
 
     ;; Merge: append new-matrix rows to original-matrix
     (nconc original-matrix new-matrix)
     original-matrix))
 
-(defun matrix-has-right-connectors-p (matrix)
-  "Check if the matrix already has closing branch connectors (ttl/tl/l) on the right side.
-   This happens when a parallel block was closed with close-branch-block."
-  (when (and matrix (first matrix))
-    (let ((last-cell (car (last (first matrix)))))
-      (and last-cell
-           (member (ladder-cell-symbol last-cell)
-                   (list *branch-ttl* *branch-tl* *branch-l* *vbar-l*)
-                   :test #'string-equal)))))
-
 (defun merge-matrix-right (original-matrix new-matrix)
   "Merge NEW-MATRIX to the right of ORIGINAL-MATRIX (for ANDSTR series connection).
-   Only adds left-side branch connectors if the new matrix doesn't already have them
-   (from a previous close-branch-block call).
+   Adds left-side FORK connectors (ttr at top, tr in middle, r at bottom) to the
+   new matrix when it has multiple rows. This shows where branches fork.
    Returns the merged matrix."
   (let ((original-height (matrix-height original-matrix))
-        (new-height (matrix-height new-matrix))
-        (already-has-connectors (matrix-has-right-connectors-p new-matrix)))
+        (new-height (matrix-height new-matrix)))
 
-    ;; Add left-side branch connectors only if:
-    ;; 1. New matrix has multiple rows AND
-    ;; 2. New matrix doesn't already have closing connectors
-    (when (and (> new-height 1) (not already-has-connectors))
+    ;; Add left-side FORK connectors when new matrix has multiple rows
+    ;; These show where the parallel paths begin
+    (when (> new-height 1)
       (loop for row in new-matrix
             for i from 0
             do (push (make-branch-tr-cell) row)  ; Default: middle connector
@@ -649,12 +598,13 @@
             ((and-instruction-p opcode)
              (setf current-matrix (append-cell-to-matrix cell current-matrix)))
 
-            ;; OR instruction - create parallel branch below (don't close yet)
-            ;; The branch will be closed by ORSTR or at the end
+            ;; OR instruction - create parallel branch below, then close block
+            ;; This matches Python algorithm: merge below, then add right-side closing connectors
             ((or-instruction-p opcode)
              (let ((new-matrix (list (list))))
                (setf new-matrix (append-cell-to-matrix cell new-matrix))
-               (setf current-matrix (merge-matrix-below current-matrix new-matrix))))
+               (setf current-matrix (merge-matrix-below current-matrix new-matrix))
+               (setf current-matrix (close-branch-block current-matrix))))
 
             ;; ORSTR - pop and merge below with closing connectors
             ((orstr-instruction-p opcode)
@@ -699,17 +649,8 @@
                    (pushnew addr all-addresses :test #'string-equal))
                  (incf output-row))))))
 
-        ;; Second pass: add branch connectors for parallel outputs
-        ;; Mark them as :output-branch type so they render in the output area
-        (when (> output-row 1)
-          (dotimes (r output-row)
-            (let ((connector (cond
-                               ((= r 0) (make-branch-ttl-cell :row r :col 0))
-                               ((= r (1- output-row)) (make-branch-l-cell :row r :col 0))
-                               (t (make-vbar-l-cell :row r :col 0)))))
-              ;; Mark as output branch so it renders in output area
-              (setf (ladder-cell-type connector) :output-branch)
-              (push connector output-cells)))))
+        ;; Note: JS handles parallel output rendering automatically based on
+        ;; having multiple outputeditN entries - no branch connectors needed
 
       ;; Convert matrix to flat cell list with correct row/col positions
       ;; Fill nil cells with hbar for horizontal wire connections
@@ -870,5 +811,77 @@
   (list :subrname (ladder-program-name ladder-prog)
         :addresses (ladder-program-addresses ladder-prog)
         :subrdata (mapcar #'rung-to-plist (ladder-program-rungs ladder-prog))))
+
+;;; ============================================================
+;;; JavaScript-Compatible Format Conversion (demodata.js format)
+;;; ============================================================
+;;; These functions produce output compatible with the MBLogic ladtest
+;;; JavaScript files (ladsubrdisplib.js, ladeditlib.js, etc.)
+
+(defun cl-symbol-to-js-symbol (symbol)
+  "Map CL branch symbols to JavaScript-compatible symbol names.
+   JS only has: brancht, branchl, branchr, branchtl, branchtr, branchtu, branchx, vbar, hbar"
+  (cond
+    ((null symbol) "")
+    ((string-equal symbol "branchttr") "brancht")
+    ((string-equal symbol "branchttl") "brancht")
+    ((string-equal symbol "vbarr") "vbar")
+    ((string-equal symbol "vbarl") "vbar")
+    (t symbol)))  ; All others pass through unchanged
+
+(defun cell-to-js-format (cell)
+  "Convert ladder cell to JS format as alist: ((value . \"noc\") (addr . (\"X1\")))"
+  (let ((symbol (cl-symbol-to-js-symbol (ladder-cell-symbol cell)))
+        (addrs (ladder-cell-addresses cell)))
+    (list (cons :value symbol)
+          (cons :addr (if addrs addrs (list ""))))))  ; Branch symbols get [""]
+
+(defun determine-rungtype (rung)
+  "Determine rungtype based on cells: single, double, triple, or empty"
+  (let ((cells (ladder-rung-cells rung)))
+    (if (null cells)
+        "empty"
+        (let ((max-input-row 0))
+          (dolist (cell cells)
+            (when (not (member (ladder-cell-type cell) '(:coil :control :output-branch)))
+              (setf max-input-row (max max-input-row (ladder-cell-row cell)))))
+          (cond
+            ((>= max-input-row 2) "triple")
+            ((>= max-input-row 1) "double")
+            (t "single"))))))
+
+(defun rung-to-js-format (rung rung-index)
+  "Convert rung to JS format with matrixdata as object (not array).
+   Keys are 'inputeditRC' for input cells and 'outputeditN' for output cells.
+   Returns an alist for proper JSON encoding."
+  (let ((matrixdata-alist nil))
+    ;; Build matrixdata as alist with inputeditRC/outputeditN keys
+    (dolist (cell (ladder-rung-cells rung))
+      (let* ((type (ladder-cell-type cell))
+             (row (ladder-cell-row cell))
+             (col (ladder-cell-col cell))
+             (key (if (member type '(:coil :control :output-branch))
+                      (format nil "outputedit~D" row)
+                      (format nil "inputedit~D~D" row col))))
+        (push (cons key (cell-to-js-format cell)) matrixdata-alist)))
+
+    ;; Return rung structure as alist for proper JSON encoding
+    (list (cons :matrixdata (nreverse matrixdata-alist))
+          (cons :rungtype (determine-rungtype rung))
+          (cons :comment (or (ladder-rung-comment rung) ""))
+          (cons :reference rung-index))))
+
+(defun ladder-program-to-js-format (ladder-prog)
+  "Convert ladder program to full JS-compatible format for demodata.js.
+   Returns an alist for proper JSON encoding."
+  (let ((rungs-js nil)
+        (idx 0))
+    (dolist (rung (ladder-program-rungs ladder-prog))
+      (push (rung-to-js-format rung idx) rungs-js)
+      (incf idx))
+    (list (cons :subroutinename (ladder-program-name ladder-prog))
+          (cons :subrcomments "")
+          (cons :signature 0)
+          (cons :rungdata (nreverse rungs-js)))))
 
 ;;; End of ladder-render.lisp

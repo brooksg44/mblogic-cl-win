@@ -65,6 +65,7 @@
                     (setf (hunchentoot:content-type*)
                           (cond
                             ((string-equal extension "html") "text/html; charset=utf-8")
+                            ((string-equal extension "xhtml") "application/xhtml+xml; charset=utf-8")
                             ((string-equal extension "css") "text/css; charset=utf-8")
                             ((string-equal extension "js") "application/javascript; charset=utf-8")
                             ((string-equal extension "json") "application/json; charset=utf-8")
@@ -203,6 +204,19 @@
             (control-response "step" t)))
       (control-response "step" nil "No interpreter loaded")))
 
+(defun handle-api-ladder-js ()
+  "Handle GET /api/ladder-js?subrname=main - Returns JS-compatible format (demodata.js style)"
+  (handler-case
+      (progn
+        (setf (hunchentoot:content-type*) "application/json")
+        (let ((subrname (or (hunchentoot:get-parameter "subrname") "main")))
+          (program-js-response *plc-interpreter* subrname)))
+    (error (e)
+      (format *error-output* "Error in handle-api-ladder-js: ~A~%" e)
+      (setf (hunchentoot:return-code*) hunchentoot:+http-internal-server-error+)
+      (setf (hunchentoot:content-type*) "application/json")
+      (plist-to-json (list :error (format nil "~A" e))))))
+
 ;;; ============================================================
 ;;; Route Dispatcher
 ;;; ============================================================
@@ -214,6 +228,7 @@
    (hunchentoot:create-prefix-dispatcher "/api/statistics" #'handle-api-statistics)
    (hunchentoot:create-prefix-dispatcher "/api/data" #'handle-api-data)
    (hunchentoot:create-prefix-dispatcher "/api/program" #'handle-api-program)
+   (hunchentoot:create-prefix-dispatcher "/api/ladder-js" #'handle-api-ladder-js)
    (hunchentoot:create-prefix-dispatcher "/api/subroutines" #'handle-api-subroutines)
    (hunchentoot:create-prefix-dispatcher "/api/control/start" #'handle-api-control-start)
    (hunchentoot:create-prefix-dispatcher "/api/control/stop" #'handle-api-control-stop)
@@ -232,6 +247,8 @@
     (lambda () (serve-static-file "laddermonitor.html")))
    (hunchentoot:create-prefix-dispatcher "/index.html"
     (lambda () (serve-static-file "index.html")))
+   (hunchentoot:create-prefix-dispatcher "/laddertest.xhtml"
+    (lambda () (serve-static-file "laddertest.xhtml")))
 
    ;; Root redirect
    (hunchentoot:create-prefix-dispatcher "/"

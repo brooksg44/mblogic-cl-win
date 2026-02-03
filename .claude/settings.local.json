@@ -34,7 +34,10 @@
       "mcp__lisp__compile-form",
       "mcp__plugin_playwright_playwright__browser_close",
       "WebFetch(domain:mblogic.sourceforge.net)",
-      "mcp__plugin_playwright_playwright__browser_press_key"
+      "mcp__plugin_playwright_playwright__browser_press_key",
+      "mcp__lisp__quickload",
+      "mcp__lisp__describe-last-error",
+      "mcp__lisp__validate-syntax"
     ]
   }
 }

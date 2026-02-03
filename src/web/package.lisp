@@ -25,4 +25,5 @@
    ;; Ladder rendering
    #:network-to-ladder
    #:program-to-ladder
-   #:instruction-to-ladder-symbol))
+   #:instruction-to-ladder-symbol
+   #:ladder-program-to-js-format))
