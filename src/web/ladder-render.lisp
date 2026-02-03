@@ -876,23 +876,40 @@
 (defun rung-to-js-format (rung rung-index)
   "Convert rung to JS format with matrixdata as object (not array).
    Keys are 'inputeditRC' for input cells and 'outputeditN' for output cells.
-   Returns an alist for proper JSON encoding."
+   Returns an alist for proper JSON encoding.
+   Note: Filters cells to match JavaScript constraints (max 3 input rows, 8 output rows)."
   (let ((matrixdata-alist nil))
-    ;; Build matrixdata as alist with inputeditRC/outputeditN keys
-    (dolist (cell (ladder-rung-cells rung))
-      (let* ((type (ladder-cell-type cell))
-             (row (ladder-cell-row cell))
-             (col (ladder-cell-col cell))
-             (key (if (member type '(:coil :control :output-branch))
-                      (format nil "outputedit~D" row)
-                      (format nil "inputedit~D~D" row col))))
-        (push (cons key (cell-to-js-format cell)) matrixdata-alist)))
+    ;; First determine rungtype to know the constraints
+    (let* ((rungtype (determine-rungtype rung))
+           ;; JavaScript constraints based on MatrixParams in ladsymbols.js
+           (max-input-row (cond ((string= rungtype "single") 7)
+                                ((string= rungtype "double") 1)
+                                ((string= rungtype "triple") 2)
+                                (t 7)))
+           (max-output-row 7)  ; All rung types support up to 8 output rows (0-7)
+           (max-input-col 7))  ; All rung types support up to 8 input columns (0-7)
+      
+      ;; Build matrixdata as alist with inputeditRC/outputeditN keys
+      ;; Filter cells to only those within JavaScript constraints
+      (dolist (cell (ladder-rung-cells rung))
+        (let* ((type (ladder-cell-type cell))
+               (row (ladder-cell-row cell))
+               (col (ladder-cell-col cell)))
+          ;; Only include cells within JavaScript's supported matrix dimensions
+          (when (if (member type '(:coil :control :output-branch))
+                    (<= row max-output-row)
+                    (and (<= row max-input-row) (<= col max-input-col)))
+            (let ((key (if (member type '(:coil :control :output-branch))
+                           (format nil "outputedit~D" row)
+                           (format nil "inputedit~D~D" row col))))
+              (push (cons key (cell-to-js-format cell)) matrixdata-alist)))))
 
-    ;; Return rung structure as alist for proper JSON encoding
-    ;; Note: reference field is omitted in final format - not used in demodata.js
-    (list (cons :matrixdata (nreverse matrixdata-alist))
-          (cons :rungtype (determine-rungtype rung))
-          (cons :comment (or (ladder-rung-comment rung) "")))))
+      ;; Return rung structure as alist for proper JSON encoding
+      ;; Include reference field for JavaScript rung tracking (required by ladsubrdata.js)
+      (list (cons :matrixdata (nreverse matrixdata-alist))
+            (cons :rungtype rungtype)
+            (cons :comment (or (ladder-rung-comment rung) ""))
+            (cons :reference rung-index)))))
 
 (defun ladder-program-to-js-format (ladder-prog)
   "Convert ladder program to full JS-compatible format for demodata.js.
