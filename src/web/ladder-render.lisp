@@ -33,7 +33,9 @@
     (:sum . "sum")              ; Sum instruction
     (:call . "call")            ; Subroutine call
     (:return . "rt")            ; Return
+    (:return-cond . "rtc")      ; Conditional return
     (:end . "end")              ; End
+    (:end-cond . "endc")        ; Conditional end
     (:for . "for")              ; For loop start
     (:next . "next"))           ; For loop end
   "Mapping from instruction :ladsymb to SVG symbol names")
@@ -514,13 +516,14 @@
   (and (coil-instruction-p opcode)
        (> (length params) 1)))
 
-(defun make-coil-cell (opcode addr col row)
-  "Create a single coil cell for one address"
+(defun make-coil-cell (opcode addr col row &optional is-range)
+  "Create a single coil cell for one address.
+   IS-RANGE indicates if this is part of a range address output."
   (let ((symbol (cond
-                  ((string-equal opcode "OUT") "out")
-                  ((string-equal opcode "SET") "set")
-                  ((string-equal opcode "RST") "rst")
-                  ((string-equal opcode "PD") "pd")
+                  ((string-equal opcode "OUT") (if is-range "out2" "out"))
+                  ((string-equal opcode "SET") (if is-range "set2" "set"))
+                  ((string-equal opcode "RST") (if is-range "rst2" "rst"))
+                  ((string-equal opcode "PD") (if is-range "pd2" "pd"))
                   (t "out"))))
     (make-ladder-cell
      :type :coil
@@ -632,13 +635,15 @@
             (cond
               ;; Coil with potentially multiple addresses
               ((coil-instruction-p opcode)
-               (dolist (addr params)
-                 (when (mblogic-cl:bool-addr-p addr)
-                   ;; Column 1 to leave room for branch connector at column 0
-                   (let ((cell (make-coil-cell opcode addr 1 output-row)))
-                     (push cell output-cells)
-                     (pushnew addr all-addresses :test #'string-equal)
-                     (incf output-row)))))
+               ;; Check if this is a range address (2 params for coil = range)
+               (let ((is-range (> (length params) 1)))
+                 (dolist (addr params)
+                   (when (mblogic-cl:bool-addr-p addr)
+                     ;; Column 1 to leave room for branch connector at column 0
+                     (let ((cell (make-coil-cell opcode addr 1 output-row is-range)))
+                       (push cell output-cells)
+                       (pushnew addr all-addresses :test #'string-equal)
+                       (incf output-row))))))
               ;; Control instructions (END, RT, etc.)
               (t
                (let ((cell (instruction-to-cell instr 0)))
@@ -647,10 +652,11 @@
                  (push cell output-cells)
                  (dolist (addr (ladder-cell-addresses cell))
                    (pushnew addr all-addresses :test #'string-equal))
-                 (incf output-row))))))
+                 (incf output-row)))))
 
         ;; Note: JS handles parallel output rendering automatically based on
         ;; having multiple outputeditN entries - no branch connectors needed
+        )
 
       ;; Convert matrix to flat cell list with correct row/col positions
       ;; Fill nil cells with hbar for horizontal wire connections
@@ -690,7 +696,7 @@
          :addresses (nreverse all-addresses)
          :comment (first (mblogic-cl:network-comments network))
          :branches nil           ; No longer needed - explicit cells
-         :output-branches nil))))) ; No longer needed - explicit cells
+         :output-branches nil)))))) ; No longer needed - explicit cells
 
 ;;; ============================================================
 ;;; Program/Subroutine to Ladder Conversion
@@ -755,7 +761,8 @@
                   "inp")
         :row (ladder-cell-row cell)
         :col (ladder-cell-col cell)
-        :addr (or (ladder-cell-addresses cell) #())  ; Empty vector for no addresses
+        :addr (let ((addrs (ladder-cell-addresses cell)))
+                (if addrs addrs (list "")))  ; Empty string in list for no addresses
         :value (ladder-cell-symbol cell)
         :monitor (format-monitor-info cell)))
 
@@ -776,10 +783,18 @@
 (defun rung-to-matrixdata (rung)
   "Convert a ladder rung to Python-compatible format.
    Format: {rungnum, rungtype, comment, ildata, matrixdata}"
-  (let ((rungtype (cond
-                    ((null (ladder-rung-cells rung)) "empty")
-                    ((> (ladder-rung-rows rung) 1) "single")  ; Has branches
-                    (t "single"))))
+  (let* ((cells (ladder-rung-cells rung))
+         (rungtype (if (null cells)
+                       "empty"
+                       ;; Determine based on max input row count
+                       (let ((max-input-row 0))
+                         (dolist (cell cells)
+                           (when (not (member (ladder-cell-type cell) '(:coil :control :output-branch)))
+                             (setf max-input-row (max max-input-row (ladder-cell-row cell)))))
+                         (cond
+                           ((>= max-input-row 2) "triple")
+                           ((>= max-input-row 1) "double")
+                           (t "single"))))))
     (list :rungnum (ladder-rung-number rung)
           :rungtype rungtype
           :comment (or (ladder-rung-comment rung) "")
@@ -823,8 +838,16 @@
    JS only has: brancht, branchl, branchr, branchtl, branchtr, branchtu, branchx, vbar, hbar"
   (cond
     ((null symbol) "")
-    ((string-equal symbol "branchttr") "brancht")
-    ((string-equal symbol "branchttl") "brancht")
+    ;; Top corners (fork start or merge end)
+    ((string-equal symbol "branchttr") "brancht")  ; Top-right fork start: ┐
+    ((string-equal symbol "branchttl") "brancht")  ; Top-left merge end: ┌
+    ;; Middle T-junctions
+    ((string-equal symbol "branchtr") "branchtr")  ; Middle-right fork: ┤ (pass through)
+    ((string-equal symbol "branchtl") "branchtl")  ; Middle-left merge: ├ (pass through)
+    ;; Bottom corners (fork end or merge start)
+    ((string-equal symbol "branchr") "branchr")    ; Bottom-right fork end: ┘ (pass through)
+    ((string-equal symbol "branchl") "branchl")    ; Bottom-left merge start: └ (pass through)
+    ;; Vertical bars (no junction)
     ((string-equal symbol "vbarr") "vbar")
     ((string-equal symbol "vbarl") "vbar")
     (t symbol)))  ; All others pass through unchanged
@@ -866,10 +889,10 @@
         (push (cons key (cell-to-js-format cell)) matrixdata-alist)))
 
     ;; Return rung structure as alist for proper JSON encoding
+    ;; Note: reference field is omitted in final format - not used in demodata.js
     (list (cons :matrixdata (nreverse matrixdata-alist))
           (cons :rungtype (determine-rungtype rung))
-          (cons :comment (or (ladder-rung-comment rung) ""))
-          (cons :reference rung-index))))
+          (cons :comment (or (ladder-rung-comment rung) "")))))
 
 (defun ladder-program-to-js-format (ladder-prog)
   "Convert ladder program to full JS-compatible format for demodata.js.

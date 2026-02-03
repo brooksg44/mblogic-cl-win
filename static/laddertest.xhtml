@@ -54,13 +54,45 @@ function loadLadderData(subrname) {
 }
 
 // Load subroutine from URL parameter or default to 'main'
-loadLadderData(getUrlParam('subrname') || 'main');
+var currentSubrname = getUrlParam('subrname') || 'LadderDemo';
+loadLadderData(currentSubrname);
+
+// Function to change subroutine
+function changeSubroutine() {
+    var select = document.getElementById('subrSelect');
+    var subrname = select.value;
+    window.location.href = '?subrname=' + encodeURIComponent(subrname);
+}
+
+// Fetch available subroutines
+function loadSubroutineList() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/api/subroutines', false);
+    xhr.send();
+    if (xhr.status === 200) {
+        var subroutines = JSON.parse(xhr.responseText).subroutines || [];
+        var select = document.getElementById('subrSelect');
+        if (select) {
+            // Clear existing options first
+            select.innerHTML = '';
+            subroutines.forEach(function(name) {
+                var option = document.createElement('option');
+                option.value = name;
+                option.text = name;
+                if (name === currentSubrname) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        }
+    }
+}
 //]]>
 </script>
 
 </head>
 
-<body onload="MBEdit_pageinit();">
+<body onload="MBEdit_pageinit(); loadSubroutineList();">
 
 
 <div id="filler">
@@ -70,6 +102,14 @@ loadLadderData(getUrlParam('subrname') || 'main');
 
 	<div id="datadisplay">
 	<h1>Ladder Editor Demo</h1>
+	
+	<!-- Subroutine selector -->
+	<div style="margin: 10px 0;">
+		<label for="subrSelect">Select Subroutine: </label>
+		<select id="subrSelect" onchange="changeSubroutine();" style="font-size: 14px; padding: 4px;">
+			<option value="main">main</option>
+		</select>
+	</div>
 	
 	<hr></hr>
 	
