@@ -886,7 +886,10 @@
                                 ((string= rungtype "double") 1)
                                 ((string= rungtype "triple") 2)
                                 (t 7)))
-           (max-output-row 7)  ; All rung types support up to 8 output rows (0-7)
+           (max-output-row (cond ((string= rungtype "single") 7)
+                                 ((string= rungtype "double") 0)
+                                 ((string= rungtype "triple") 0)
+                                 (t 7)))
            (max-input-col 7))  ; All rung types support up to 8 input columns (0-7)
       
       ;; Build matrixdata as alist with inputeditRC/outputeditN keys
