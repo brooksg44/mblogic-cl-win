@@ -860,15 +860,22 @@
           (cons :addr (if addrs addrs (list ""))))))  ; Branch symbols get [""]
 
 (defun determine-rungtype (rung)
-  "Determine rungtype based on cells: single, double, triple, or empty"
+  "Determine rungtype based on cells: single, double, triple, or empty.
+   Takes into account both input rows and output rows.
+   Double/triple rungs can only have 1 output row, so if there are multiple
+   output rows, the rung must be single type."
   (let ((cells (ladder-rung-cells rung)))
     (if (null cells)
         "empty"
-        (let ((max-input-row 0))
+        (let ((max-input-row 0)
+              (max-output-row 0))
           (dolist (cell cells)
-            (when (not (member (ladder-cell-type cell) '(:coil :control :output-branch)))
-              (setf max-input-row (max max-input-row (ladder-cell-row cell)))))
+            (if (member (ladder-cell-type cell) '(:coil :control :output-branch))
+                (setf max-output-row (max max-output-row (ladder-cell-row cell)))
+                (setf max-input-row (max max-input-row (ladder-cell-row cell)))))
+          ;; If multiple output rows, must be single rung type
           (cond
+            ((> max-output-row 0) "single")
             ((>= max-input-row 2) "triple")
             ((>= max-input-row 1) "double")
             (t "single"))))))
