@@ -325,14 +325,13 @@
                           (subseq ctr-addr 2))
                    addresses)))))
 
-      ;; Compare instructions - word addresses
+      ;; Compare instructions - all params (addresses AND literals for display)
       ((member opcode '("STRE" "STRNE" "STRGT" "STRLT" "STRGE" "STRLE"
                         "ANDE" "ANDNE" "ANDGT" "ANDLT" "ANDGE" "ANDLE"
                         "ORE" "ORNE" "ORGT" "ORLT" "ORGE" "ORLE")
                :test #'string-equal)
        (dolist (p params)
-         (when (mblogic-cl:word-addr-p p)
-           (push p addresses))))
+         (push p addresses)))
 
       ;; COPY - source and dest
       ((string-equal opcode "COPY")
@@ -458,22 +457,23 @@
 
 (defun merge-matrix-right (original-matrix new-matrix)
   "Merge NEW-MATRIX to the right of ORIGINAL-MATRIX (for ANDSTR series connection).
-   Adds left-side FORK connectors (ttr at top, tr in middle, r at bottom) to the
-   new matrix when it has multiple rows. This shows where branches fork.
+   Adds left-side MERGE connectors (ttl at top, tl in middle, l at bottom) to the
+   new matrix when it has multiple rows. These are LEFT-side connectors showing
+   where parallel paths from the right block connect to the left block's wire.
    Returns the merged matrix."
   (let ((original-height (matrix-height original-matrix))
         (new-height (matrix-height new-matrix)))
 
-    ;; Add left-side FORK connectors when new matrix has multiple rows
-    ;; These show where the parallel paths begin
+    ;; Add left-side MERGE connectors when new matrix has multiple rows
+    ;; Use LEFT-side connectors: ttl (┌), tl (├), l (└)
     (when (> new-height 1)
       (loop for row in new-matrix
             for i from 0
-            do (push (make-branch-tr-cell) row)  ; Default: middle connector
+            do (push (make-branch-tl-cell) row)  ; Default: middle left connector ├
                (setf (nth i new-matrix) row))
       ;; Fix top and bottom corners
-      (setf (ladder-cell-symbol (first (first new-matrix))) *branch-ttr*)  ; Top: ┐
-      (setf (ladder-cell-symbol (first (car (last new-matrix)))) *branch-r*))  ; Bottom: ┘
+      (setf (ladder-cell-symbol (first (first new-matrix))) *branch-ttl*)  ; Top: ┌
+      (setf (ladder-cell-symbol (first (car (last new-matrix)))) *branch-l*))  ; Bottom: └
 
     ;; Pad to same height
     (cond
@@ -497,34 +497,63 @@
     original-matrix))
 
 (defun close-branch-block (matrix)
-  "Add right-side branch connectors after merging rows (for ORSTR).
-   Adds brancht at top, branchtr in middle, branchr at bottom.
+  "Add or update right-side branch connectors after merging rows (for OR/ORSTR).
+   Ensures the last column has correct connectors for ALL rows:
+   branchttr at top, branchtr in middle, branchr at bottom.
    Returns the modified matrix.
 
-   Simplified algorithm:
-   - Only add connectors if there are multiple rows
-   - Add brancht to top row, branchr to bottom row, branchtr to middle rows
-   - Don't add connectors if they already exist"
-  (let ((height (matrix-height matrix)))
-    ;; Only process if there are multiple rows (parallel branches)
+   Algorithm:
+   - Only process if there are multiple rows (parallel branches)
+   - If the last column already has vertical branch connectors: UPDATE in-place
+     (handles cascaded ORs where previous branchr becomes branchtr)
+   - If not: ADD a new column of connectors
+   - Non-branch cells (like hbar from padding) are replaced when updating"
+  (let ((height (matrix-height matrix))
+        (width (matrix-width matrix)))
     (when (> height 1)
-      (loop for row in matrix
-            for i from 0
-            for last-cell = (car (last row))
-            do
-               ;; Skip if row already ends with a branch connector
-               (unless (and last-cell (branch-symbol-p (ladder-cell-symbol last-cell)))
-                 (cond
-                   ;; Top row - add brancht (top of fork/merge)
-                   ((= i 0)
-                    (nconc row (list (make-branch-ttr-cell))))
-                   ;; Bottom row - add branchr (bottom of fork, connects left and up)
-                   ((= i (1- height))
-                    (nconc row (list (make-branch-r-cell))))
-                   ;; Middle rows - add branchtr (T junction connecting left, up, and down)
-                   (t
-                    (nconc row (list (make-branch-tr-cell))))))))
-    matrix))
+      ;; Check if any cell in the last column is a vertical branch connector
+      (let ((has-existing-branch nil))
+        (dolist (row matrix)
+          (let ((last-cell (when (>= (length row) width)
+                             (nth (1- width) row))))
+            (when (and last-cell
+                       (vertical-branch-symbol-p (ladder-cell-symbol last-cell)))
+              (setf has-existing-branch t))))
+
+        (if has-existing-branch
+            ;; UPDATE existing branch column - set correct connector for each row
+            (loop for row in matrix
+                  for i from 0
+                  for target-symbol = (cond
+                                        ((= i 0) *branch-ttr*)
+                                        ((= i (1- height)) *branch-r*)
+                                        (t *branch-tr*))
+                  do (let ((cell (when (>= (length row) width)
+                                  (nth (1- width) row))))
+                       (cond
+                         ;; Cell exists and is vertical branch - update symbol
+                         ((and cell (vertical-branch-symbol-p (ladder-cell-symbol cell)))
+                          (setf (ladder-cell-symbol cell) target-symbol))
+                         ;; Cell exists but is not vertical branch (hbar, etc.) - replace
+                         (cell
+                          (setf (nth (1- width) row)
+                                (make-branch-cell target-symbol
+                                                  :row i :col (1- width))))
+                         ;; Row is shorter than width - pad and add
+                         (t
+                          (dotimes (j (- width (length row) 1))
+                            (nconc row (list nil)))
+                          (nconc row (list (make-branch-cell target-symbol
+                                                            :row i :col (1- width))))))))
+            ;; No existing branch column - ADD new column
+            (loop for row in matrix
+                  for i from 0
+                  do (let ((new-cell (cond
+                                       ((= i 0) (make-branch-ttr-cell))
+                                       ((= i (1- height)) (make-branch-r-cell))
+                                       (t (make-branch-tr-cell)))))
+                       (nconc row (list new-cell))))))))
+  matrix)
 
 ;;; ============================================================
 ;;; Network to Ladder Rung Conversion
