@@ -639,9 +639,18 @@ cd ~/common-lisp/mblogic-cl
 - `ladmonitor.js` - Main monitor with polling, button handlers, stats
 
 **Components Remaining**:
-- [ ] Branch visualization (parallel contacts with vertical lines)
+- [x] Branch visualization (parallel contacts with vertical lines) - FIXED 2025-02
 - [ ] Enhanced block instruction rendering (parameter display in blocks)
 - [ ] Real-time value overlay on cells
+
+**Branch Visualization Fix (2025-02)**:
+Fixed `close-branch-block` in `ladder-render.lisp` (lines 480-508) to use correct branch connector symbols:
+- Top row: `branchttr` → `brancht` (top of fork/merge)
+- Middle rows: `branchtr` → `branchtr` (T junction)
+- Bottom row: `branchr` → `branchr` (bottom of fork, connects left and up)
+
+Previously the bottom row incorrectly used `branchl` (└) instead of `branchr` (┘), causing rendering issues.
+All 174 tests pass. JSON output verified against `demodata.js` format.
 
 ## Future Enhancements (Post Phase 7+)
 - Live debugging/monitoring completion

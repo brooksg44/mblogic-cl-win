@@ -264,6 +264,25 @@
   "Check if instruction is a control flow instruction"
   (member opcode '("END" "ENDC" "RT" "RTC" "NEXT") :test #'string-equal))
 
+(defun output-block-instruction-p (opcode)
+  "Check if instruction is a block that belongs in the output column.
+   These are NOT comparison instructions (which modify the logic stack like contacts)."
+  (member opcode '("TMR" "TMRA" "TMROFF" "CNTU" "CNTD" "UDC"
+                   "COPY" "CPYBLK" "FILL" "PACK" "UNPACK" "SHFRG"
+                   "MATHDEC" "MATHHEX" "SUM"
+                   "FINDEQ" "FINDNE" "FINDGT" "FINDLT" "FINDGE" "FINDLE"
+                   "FINDIEQ" "FINDINE" "FINDIGT" "FINDILT" "FINDIGE" "FINDILE"
+                   "CALL" "FOR")
+          :test #'string-equal))
+
+(defun rungtype-for-output (opcode)
+  "Return the rungtype string for an output block instruction.
+   Double rungs have 2 input rows, triple have 3."
+  (cond
+    ((member opcode '("CNTU" "CNTD" "TMRA") :test #'string-equal) "double")
+    ((member opcode '("UDC" "SHFRG") :test #'string-equal) "triple")
+    (t "single")))
+
 ;;; ============================================================
 ;;; Address Extraction
 ;;; ============================================================
@@ -479,12 +498,12 @@
 
 (defun close-branch-block (matrix)
   "Add right-side branch connectors after merging rows (for ORSTR).
-   Adds branchttl at top, vbarl in middle, branchl at bottom.
+   Adds brancht at top, branchtr in middle, branchr at bottom.
    Returns the modified matrix.
 
    Simplified algorithm:
    - Only add connectors if there are multiple rows
-   - Add ttl to top row, l to bottom row, vbar to middle rows
+   - Add brancht to top row, branchr to bottom row, branchtr to middle rows
    - Don't add connectors if they already exist"
   (let ((height (matrix-height matrix)))
     ;; Only process if there are multiple rows (parallel branches)
@@ -493,18 +512,18 @@
             for i from 0
             for last-cell = (car (last row))
             do
-            ;; Skip if row already ends with a branch connector
-            (unless (and last-cell (branch-symbol-p (ladder-cell-symbol last-cell)))
-              (cond
-                ;; Top row - add branchttl
-                ((= i 0)
-                 (nconc row (list (make-branch-ttl-cell))))
-                ;; Bottom row - add branchl
-                ((= i (1- height))
-                 (nconc row (list (make-branch-l-cell))))
-                ;; Middle rows - add vbarl (vertical bar)
-                (t
-                 (nconc row (list (make-vbar-l-cell))))))))
+               ;; Skip if row already ends with a branch connector
+               (unless (and last-cell (branch-symbol-p (ladder-cell-symbol last-cell)))
+                 (cond
+                   ;; Top row - add brancht (top of fork/merge)
+                   ((= i 0)
+                    (nconc row (list (make-branch-ttr-cell))))
+                   ;; Bottom row - add branchr (bottom of fork, connects left and up)
+                   ((= i (1- height))
+                    (nconc row (list (make-branch-r-cell))))
+                   ;; Middle rows - add branchtr (T junction connecting left, up, and down)
+                   (t
+                    (nconc row (list (make-branch-tr-cell))))))))
     matrix))
 
 ;;; ============================================================
@@ -569,6 +588,8 @@
              (push instr outputs))
             ((control-instruction-p opcode)
              (push instr outputs))
+            ((output-block-instruction-p opcode)
+             (push instr outputs))
             (t
              (push instr inputs)))))
       (setf inputs (nreverse inputs))
@@ -626,6 +647,14 @@
             (t
              (setf current-matrix (append-cell-to-matrix cell current-matrix))))))
 
+      ;; Unwind any remaining matrices on the stack.
+      ;; This handles double/triple rungs where multiple STR instructions push
+      ;; matrices that are never consumed by ANDSTR/ORSTR (because the
+      ;; counter/timer is an output block, not an input merge point).
+      (loop while matrix-stack
+            do (let ((old-matrix (pop matrix-stack)))
+                 (setf current-matrix (merge-matrix-below old-matrix current-matrix))))
+
       ;; Process output instructions
       ;; First pass: collect all output cells with sequential row numbers
       (let ((output-row 0))
@@ -644,6 +673,30 @@
                        (push cell output-cells)
                        (pushnew addr all-addresses :test #'string-equal)
                        (incf output-row))))))
+              ;; Output block instructions (TMR, CNTU, COPY, MATHDEC, etc.)
+              ((output-block-instruction-p opcode)
+               (let* ((instr-def (mblogic-cl:parsed-instruction-def instr))
+                      (ladsymb (when instr-def (mblogic-cl:instruction-ladsymb instr-def)))
+                      (svg-symbol (ladsymb-to-svg-symbol ladsymb opcode))
+                      ;; All params go into addresses (matches demodata.js format)
+                      (addr-list (if params (copy-list params) (list "")))
+                      (cell (make-ladder-cell
+                             :type :coil
+                             :symbol svg-symbol
+                             :address (first params)
+                             :addresses addr-list
+                             :opcode opcode
+                             :params params
+                             :row output-row
+                             :col 1
+                             :monitor-type (when instr-def
+                                             (mblogic-cl:instruction-monitor instr-def)))))
+                 (push cell output-cells)
+                 ;; Track PLC addresses for monitoring
+                 (dolist (p params)
+                   (when (mblogic-cl:any-addr-p p)
+                     (pushnew p all-addresses :test #'string-equal)))
+                 (incf output-row)))
               ;; Control instructions (END, RT, etc.)
               (t
                (let ((cell (instruction-to-cell instr 0)))
@@ -783,23 +836,11 @@
 (defun rung-to-matrixdata (rung)
   "Convert a ladder rung to Python-compatible format.
    Format: {rungnum, rungtype, comment, ildata, matrixdata}"
-  (let* ((cells (ladder-rung-cells rung))
-         (rungtype (if (null cells)
-                       "empty"
-                       ;; Determine based on max input row count
-                       (let ((max-input-row 0))
-                         (dolist (cell cells)
-                           (when (not (member (ladder-cell-type cell) '(:coil :control :output-branch)))
-                             (setf max-input-row (max max-input-row (ladder-cell-row cell)))))
-                         (cond
-                           ((>= max-input-row 2) "triple")
-                           ((>= max-input-row 1) "double")
-                           (t "single"))))))
-    (list :rungnum (ladder-rung-number rung)
-          :rungtype rungtype
-          :comment (or (ladder-rung-comment rung) "")
-          :ildata #()  ; TODO: capture original IL if needed
-          :matrixdata (mapcar #'cell-to-matrixdata (ladder-rung-cells rung)))))
+  (list :rungnum (ladder-rung-number rung)
+        :rungtype (determine-rungtype rung)
+        :comment (or (ladder-rung-comment rung) "")
+        :ildata #()  ; TODO: capture original IL if needed
+        :matrixdata (mapcar #'cell-to-matrixdata (ladder-rung-cells rung))))
 
 ;; Keep old function for backwards compatibility
 (defun rung-to-plist (rung)
@@ -860,25 +901,41 @@
           (cons :addr (if addrs addrs (list ""))))))  ; Branch symbols get [""]
 
 (defun determine-rungtype (rung)
-  "Determine rungtype based on cells: single, double, triple, or empty.
-   Takes into account both input rows and output rows.
-   Double/triple rungs can only have 1 output row, so if there are multiple
-   output rows, the rung must be single type."
+  "Determine rungtype based on output block instruction type.
+   The rungtype is driven by the output block instruction (if any):
+   - CNTU/CNTD/TMRA → double (2 input rows)
+   - UDC/SHFRG → triple (3 input rows)
+   - Everything else → single
+   Verifies the actual input row count fits the constraint."
   (let ((cells (ladder-rung-cells rung)))
     (if (null cells)
         "empty"
-        (let ((max-input-row 0)
-              (max-output-row 0))
+        ;; Find the first output block instruction's opcode
+        (let ((block-opcode nil)
+              (max-input-row 0))
           (dolist (cell cells)
-            (if (member (ladder-cell-type cell) '(:coil :control :output-branch))
-                (setf max-output-row (max max-output-row (ladder-cell-row cell)))
-                (setf max-input-row (max max-input-row (ladder-cell-row cell)))))
-          ;; If multiple output rows, must be single rung type
-          (cond
-            ((> max-output-row 0) "single")
-            ((>= max-input-row 2) "triple")
-            ((>= max-input-row 1) "double")
-            (t "single"))))))
+            (let ((opcode (ladder-cell-opcode cell)))
+              (cond
+                ;; Track input rows (non-output cells)
+                ((not (member (ladder-cell-type cell) '(:coil :control :output-branch)))
+                 (setf max-input-row (max max-input-row (ladder-cell-row cell))))
+                ;; Find first output block instruction
+                ((and (null block-opcode)
+                      opcode
+                      (output-block-instruction-p opcode))
+                 (setf block-opcode opcode)))))
+          (if block-opcode
+              ;; Get base rungtype from the output block instruction
+              (let ((base-type (rungtype-for-output block-opcode)))
+                ;; Verify input row count fits the constraint
+                (cond
+                  ((and (string= base-type "triple") (<= max-input-row 2)) "triple")
+                  ((and (string= base-type "double") (<= max-input-row 1)) "double")
+                  ((string= base-type "single") "single")
+                  ;; Fall back to single if rows overflow
+                  (t "single")))
+              ;; No output block instruction → always single
+              "single")))))
 
 (defun rung-to-js-format (rung rung-index)
   "Convert rung to JS format with matrixdata as object (not array).

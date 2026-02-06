@@ -227,7 +227,7 @@ OUT Y1
     ;; Check rung structure
     (is (= 1 (mblogic-cl-web::ladder-rung-number rung)))
     (is (= 1 (mblogic-cl-web::ladder-rung-rows rung)))  ; No branches = 1 row
-    (is (= 3 (mblogic-cl-web::ladder-rung-cols rung)))  ; 3 instructions
+    (is (= 2 (mblogic-cl-web::ladder-rung-cols rung)))  ; 2 input columns (outputs are separate)
     ;; Check cells
     (let ((cells (mblogic-cl-web::ladder-rung-cells rung)))
       (is (= 3 (length cells)))
@@ -342,7 +342,7 @@ OUT Y1
          (plist (mblogic-cl-web::rung-to-plist rung)))
     (is (= 5 (getf plist :rungnum)))
     (is (= 1 (getf plist :rows)))
-    (is (= 2 (getf plist :cols)))
+    (is (= 1 (getf plist :cols)))  ; 1 input column (outputs are separate)
     (is (listp (getf plist :cells)))
     (is (= 2 (length (getf plist :cells))))))
 
@@ -413,14 +413,14 @@ OUT Y2
     (let ((rung1 (first (mblogic-cl-web::ladder-program-rungs ladder))))
       (is (= 1 (mblogic-cl-web::ladder-rung-number rung1)))
       (is (= 3 (length (mblogic-cl-web::ladder-rung-cells rung1)))))
-    ;; Verify second rung has timer
+    ;; Verify second rung has timer as output (type :coil)
     (let* ((rung2 (second (mblogic-cl-web::ladder-program-rungs ladder)))
            (cells (mblogic-cl-web::ladder-rung-cells rung2))
            (timer-cell (find "TMR" cells
                             :key #'mblogic-cl-web::ladder-cell-opcode
                             :test #'string=)))
       (is (not (null timer-cell)))
-      (is (eq :block (mblogic-cl-web::ladder-cell-type timer-cell))))))
+      (is (eq :coil (mblogic-cl-web::ladder-cell-type timer-cell))))))
 
 (test ladder-to-json-integration
   "Test complete ladder to JSON conversion"
@@ -516,5 +516,289 @@ OUT Y1 Y2 Y3 Y4
     (is (string= "test" (mblogic-cl-web::ladder-program-name prog)))
     (is (null (mblogic-cl-web::ladder-program-rungs prog)))
     (is (null (mblogic-cl-web::ladder-program-addresses prog)))))
+
+;;; ============================================================
+;;; Branch Rung Tests
+;;; ============================================================
+
+(test branch-rung-with-or
+  "Test rung with OR creates parallel branch with correct connectors"
+  (let* ((source "NETWORK 1
+STR X1
+OR X2
+AND X3
+OUT Y1
+")
+         (program (parse-test-il source))
+         (network (first (mblogic-cl:program-main-networks program)))
+         (rung (mblogic-cl-web::network-to-ladder-rung network)))
+    ;; Should have 2 rows due to OR creating parallel branch
+    (is (= 2 (mblogic-cl-web::ladder-rung-rows rung)))
+    ;; Check cells exist at expected positions
+    (let ((cells (mblogic-cl-web::ladder-rung-cells rung)))
+      ;; Should have: X1 at (0,0), X2 at (1,0), connectors, X3, output
+      (is (>= (length cells) 4))
+      ;; Find branch connectors
+      (let ((branch-cells (remove-if-not
+                           (lambda (c)
+                             (member (mblogic-cl-web::ladder-cell-symbol c)
+                                     '("branchttr" "branchtr" "branchr" "brancht")
+                                     :test #'string-equal))
+                           cells)))
+        ;; Should have branch connectors
+        (is (>= (length branch-cells) 1))))))
+
+(test branch-rung-js-format
+  "Test that branch rung produces correct JS format"
+  (let* ((source "NETWORK 1
+STR X1
+OR X2
+OUT Y1
+")
+         (program (parse-test-il source))
+         (ladder (mblogic-cl-web::program-to-ladder program "main"))
+         (js-data (mblogic-cl-web::ladder-program-to-js-format ladder)))
+    ;; Should have rungdata
+    (let ((rungdata (cdr (assoc :rungdata js-data))))
+      (is (not (null rungdata)))
+      (when rungdata
+        (let* ((first-rung (first rungdata))
+               (matrixdata (cdr (assoc :matrixdata first-rung))))
+          ;; Should have inputedit00 (X1) and inputedit10 (X2)
+          (is (assoc "inputedit00" matrixdata :test #'string=))
+          (is (assoc "inputedit10" matrixdata :test #'string=))
+          ;; Should have branch connectors in column 1
+          (let ((brancht-cell (assoc "inputedit01" matrixdata :test #'string=)))
+            (when brancht-cell
+              (let ((value (cdr (assoc :value (cdr brancht-cell)))))
+                ;; Top connector should map to 'brancht'
+                (is (string= "brancht" value))))))))))
+
+;;; ============================================================
+;;; Output Block Instruction Tests
+;;; ============================================================
+
+(test output-block-instruction-classification
+  "Test that output block instructions are correctly identified"
+  ;; Timers
+  (is (mblogic-cl-web::output-block-instruction-p "TMR"))
+  (is (mblogic-cl-web::output-block-instruction-p "TMRA"))
+  (is (mblogic-cl-web::output-block-instruction-p "TMROFF"))
+  ;; Counters
+  (is (mblogic-cl-web::output-block-instruction-p "CNTU"))
+  (is (mblogic-cl-web::output-block-instruction-p "CNTD"))
+  (is (mblogic-cl-web::output-block-instruction-p "UDC"))
+  ;; Data operations
+  (is (mblogic-cl-web::output-block-instruction-p "COPY"))
+  (is (mblogic-cl-web::output-block-instruction-p "CPYBLK"))
+  (is (mblogic-cl-web::output-block-instruction-p "FILL"))
+  (is (mblogic-cl-web::output-block-instruction-p "PACK"))
+  (is (mblogic-cl-web::output-block-instruction-p "UNPACK"))
+  (is (mblogic-cl-web::output-block-instruction-p "SHFRG"))
+  ;; Math
+  (is (mblogic-cl-web::output-block-instruction-p "MATHDEC"))
+  (is (mblogic-cl-web::output-block-instruction-p "MATHHEX"))
+  (is (mblogic-cl-web::output-block-instruction-p "SUM"))
+  ;; Find
+  (is (mblogic-cl-web::output-block-instruction-p "FINDEQ"))
+  (is (mblogic-cl-web::output-block-instruction-p "FINDNE"))
+  ;; Control blocks
+  (is (mblogic-cl-web::output-block-instruction-p "CALL"))
+  (is (mblogic-cl-web::output-block-instruction-p "FOR"))
+  ;; NOT output blocks: comparisons are inputs
+  (is (not (mblogic-cl-web::output-block-instruction-p "STRE")))
+  (is (not (mblogic-cl-web::output-block-instruction-p "ANDE")))
+  (is (not (mblogic-cl-web::output-block-instruction-p "ORE")))
+  ;; NOT output blocks: contacts and coils
+  (is (not (mblogic-cl-web::output-block-instruction-p "STR")))
+  (is (not (mblogic-cl-web::output-block-instruction-p "OUT")))
+  (is (not (mblogic-cl-web::output-block-instruction-p "END"))))
+
+(test rungtype-for-output-mapping
+  "Test rungtype determination from output block opcode"
+  ;; Double rungs
+  (is (string= "double" (mblogic-cl-web::rungtype-for-output "CNTU")))
+  (is (string= "double" (mblogic-cl-web::rungtype-for-output "CNTD")))
+  (is (string= "double" (mblogic-cl-web::rungtype-for-output "TMRA")))
+  ;; Triple rungs
+  (is (string= "triple" (mblogic-cl-web::rungtype-for-output "UDC")))
+  (is (string= "triple" (mblogic-cl-web::rungtype-for-output "SHFRG")))
+  ;; Single rungs
+  (is (string= "single" (mblogic-cl-web::rungtype-for-output "TMR")))
+  (is (string= "single" (mblogic-cl-web::rungtype-for-output "TMROFF")))
+  (is (string= "single" (mblogic-cl-web::rungtype-for-output "COPY")))
+  (is (string= "single" (mblogic-cl-web::rungtype-for-output "MATHDEC")))
+  (is (string= "single" (mblogic-cl-web::rungtype-for-output "CALL")))
+  (is (string= "single" (mblogic-cl-web::rungtype-for-output "FOR"))))
+
+;;; ============================================================
+;;; Timer/Counter/Block Output Rendering Tests
+;;; ============================================================
+
+(test timer-rung-output-column
+  "Test that TMR appears in the output column, not input"
+  (let* ((source "NETWORK 1
+STR X3
+TMR T1 100
+OUT Y2
+")
+         (program (parse-test-il source))
+         (network (first (mblogic-cl:program-main-networks program)))
+         (rung (mblogic-cl-web::network-to-ladder-rung network))
+         (cells (mblogic-cl-web::ladder-rung-cells rung)))
+    ;; TMR should be in output column (type :coil), not input
+    (let ((tmr-cell (find "TMR" cells
+                          :key #'mblogic-cl-web::ladder-cell-opcode
+                          :test #'string=)))
+      (is (not (null tmr-cell)))
+      (is (eq :coil (mblogic-cl-web::ladder-cell-type tmr-cell)))
+      ;; Should have all params as addresses
+      (is (member "T1" (mblogic-cl-web::ladder-cell-addresses tmr-cell)
+                  :test #'string=))
+      (is (member "100" (mblogic-cl-web::ladder-cell-addresses tmr-cell)
+                  :test #'string=)))))
+
+(test counter-double-rung
+  "Test CNTU creates a double rung with 2 input rows"
+  (let* ((source "NETWORK 1
+STR X1
+STR X2
+CNTU CT1 100
+")
+         (program (parse-test-il source))
+         (network (first (mblogic-cl:program-main-networks program)))
+         (rung (mblogic-cl-web::network-to-ladder-rung network)))
+    ;; Should have 2 input rows
+    (is (>= (mblogic-cl-web::ladder-rung-rows rung) 2))
+    ;; CNTU should be in output column
+    (let* ((cells (mblogic-cl-web::ladder-rung-cells rung))
+           (cntu-cell (find "CNTU" cells
+                            :key #'mblogic-cl-web::ladder-cell-opcode
+                            :test #'string=)))
+      (is (not (null cntu-cell)))
+      (is (eq :coil (mblogic-cl-web::ladder-cell-type cntu-cell)))
+      ;; Rungtype should be double
+      (is (string= "double" (mblogic-cl-web::determine-rungtype rung))))))
+
+(test udc-triple-rung
+  "Test UDC creates a triple rung with 3 input rows"
+  (let* ((source "NETWORK 1
+STR X1
+STR X2
+STR X3
+UDC CT1 100
+")
+         (program (parse-test-il source))
+         (network (first (mblogic-cl:program-main-networks program)))
+         (rung (mblogic-cl-web::network-to-ladder-rung network)))
+    ;; Should have 3 input rows
+    (is (>= (mblogic-cl-web::ladder-rung-rows rung) 3))
+    ;; UDC should be in output column
+    (let* ((cells (mblogic-cl-web::ladder-rung-cells rung))
+           (udc-cell (find "UDC" cells
+                           :key #'mblogic-cl-web::ladder-cell-opcode
+                           :test #'string=)))
+      (is (not (null udc-cell)))
+      (is (eq :coil (mblogic-cl-web::ladder-cell-type udc-cell)))
+      ;; Rungtype should be triple
+      (is (string= "triple" (mblogic-cl-web::determine-rungtype rung))))))
+
+(test or-branch-stays-single
+  "Test OR-branched rung stays single type (not double)"
+  (let* ((source "NETWORK 1
+STR X1
+OR X2
+OUT Y1
+")
+         (program (parse-test-il source))
+         (network (first (mblogic-cl:program-main-networks program)))
+         (rung (mblogic-cl-web::network-to-ladder-rung network)))
+    ;; Rungtype should be single even though there are 2 input rows
+    (is (string= "single" (mblogic-cl-web::determine-rungtype rung)))))
+
+(test mathdec-output-column
+  "Test MATHDEC appears in the output column"
+  (let* ((source "NETWORK 1
+STR X1
+MATHDEC DS1 0 1+1
+OUT Y1
+")
+         (program (parse-test-il source))
+         (network (first (mblogic-cl:program-main-networks program)))
+         (rung (mblogic-cl-web::network-to-ladder-rung network))
+         (cells (mblogic-cl-web::ladder-rung-cells rung)))
+    ;; MATHDEC should be in output column
+    (let ((math-cell (find "MATHDEC" cells
+                           :key #'mblogic-cl-web::ladder-cell-opcode
+                           :test #'string=)))
+      (is (not (null math-cell)))
+      (is (eq :coil (mblogic-cl-web::ladder-cell-type math-cell)))
+      ;; Rungtype should be single
+      (is (string= "single" (mblogic-cl-web::determine-rungtype rung))))))
+
+(test copy-output-column
+  "Test COPY appears in the output column"
+  (let* ((source "NETWORK 1
+STR X1
+COPY DS1 DS2
+OUT Y1
+")
+         (program (parse-test-il source))
+         (network (first (mblogic-cl:program-main-networks program)))
+         (rung (mblogic-cl-web::network-to-ladder-rung network))
+         (cells (mblogic-cl-web::ladder-rung-cells rung)))
+    ;; COPY should be in output column
+    (let ((copy-cell (find "COPY" cells
+                           :key #'mblogic-cl-web::ladder-cell-opcode
+                           :test #'string=)))
+      (is (not (null copy-cell)))
+      (is (eq :coil (mblogic-cl-web::ladder-cell-type copy-cell))))))
+
+(test timer-rung-js-format
+  "Test TMR rung produces correct JS format with outputedit entry"
+  (let* ((source "NETWORK 1
+STR X1
+TMR T1 100
+OUT Y1
+")
+         (program (parse-test-il source))
+         (ladder (mblogic-cl-web::program-to-ladder program "main"))
+         (js-data (mblogic-cl-web::ladder-program-to-js-format ladder)))
+    (let* ((rungdata (cdr (assoc :rungdata js-data)))
+           (first-rung (first rungdata))
+           (matrixdata (cdr (assoc :matrixdata first-rung)))
+           (rungtype (cdr (assoc :rungtype first-rung))))
+      ;; Should be single rungtype
+      (is (string= "single" rungtype))
+      ;; Should have TMR as outputedit0
+      (let ((output0 (cdr (assoc "outputedit0" matrixdata :test #'string=))))
+        (is (not (null output0)))
+        (when output0
+          (is (string= "tmr" (cdr (assoc :value output0)))))))))
+
+(test counter-double-rung-js-format
+  "Test CNTU rung produces correct JS format as double rung"
+  (let* ((source "NETWORK 1
+STR X1
+STR X2
+CNTU CT1 100
+")
+         (program (parse-test-il source))
+         (ladder (mblogic-cl-web::program-to-ladder program "main"))
+         (js-data (mblogic-cl-web::ladder-program-to-js-format ladder)))
+    (let* ((rungdata (cdr (assoc :rungdata js-data)))
+           (first-rung (first rungdata))
+           (matrixdata (cdr (assoc :matrixdata first-rung)))
+           (rungtype (cdr (assoc :rungtype first-rung))))
+      ;; Should be double rungtype
+      (is (string= "double" rungtype))
+      ;; Should have two input rows
+      (is (assoc "inputedit00" matrixdata :test #'string=))
+      (is (assoc "inputedit10" matrixdata :test #'string=))
+      ;; Should have CNTU as outputedit0
+      (let ((output0 (cdr (assoc "outputedit0" matrixdata :test #'string=))))
+        (is (not (null output0)))
+        (when output0
+          (is (string= "cntu" (cdr (assoc :value output0)))))))))
 
 ;;; End of test-ld-visualization.lisp
