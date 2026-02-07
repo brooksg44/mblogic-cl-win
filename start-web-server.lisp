@@ -4,8 +4,16 @@
 ;; Load quicklisp
 (load "~/quicklisp/setup.lisp")
 
+;; Determine base directory based on platform
+(defparameter *mblogic-base-dir*
+  (pathname
+   (if (or (member :windows *features*)
+           (member :win32 *features*))
+       "D:/common-lisp/mblogic-cl/"
+       (merge-pathnames "common-lisp/mblogic-cl/" (user-homedir-pathname)))))
+
 ;; Add local system directory
-(push #p"D:/common-lisp/mblogic-cl/" asdf:*central-registry*)
+(push *mblogic-base-dir* asdf:*central-registry*)
 
 ;; Load the systems
 (format t "~%Loading MBLogic systems...~%")
@@ -13,12 +21,14 @@
 (ql:quickload :mblogic-cl/web :silent t)
 
 ;; Set static directory
-(setf mblogic-cl-web:*static-directory* #p"D:/common-lisp/mblogic-cl/static/")
+(setf mblogic-cl-web:*static-directory* 
+      (merge-pathnames "static/" *mblogic-base-dir*))
 
 ;; Parse and load the test program
 (format t "~%Parsing IL program...~%")
 (defparameter *parsed-prog* 
-  (mblogic-cl:parse-il-file "D:/common-lisp/mblogic-cl/test/plcprog.txt"))
+  (mblogic-cl:parse-il-file 
+   (namestring (merge-pathnames "test/plcprog.txt" *mblogic-base-dir*))))
 
 ;; Compile the program
 (format t "Compiling program...~%")
