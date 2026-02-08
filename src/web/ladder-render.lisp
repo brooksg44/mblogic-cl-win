@@ -127,18 +127,20 @@
 (defparameter *branch-tl*  "branchtl"    "Middle-left T: ├ - middle rows of merge")
 (defparameter *branch-l*   "branchl"     "Bottom-left corner: └ - bottom of merge")
 (defparameter *vbar-l*     "vbarl"       "Vertical bar left: │ - no junction (left side)")
+(defparameter *branch-tu*  "branchtu"    "Bottom T: ┴ - connects left, right, up")
+(defparameter *branch-x*   "branchx"     "Cross: ┼ - connects all four directions")
 (defparameter *hbar*       "hbar"        "Horizontal bar: ─ - wire segment")
 
 ;; List of all branch/connector symbols for identification
 (defparameter *branch-symbols*
   (list *branch-ttr* *branch-tr* *branch-r* *vbar-r*
-        *branch-ttl* *branch-tl* *branch-l* *vbar-l* *hbar*)
+        *branch-ttl* *branch-tl* *branch-l* *vbar-l* *branch-tu* *branch-x* *hbar*)
   "All branch connector symbol names")
 
 ;; Vertical branch symbols (excludes horizontal)
 (defparameter *vertical-branch-symbols*
   (list *branch-ttr* *branch-tr* *branch-r* *vbar-r*
-        *branch-ttl* *branch-tl* *branch-l* *vbar-l*)
+        *branch-ttl* *branch-tl* *branch-l* *vbar-l* *branch-tu* *branch-x*)
   "Vertical branch connector symbols")
 
 (defun branch-symbol-p (symbol)
@@ -196,6 +198,14 @@
 (defun make-branch-r-cell (&key (row 0) (col 0))
   "Create a bottom-right corner cell: ┘"
   (make-branch-cell *branch-r* :row row :col col))
+
+(defun make-branch-tu-cell (&key (row 0) (col 0))
+  "Create a bottom T cell: ┴ (connects left, right, up)"
+  (make-branch-cell *branch-tu* :row row :col col))
+
+(defun make-branch-x-cell (&key (row 0) (col 0))
+  "Create a cross cell: ┼ (connects all four directions)"
+  (make-branch-cell *branch-x* :row row :col col))
 
 ;;; ============================================================
 ;;; Instruction Classification
@@ -498,16 +508,9 @@
 
 (defun close-branch-block (matrix)
   "Add or update right-side branch connectors after merging rows (for OR/ORSTR).
-   Ensures the last column has correct connectors for ALL rows:
-   branchttr at top, branchtr in middle, branchr at bottom.
-   Returns the modified matrix.
-
-   Algorithm:
-   - Only process if there are multiple rows (parallel branches)
-   - If the last column already has vertical branch connectors: UPDATE in-place
-     (handles cascaded ORs where previous branchr becomes branchtr)
-   - If not: ADD a new column of connectors
-   - Non-branch cells (like hbar from padding) are replaced when updating"
+   Uses branchttr at top, branchtr in middle, branchr at bottom.
+   Preserves existing corner connectors (branchr, branchttr) - only updates hbar.
+   Returns the modified matrix."
   (let ((height (matrix-height matrix))
         (width (matrix-width matrix)))
     (when (> height 1)
@@ -521,20 +524,22 @@
               (setf has-existing-branch t))))
 
         (if has-existing-branch
-            ;; UPDATE existing branch column - set correct connector for each row
+            ;; UPDATE existing branch column - only update hbar cells, leave existing branches alone
             (loop for row in matrix
                   for i from 0
                   for target-symbol = (cond
                                         ((= i 0) *branch-ttr*)
-                                        ((= i (1- height)) *branch-r*)
-                                        (t *branch-tr*))
+                                        (t *branch-r*))  ; All non-top rows get branchr
                   do (let ((cell (when (>= (length row) width)
                                   (nth (1- width) row))))
                        (cond
-                         ;; Cell exists and is vertical branch - update symbol
-                         ((and cell (vertical-branch-symbol-p (ladder-cell-symbol cell)))
+                         ;; Cell is hbar - replace with branch connector
+                         ((and cell (string-equal (ladder-cell-symbol cell) *hbar*))
                           (setf (ladder-cell-symbol cell) target-symbol))
-                         ;; Cell exists but is not vertical branch (hbar, etc.) - replace
+                         ;; Cell is already a vertical branch - leave it alone
+                         ((and cell (vertical-branch-symbol-p (ladder-cell-symbol cell)))
+                          nil)  ; do nothing, preserve existing
+                         ;; Cell exists but is something else - replace
                          (cell
                           (setf (nth (1- width) row)
                                 (make-branch-cell target-symbol
@@ -554,6 +559,33 @@
                                        (t (make-branch-tr-cell)))))
                        (nconc row (list new-cell))))))))
   matrix)
+
+(defun add-orstr-junction (matrix top-height)
+  "Add junction connectors at the ORSTR merge point.
+   TOP-HEIGHT is the number of rows from the top matrix (before merge).
+   This adds vertical connections between the bottom of the top section
+   and the top of the bottom section at the rightmost column.
+   Result: top-bottom-row gets branchtl (├), bottom-top-row gets branchr (┘)
+   Returns the modified matrix."
+  (let ((width (matrix-width matrix))
+        (height (matrix-height matrix)))
+    (when (and (> width 0) (> height top-height) (> top-height 0))
+      (let* ((junction-col (1- width))
+             (top-bottom-row (1- top-height))
+             (bottom-top-row top-height)
+             (top-row (nth top-bottom-row matrix))
+             (bottom-row (nth bottom-top-row matrix)))
+        ;; Top section bottom row: convert to branchtl (├) - connects up, down, left
+        (when (and top-row (>= (length top-row) width))
+          (let ((top-cell (nth junction-col top-row)))
+            (when top-cell
+              (setf (ladder-cell-symbol top-cell) *branch-tl*))))
+        ;; Bottom section top row: convert to branchr (┘) - connects up, left
+        (when (and bottom-row (>= (length bottom-row) width))
+          (let ((bottom-cell (nth junction-col bottom-row)))
+            (when bottom-cell
+              (setf (ladder-cell-symbol bottom-cell) *branch-r*))))))
+    matrix))
 
 ;;; ============================================================
 ;;; Network to Ladder Rung Conversion
@@ -659,12 +691,14 @@
                (setf current-matrix (merge-matrix-below current-matrix new-matrix))
                (setf current-matrix (close-branch-block current-matrix))))
 
-            ;; ORSTR - pop and merge below with closing connectors
+            ;; ORSTR - pop and merge below, then add junction connectors
+            ;; The junction connects the bottom of the top section to the top of the bottom section
             ((orstr-instruction-p opcode)
              (when matrix-stack
-               (let ((old-matrix (pop matrix-stack)))
+               (let* ((old-matrix (pop matrix-stack))
+                      (top-height (matrix-height old-matrix)))
                  (setf current-matrix (merge-matrix-below old-matrix current-matrix))
-                 (setf current-matrix (close-branch-block current-matrix)))))
+                 (setf current-matrix (add-orstr-junction current-matrix top-height)))))
 
             ;; ANDSTR - pop and merge right with left-side connectors
             ((andstr-instruction-p opcode)
@@ -739,6 +773,20 @@
         ;; Note: JS handles parallel output rendering automatically based on
         ;; having multiple outputeditN entries - no branch connectors needed
         )
+
+      ;; Post-process: convert branchr to branchtu when there's an hbar to the right
+      ;; This creates the ┴ junction for branches that continue horizontally
+      ;; Also convert if next cell is nil (which will become hbar) or explicit hbar
+      (dolist (row current-matrix)
+        (loop for col-idx from 0 below (1- (length row))
+              for cell = (nth col-idx row)
+              for next-cell = (nth (1+ col-idx) row)
+              when (and cell
+                        (string-equal (ladder-cell-symbol cell) *branch-r*)
+                        (or (null next-cell)  ; nil becomes hbar
+                            (and next-cell
+                                 (string-equal (ladder-cell-symbol next-cell) *hbar*))))
+              do (setf (ladder-cell-symbol cell) *branch-tu*)))
 
       ;; Convert matrix to flat cell list with correct row/col positions
       ;; Fill nil cells with hbar for horizontal wire connections
