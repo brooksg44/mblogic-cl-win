@@ -467,23 +467,23 @@
 
 (defun merge-matrix-right (original-matrix new-matrix)
   "Merge NEW-MATRIX to the right of ORIGINAL-MATRIX (for ANDSTR series connection).
-   Adds left-side MERGE connectors (ttl at top, tl in middle, l at bottom) to the
-   new matrix when it has multiple rows. These are LEFT-side connectors showing
-   where parallel paths from the right block connect to the left block's wire.
+   Adds right-side connectors (ttr at top, tr in middle, r at bottom) to the
+   new matrix when it has multiple rows. These are RIGHT-side connectors showing
+   where parallel paths from the right block merge together before going to output.
    Returns the merged matrix."
   (let ((original-height (matrix-height original-matrix))
         (new-height (matrix-height new-matrix)))
 
-    ;; Add left-side MERGE connectors when new matrix has multiple rows
-    ;; Use LEFT-side connectors: ttl (┌), tl (├), l (└)
+    ;; Add right-side connectors when new matrix has multiple rows
+    ;; Use RIGHT-side connectors: ttr (┐), tr (┤), r (┘)
     (when (> new-height 1)
       (loop for row in new-matrix
             for i from 0
-            do (push (make-branch-tl-cell) row)  ; Default: middle left connector ├
+            do (push (make-branch-tr-cell) row)  ; Default: middle right connector ┤
                (setf (nth i new-matrix) row))
       ;; Fix top and bottom corners
-      (setf (ladder-cell-symbol (first (first new-matrix))) *branch-ttl*)  ; Top: ┌
-      (setf (ladder-cell-symbol (first (car (last new-matrix)))) *branch-l*))  ; Bottom: └
+      (setf (ladder-cell-symbol (first (first new-matrix))) *branch-ttr*)  ; Top: ┐
+      (setf (ladder-cell-symbol (first (car (last new-matrix)))) *branch-r*))  ; Bottom: ┘
 
     ;; Pad to same height
     (cond
@@ -691,14 +691,13 @@
                (setf current-matrix (merge-matrix-below current-matrix new-matrix))
                (setf current-matrix (close-branch-block current-matrix))))
 
-            ;; ORSTR - pop and merge below, then add junction connectors
-            ;; The junction connects the bottom of the top section to the top of the bottom section
+            ;; ORSTR - pop and merge below, then add right-side closing connectors
+            ;; This matches Python algorithm: merge below, then close-branch-block
             ((orstr-instruction-p opcode)
              (when matrix-stack
-               (let* ((old-matrix (pop matrix-stack))
-                      (top-height (matrix-height old-matrix)))
+               (let ((old-matrix (pop matrix-stack)))
                  (setf current-matrix (merge-matrix-below old-matrix current-matrix))
-                 (setf current-matrix (add-orstr-junction current-matrix top-height)))))
+                 (setf current-matrix (close-branch-block current-matrix)))))
 
             ;; ANDSTR - pop and merge right with left-side connectors
             ((andstr-instruction-p opcode)
@@ -774,18 +773,18 @@
         ;; having multiple outputeditN entries - no branch connectors needed
         )
 
-      ;; Post-process: convert branchr to branchtu when there's an hbar to the right
+      ;; Post-process: convert branchr to branchtu when there's an explicit hbar to the right
       ;; This creates the ┴ junction for branches that continue horizontally
-      ;; Also convert if next cell is nil (which will become hbar) or explicit hbar
+      ;; Only convert when the next cell is explicitly hbar, not when the row ends (nil)
+      ;; This preserves branchr as the closing connector for shorter branch rows
       (dolist (row current-matrix)
         (loop for col-idx from 0 below (1- (length row))
               for cell = (nth col-idx row)
               for next-cell = (nth (1+ col-idx) row)
               when (and cell
                         (string-equal (ladder-cell-symbol cell) *branch-r*)
-                        (or (null next-cell)  ; nil becomes hbar
-                            (and next-cell
-                                 (string-equal (ladder-cell-symbol next-cell) *hbar*))))
+                        next-cell  ; Only if there IS a next cell
+                        (string-equal (ladder-cell-symbol next-cell) *hbar*))
               do (setf (ladder-cell-symbol cell) *branch-tu*)))
 
       ;; Convert matrix to flat cell list with correct row/col positions
@@ -965,6 +964,9 @@
     ;; Bottom corners (fork end or merge start)
     ((string-equal symbol "branchr") "branchr")    ; Bottom-right fork end: ┘ (pass through)
     ((string-equal symbol "branchl") "branchl")    ; Bottom-left merge start: └ (pass through)
+    ;; Special junctions
+    ((string-equal symbol "branchtu") "branchtu")  ; Top continuation from right: ┴
+    ((string-equal symbol "branchx") "branchx")    ; Cross junction: ╳
     ;; Vertical bars (no junction)
     ((string-equal symbol "vbarr") "vbar")
     ((string-equal symbol "vbarl") "vbar")
@@ -1052,6 +1054,7 @@
       ;; Include reference field for JavaScript rung tracking (required by ladsubrdata.js)
       (list (cons :matrixdata (nreverse matrixdata-alist))
             (cons :rungtype rungtype)
+            (cons :ildata ())  ; Empty IL data array (required by JavaScript)
             (cons :comment (or (ladder-rung-comment rung) ""))
             (cons :reference rung-index)))))
 
