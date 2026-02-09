@@ -479,11 +479,15 @@
     (when (> new-height 1)
       (loop for row in new-matrix
             for i from 0
-            do (push (make-branch-tl-cell) row)  ; Default: middle left connector ├
-               (setf (nth i new-matrix) row))
-      ;; Fix top and bottom corners
-      (setf (ladder-cell-symbol (first (first new-matrix))) *branch-ttl*)  ; Top: ┌
-      (setf (ladder-cell-symbol (first (car (last new-matrix)))) *branch-l*))  ; Bottom: └
+            do (if (< i original-height)
+                   nil
+                   (progn
+                     (push (make-branch-tl-cell) row)
+                     (setf (nth i new-matrix) row))))
+      ;; Fix top and bottom corners only for new rows
+      (when (> new-height original-height)
+        (setf (ladder-cell-symbol (first (first new-matrix))) *branch-ttl*)  ; Top: ┌
+        (setf (ladder-cell-symbol (first (car (last new-matrix)))) *branch-l*)))  ; Bottom: └
 
     ;; Pad to same height
     (cond
