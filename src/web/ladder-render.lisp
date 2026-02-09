@@ -467,23 +467,23 @@
 
 (defun merge-matrix-right (original-matrix new-matrix)
   "Merge NEW-MATRIX to the right of ORIGINAL-MATRIX (for ANDSTR series connection).
-   Adds right-side connectors (ttr at top, tr in middle, r at bottom) to the
-   new matrix when it has multiple rows. These are RIGHT-side connectors showing
-   where parallel paths from the right block merge together before going to output.
+   Adds left-side MERGE connectors (ttl at top, tl in middle, l at bottom) to the
+   new matrix when it has multiple rows. These are LEFT-side connectors showing
+   where parallel paths from the right block connect to the left block's wire.
    Returns the merged matrix."
   (let ((original-height (matrix-height original-matrix))
         (new-height (matrix-height new-matrix)))
 
-    ;; Add right-side connectors when new matrix has multiple rows
-    ;; Use RIGHT-side connectors: ttr (┐), tr (┤), r (┘)
+    ;; Add left-side MERGE connectors when new matrix has multiple rows
+    ;; Use LEFT-side connectors: ttl (┌), tl (├), l (└)
     (when (> new-height 1)
       (loop for row in new-matrix
             for i from 0
-            do (push (make-branch-tr-cell) row)  ; Default: middle right connector ┤
+            do (push (make-branch-tl-cell) row)  ; Default: middle left connector ├
                (setf (nth i new-matrix) row))
       ;; Fix top and bottom corners
-      (setf (ladder-cell-symbol (first (first new-matrix))) *branch-ttr*)  ; Top: ┐
-      (setf (ladder-cell-symbol (first (car (last new-matrix)))) *branch-r*))  ; Bottom: ┘
+      (setf (ladder-cell-symbol (first (first new-matrix))) *branch-ttl*)  ; Top: ┌
+      (setf (ladder-cell-symbol (first (car (last new-matrix)))) *branch-l*))  ; Bottom: └
 
     ;; Pad to same height
     (cond
