@@ -475,15 +475,63 @@
 
 (defun parse-time-value (value unit)
   "Convert time value and unit to milliseconds"
-  (let ((v (if (stringp value) (parse-number:parse-number value) value))
-        (u (if unit (string-downcase unit) "ms")))
+  (let ((u (if unit (string-downcase unit) "ms")))
     (cond
-      ((string= u "ms") v)
-      ((string= u "sec") (* v 1000))
-      ((string= u "min") (* v 60000))
-      ((string= u "hour") (* v 3600000))
-      ((string= u "day") (* v 86400000))
-      (t v))))
+      ((string= u "ms")
+       (typecase value
+         (string 
+          (cond
+            ((word-addr-p value) (gen-get-word value))
+            ((numeric-p value) (parse-number:parse-number value))
+            ((hex-constant-p value)
+             (parse-integer (string-right-trim "hH" value) :radix 16))
+            (t (error "Invalid time value: ~A" value))))
+         (t value)))
+      ((string= u "sec")
+       `(let ((v ,(typecase value
+                    (string 
+                     (cond
+                       ((word-addr-p value) (gen-get-word value))
+                       ((numeric-p value) (parse-number:parse-number value))
+                       ((hex-constant-p value)
+                        (parse-integer (string-right-trim "hH" value) :radix 16))
+                       (t (error "Invalid time value: ~A" value))))
+                    (t value))))
+          (* v 1000)))
+      ((string= u "min")
+       `(let ((v ,(typecase value
+                    (string 
+                     (cond
+                       ((word-addr-p value) (gen-get-word value))
+                       ((numeric-p value) (parse-number:parse-number value))
+                       ((hex-constant-p value)
+                        (parse-integer (string-right-trim "hH" value) :radix 16))
+                       (t (error "Invalid time value: ~A" value))))
+                    (t value))))
+          (* v 60000)))
+      ((string= u "hour")
+       `(let ((v ,(typecase value
+                    (string 
+                     (cond
+                       ((word-addr-p value) (gen-get-word value))
+                       ((numeric-p value) (parse-number:parse-number value))
+                       ((hex-constant-p value)
+                        (parse-integer (string-right-trim "hH" value) :radix 16))
+                       (t (error "Invalid time value: ~A" value))))
+                    (t value))))
+          (* v 3600000)))
+      ((string= u "day")
+       `(let ((v ,(typecase value
+                    (string 
+                     (cond
+                       ((word-addr-p value) (gen-get-word value))
+                       ((numeric-p value) (parse-number:parse-number value))
+                       ((hex-constant-p value)
+                        (parse-integer (string-right-trim "hH" value) :radix 16))
+                       (t (error "Invalid time value: ~A" value))))
+                    (t value))))
+          (* v 86400000)))
+      (t (error "Unknown time unit: ~A" u)))))
 
 (defun compile-tmr (params)
   "TMR - On-delay timer"
