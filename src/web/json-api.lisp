@@ -46,12 +46,29 @@
                (cons (car pair)  ; Keep string key as-is
                      (convert-value-for-json (cdr pair))))
              value))
+    ;; Nested alist with keyword keys (like cell data) - recursively convert
+    ((and (listp value)
+          (not (null value))
+          (consp (first value))
+          (keywordp (car (first value))))
+     (mapcar (lambda (pair)
+               (cons (car pair)  ; Keep keyword key
+                     (convert-value-for-json (cdr pair))))
+             value))
     ;; Nested plist - recursively convert
     ((plist-p value)
      (plist-to-alist value))
     ;; List of plists - convert each
     ((list-of-plists-p value)
      (mapcar #'plist-to-alist value))
+    ;; Ladder-cell struct - convert to plist format
+    ;; Use find-class to check if value is a ladder-cell
+    ((let ((cell-class (find-class 'ladder-cell nil)))
+       (when cell-class
+         (typep value cell-class)))
+     (list :type (string-downcase (symbol-name (slot-value value 'type)))
+           :value (slot-value value 'symbol)
+           :addr (or (slot-value value 'addresses) (list ""))))
     ;; Plain list or atom - return as-is
     (t value)))
 
@@ -185,19 +202,20 @@
 (defun program-js-response (interpreter subrname)
   "Generate JavaScript-compatible ladder JSON (demodata.js format).
    This format is expected by the MBLogic ladtest JavaScript files."
-  (if interpreter
-      (let* ((program (mblogic-cl:interpreter-program interpreter))
-             (source (when program (mblogic-cl:program-source program))))
-        (if source
-            (let ((ladder (program-to-ladder source (or subrname "main"))))
-              (if ladder
-                  ;; ladder-program-to-js-format returns an alist, encode directly
-                  (cl-json:encode-json-alist-to-string
-                   (ladder-program-to-js-format ladder))
-                  (plist-to-json
-                   (list :error (format nil "Subroutine '~A' not found" subrname)))))
-            (plist-to-json (list :error "No program source available"))))
-      (plist-to-json (list :error "No interpreter loaded"))))
+   (if interpreter
+       (let* ((program (mblogic-cl:interpreter-program interpreter))
+              (source (when program (mblogic-cl:program-source program))))
+         (if source
+             (let ((ladder (program-to-ladder source (or subrname "main"))))
+               (if ladder
+                   ;; Convert alist recursively before encoding
+                   (let ((converted (convert-value-for-json
+                                    (ladder-program-to-js-format ladder))))
+                     (cl-json:encode-json-alist-to-string converted))
+                   (plist-to-json
+                    (list :error (format nil "Subroutine '~A' not found" subrname)))))
+             (plist-to-json (list :error "No program source available"))))
+       (plist-to-json (list :error "No interpreter loaded"))))
 
 ;;; ============================================================
 ;;; Subroutine List Response

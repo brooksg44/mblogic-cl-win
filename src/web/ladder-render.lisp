@@ -443,78 +443,76 @@
        (vertical-branch-symbol-p (ladder-cell-symbol (first (first matrix))))))
 
 (defun merge-matrix-below (original-matrix new-matrix)
-  "Merge NEW-MATRIX below ORIGINAL-MATRIX (for OR/ORSTR parallel connections).
-   Only pads matrices to same width with hbar cells - does NOT add branch connectors.
-   Branch connectors should be added separately by close-branch-block.
-   Returns the merged matrix."
-  (let* ((original-width (matrix-width original-matrix))
-         (new-width (matrix-width new-matrix))
-         (max-width (max original-width new-width)))
+   "Merge NEW-MATRIX below ORIGINAL-MATRIX (for OR/ORSTR parallel connections).
+    Only pads matrices to same width with hbar cells - does NOT add branch connectors.
+    Branch connectors should be added separately by close-branch-block.
+    Returns the merged matrix."
+   (let* ((original-width (matrix-width original-matrix))
+          (new-width (matrix-width new-matrix))
+          (max-width (max original-width new-width)))
 
-    ;; Pad both matrices to the same width with hbar cells
-    (dolist (row original-matrix)
-      (let ((row-width (length row)))
-        (dotimes (i (- max-width row-width))
-          (nconc row (list (make-hbar-cell))))))
-    (dolist (row new-matrix)
-      (let ((row-width (length row)))
-        (dotimes (i (- max-width row-width))
-          (nconc row (list (make-hbar-cell))))))
+     ;; Pad original rows with hbar cells (only rows with content)
+     (dolist (row original-matrix)
+       (let ((row-width (length row)))
+         (dotimes (i (- max-width row-width))
+           (nconc row (list (make-hbar-cell))))))
 
-    ;; Merge: append new-matrix rows to original-matrix
-    (nconc original-matrix new-matrix)
-    original-matrix))
+     ;; Pad new rows with hbar cells (only rows with content)
+     (dolist (row new-matrix)
+       (let ((row-width (length row)))
+         (dotimes (i (- max-width row-width))
+           (nconc row (list (make-hbar-cell))))))
+
+     ;; Merge: append new-matrix rows to original-matrix
+     (nconc original-matrix new-matrix)
+     original-matrix))
 
 (defun merge-matrix-right (original-matrix new-matrix)
-  "Merge NEW-MATRIX to the right of ORIGINAL-MATRIX (for ANDSTR series connection).
-   Adds left-side MERGE connectors (ttl at top, tl in middle, l at bottom) to the
-   new matrix when it has multiple rows. These are LEFT-side connectors showing
-   where parallel paths from the right block connect to the left block's wire.
-   Returns the merged matrix."
-  (let ((original-height (matrix-height original-matrix))
-        (new-height (matrix-height new-matrix)))
+   "Merge NEW-MATRIX to the right of ORIGINAL-MATRIX (for ANDSTR series connection).
+    Adds RIGHT-side connectors (ttr at top, tr in middle, r at bottom) to the LEFT
+    edge of new matrix when it has multiple rows. These show where the right block's
+    parallel paths fork from the main wire.
+    Returns the merged matrix."
+   (let ((original-height (matrix-height original-matrix))
+         (new-height (matrix-height new-matrix)))
 
-    ;; Add left-side MERGE connectors when new matrix has multiple rows
-    ;; Use LEFT-side connectors: ttl (┌), tl (├), l (└)
-    (when (> new-height 1)
-      (loop for row in new-matrix
-            for i from 0
-            do (if (< i original-height)
-                   nil
-                   (progn
-                     (push (make-branch-tl-cell) row)
-                     (setf (nth i new-matrix) row))))
-      ;; Fix top and bottom corners only for new rows
-      (when (> new-height original-height)
-        (setf (ladder-cell-symbol (first (first new-matrix))) *branch-ttl*)  ; Top: ┌
-        (setf (ladder-cell-symbol (first (car (last new-matrix)))) *branch-l*)))  ; Bottom: └
+     ;; Add RIGHT-side connectors when new matrix has multiple rows
+     ;; Use RIGHT-side connectors: ttr (┐), tr (┤), r (┘) on LEFT edge of new matrix
+     ;; (matching Python _MergeRight behavior)
+     ;; Note: must use (loop for cell on ...) to modify the list structure in place
+     (when (> new-height 1)
+       (loop for cell on new-matrix
+             do (setf (car cell) (cons (make-branch-tr-cell) (car cell))))
+       ;; Fix top and bottom corners
+       (setf (ladder-cell-symbol (first (first new-matrix))) *branch-ttr*)
+       (setf (ladder-cell-symbol (first (car (last new-matrix)))) *branch-r*))
 
-    ;; Pad to same height
-    (cond
-      ;; Original is taller - pad new matrix with nil rows
-      ((> original-height new-height)
-       (dotimes (i (- original-height new-height))
-         (let ((empty-row (make-list (matrix-width new-matrix) :initial-element nil)))
-           (nconc new-matrix (list empty-row)))))
+     ;; Pad the smaller matrix to match the larger one (matching Python behavior)
+     (cond
+       ;; Original is taller than new - pad new matrix with nil rows at END
+       ((> original-height new-height)
+        (dotimes (i (- original-height new-height))
+          (let ((empty-row (make-list (matrix-width new-matrix) :initial-element nil)))
+            (nconc new-matrix (list empty-row)))))
 
-      ;; New is taller - pad original matrix with nil rows
-      ((> new-height original-height)
-       (dotimes (i (- new-height original-height))
-         (let ((empty-row (make-list (matrix-width original-matrix) :initial-element nil)))
-           (nconc original-matrix (list empty-row))))))
+       ;; New is taller than original - extend original with nil rows at END
+       ((> new-height original-height)
+        (dotimes (i (- new-height original-height))
+          (let ((empty-row (make-list (matrix-width original-matrix) :initial-element nil)))
+            (nconc original-matrix (list empty-row))))))
 
-    ;; Merge: append each new row to corresponding original row
-    (loop for orig-row in original-matrix
-          for new-row in new-matrix
-          do (nconc orig-row new-row))
+     ;; Merge: extend each original row with corresponding new row (matching Python zip)
+     (loop for orig-row in original-matrix
+           for new-row in new-matrix
+           do (nconc orig-row new-row))
 
-    original-matrix))
+     original-matrix))
 
 (defun close-branch-block (matrix)
-  "Add or update right-side branch connectors after merging rows (for OR/ORSTR).
-   Uses branchttr at top, branchtr in middle, branchr at bottom.
-   Preserves existing corner connectors (branchr, branchttr) - only updates hbar.
-   Returns the modified matrix."
+  "Add or update RIGHT-side branch connectors after merging rows (for OR/ORSTR).
+   Uses branchttr at top (normalizes to brancht), branchtr in middle, branchr at bottom.
+   This closes the branch on the right side connecting back to the main rail.
+   Returns the modified matrix. (Matches demodata.js conventions)"
   (let ((height (matrix-height matrix))
         (width (matrix-width matrix)))
     (when (> height 1)
@@ -1037,7 +1035,7 @@
                                  ((string= rungtype "double") 0)
                                  ((string= rungtype "triple") 0)
                                  (t 7)))
-           (max-input-col 7))  ; All rung types support up to 8 input columns (0-7)
+           (max-input-col 7))  ; JS key format only supports single-digit columns (0-7)
       
       ;; Build matrixdata as alist with inputeditRC/outputeditN keys
       ;; Filter cells to only those within JavaScript constraints
