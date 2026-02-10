@@ -239,6 +239,15 @@
   "Check if opcode is ORSTR (merge parallel blocks)"
   (string-equal opcode "ORSTR"))
 
+(defun continuation-instruction-p (opcode)
+  "Check if opcode is a continuation instruction (comparison/pulse that continues current row).
+   These instructions should be appended to the continuation row after nested branches.
+   Includes: STRE, STRNE, STRGT, STRLT, STRGE, STRLE, ORPD, ORND, ANDGT, ANDLT, ANDGE, ANDLE"
+  (member opcode '("STRE" "STRNE" "STRGT" "STRLT" "STRGE" "STRLE"
+                  "ORPD" "ORND"
+                  "ANDGT" "ANDLT" "ANDGE" "ANDLE")
+          :test #'string-equal))
+
 (defun andstr-instruction-p (opcode)
   "Check if opcode is ANDSTR (merge series blocks)"
   (string-equal opcode "ANDSTR"))
@@ -434,6 +443,37 @@
       (nconc row (list nil)))
     matrix))
 
+(defun append-cell-to-row (cell matrix target-row)
+  "Append CELL to a specific TARGET-ROW of MATRIX, padding other rows with hbar.
+   Returns the modified matrix."
+  (let* ((cell-copy (copy-cell cell))
+         (height (matrix-height matrix))
+         (target-row (min target-row (1- height))))
+    ;; Add to target row
+    (setf (nth target-row matrix) (append (nth target-row matrix) (list cell-copy)))
+    ;; Pad other rows with hbar to keep rectangular
+    (dotimes (i height)
+      (unless (= i target-row)
+        (let ((row (nth i matrix)))
+          (nconc row (list (make-hbar-cell))))))
+    matrix))
+
+(defun append-cell-to-last-row (cell matrix)
+  "Append CELL to the LAST row of MATRIX, padding other rows with hbar.
+   Returns the modified matrix."
+  (let* ((cell-copy (copy-cell cell))
+         (height (matrix-height matrix))
+         (last-row-idx (1- height))
+         (last-row (nth last-row-idx matrix)))
+    ;; Add to last row
+    (setf last-row (append last-row (list cell-copy)))
+    (setf (nth last-row-idx matrix) last-row)
+    ;; Pad other rows with hbar to keep rectangular
+    (dotimes (i last-row-idx)
+      (let ((row (nth i matrix)))
+        (nconc row (list (make-hbar-cell)))))
+    matrix))
+
 (defun has-fork-column-p (matrix)
   "Check if matrix already has a fork connector column at column 0.
    Returns T if the first cell of the first row is a vertical branch connector."
@@ -469,44 +509,60 @@
 
 (defun merge-matrix-right (original-matrix new-matrix)
    "Merge NEW-MATRIX to the right of ORIGINAL-MATRIX (for ANDSTR series connection).
-    Adds RIGHT-side connectors (ttr at top, tr in middle, r at bottom) to the LEFT
-    edge of new matrix when it has multiple rows. These show where the right block's
-    parallel paths fork from the main wire.
+    When heights are equal, does horizontal merge with hbar (no vertical connectors).
+    When heights differ, pads matrices and merges horizontally.
+    Adds fork connector to the ORIGINAL matrix where the fork occurs.
     Returns the merged matrix."
    (let ((original-height (matrix-height original-matrix))
-         (new-height (matrix-height new-matrix)))
+         (new-height (matrix-height new-matrix))
+         (original-width (matrix-width original-matrix))
+         (new-width (matrix-width new-matrix))
+         (fork-col 0))
 
-     ;; Add RIGHT-side connectors when new matrix has multiple rows
-     ;; Use RIGHT-side connectors: ttr (┐), tr (┤), r (┘) on LEFT edge of new matrix
-     ;; (matching Python _MergeRight behavior)
-     ;; Note: must use (loop for cell on ...) to modify the list structure in place
-     (when (> new-height 1)
-       (loop for cell on new-matrix
-             do (setf (car cell) (cons (make-branch-tr-cell) (car cell))))
-       ;; Fix top and bottom corners
-       (setf (ladder-cell-symbol (first (first new-matrix))) *branch-ttr*)
-       (setf (ladder-cell-symbol (first (car (last new-matrix)))) *branch-r*))
+      ;; Handle empty matrices
+      (when (zerop original-width)
+        (return-from merge-matrix-right original-matrix))
 
-     ;; Pad the smaller matrix to match the larger one (matching Python behavior)
-     (cond
-       ;; Original is taller than new - pad new matrix with nil rows at END
-       ((> original-height new-height)
-        (dotimes (i (- original-height new-height))
-          (let ((empty-row (make-list (matrix-width new-matrix) :initial-element nil)))
-            (nconc new-matrix (list empty-row)))))
+      ;; If heights differ, pad the shorter matrix with nil rows to match
+      (cond
+        ;; Original is taller - pad new-matrix with nil rows
+        ((> original-height new-height)
+         (dotimes (i (- original-height new-height))
+           (let ((empty-row (make-list (matrix-width new-matrix) :initial-element nil)))
+             (nconc new-matrix (list empty-row)))))
+        ;; New is taller - pad original-matrix with nil rows
+        ((> new-height original-height)
+         (dotimes (i (- new-height original-height))
+           (let ((empty-row (make-list (matrix-width original-matrix) :initial-element nil)))
+             (nconc original-matrix (list empty-row))))))
 
-       ;; New is taller than original - extend original with nil rows at END
-       ((> new-height original-height)
-        (dotimes (i (- new-height original-height))
-          (let ((empty-row (make-list (matrix-width original-matrix) :initial-element nil)))
-            (nconc original-matrix (list empty-row))))))
+      ;; Set fork-col to original width for later use
+      (setf fork-col original-width)
 
-     ;; Merge: extend each original row with corresponding new row (matching Python zip)
-     (loop for orig-row in original-matrix
-           for new-row in new-matrix
-           do (nconc orig-row new-row))
+      ;; Pad all rows with hbar to match max width
+      (let ((max-width (max (matrix-width original-matrix) (matrix-width new-matrix))))
+        (dolist (row original-matrix)
+          (let ((row-width (length row)))
+            (dotimes (i (- max-width row-width))
+              (nconc row (list (make-hbar-cell))))))
+        (dolist (row new-matrix)
+          (let ((row-width (length row)))
+            (dotimes (i (- max-width row-width))
+              (nconc row (list (make-hbar-cell)))))))
 
-     original-matrix))
+      ;; Now add fork connector at fork-col for each row of original
+      (dotimes (row-idx original-height)
+        (let ((row (nth row-idx original-matrix)))
+          ;; Replace the hbar at fork-col with a branch connector
+          (when (and (< fork-col (length row)) (nth fork-col row))
+            (setf (nth fork-col row) (make-branch-tr-cell :row row-idx :col fork-col)))))
+
+      ;; Horizontal merge: extend each original row with corresponding new row
+      (loop for orig-row in original-matrix
+            for new-row in new-matrix
+            do (nconc orig-row new-row))
+
+      original-matrix))
 
 (defun close-branch-block (matrix)
   "Add or update RIGHT-side branch connectors after merging rows (for OR/ORSTR).

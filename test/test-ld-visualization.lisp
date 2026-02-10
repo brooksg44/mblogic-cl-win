@@ -796,9 +796,54 @@ CNTU CT1 100
       (is (assoc "inputedit00" matrixdata :test #'string=))
       (is (assoc "inputedit10" matrixdata :test #'string=))
       ;; Should have CNTU as outputedit0
-      (let ((output0 (cdr (assoc "outputedit0" matrixdata :test #'string=))))
-        (is (not (null output0)))
-        (when output0
-          (is (string= "cntu" (cdr (assoc :value output0)))))))))
+            (let ((output0 (cdr (assoc "outputedit0" matrixdata :test #'string=))))
+         (is (not (null output0)))
+         (when output0
+           (is (string= "cntu" (cdr (assoc :value output0)))))))))
+
+(test complex-nested-branch-with-continuation
+  "Test complex rung with nested branches and continuation instructions
+   Continuation instructions (STRE, ORPD, ANDGT) should appear on the top wire path"
+  (let* ((source "NETWORK 1
+STR T5
+ORN C1
+AND C2
+STR C3
+AND C4
+STR C5
+OR C6
+ANDSTR
+ORSTR
+STRE DS100 50
+ORPD C100
+ANDGT DS112 86
+ANDSTR
+SET C101
+")
+         (program (parse-test-il source))
+         (network (first (mblogic-cl:program-main-networks program)))
+         (rung (mblogic-cl-web::network-to-ladder-rung network))
+         (cells (mblogic-cl-web::ladder-rung-cells rung)))
+    ;; Should have at least 3 rows (nested branches create multi-row structure)
+    (is (>= (mblogic-cl-web::ladder-rung-rows rung) 3))
+    ;; Find continuation instruction cells (STRE, ORPD, ANDGT)
+    (let ((stre-cell (find "STRE" cells
+                          :key #'mblogic-cl-web::ladder-cell-opcode
+                          :test #'string=))
+          (orpd-cell (find "ORPD" cells
+                          :key #'mblogic-cl-web::ladder-cell-opcode
+                          :test #'string=))
+          (andgt-cell (find "ANDGT" cells
+                           :key #'mblogic-cl-web::ladder-cell-opcode
+                           :test #'string=)))
+      ;; All continuation instructions should exist
+      (is (not (null stre-cell)))
+      (is (not (null orpd-cell)))
+      (is (not (null andgt-cell)))
+      ;; Verify continuation instructions are on row 0 (top wire)
+      (is (= (mblogic-cl-web::ladder-cell-row stre-cell) 0))
+      (is (= (mblogic-cl-web::ladder-cell-row andgt-cell) 0))
+      ;; Verify ORPD is on row 1 (bottom wire)
+      (is (= (mblogic-cl-web::ladder-cell-row orpd-cell) 1)))))
 
 ;;; End of test-ld-visualization.lisp
