@@ -508,20 +508,31 @@
      original-matrix))
 
 (defun merge-matrix-right (original-matrix new-matrix)
-   "Merge NEW-MATRIX to the right of ORIGINAL-MATRIX (for ANDSTR series connection).
-    When heights are equal, does horizontal merge with hbar (no vertical connectors).
-    When heights differ, pads matrices and merges horizontally.
-    Adds fork connector to the ORIGINAL matrix where the fork occurs.
-    Returns the merged matrix."
-   (let ((original-height (matrix-height original-matrix))
-         (new-height (matrix-height new-matrix))
-         (original-width (matrix-width original-matrix))
-         (new-width (matrix-width new-matrix))
-         (fork-col 0))
+    "Merge NEW-MATRIX to the right of ORIGINAL-MATRIX (for ANDSTR series connection).
+     When heights are equal, does horizontal merge with hbar (no vertical connectors).
+     When heights differ, pads matrices and merges horizontally.
+     Fork connectors are only added when both matrices have multi-cell rows
+     (actual parallel branches, not continuation rows).
+     Returns the merged matrix."
+    (let ((original-height (matrix-height original-matrix))
+          (new-height (matrix-height new-matrix))
+          (original-width (matrix-width original-matrix))
+          (fork-col 0))
 
       ;; Handle empty matrices
       (when (zerop original-width)
         (return-from merge-matrix-right original-matrix))
+
+      ;; Determine if we should add fork connectors
+      ;; Forks are only needed when BOTH matrices have multi-cell rows (parallel branches)
+      ;; Single-cell rows (continuations) merged with multi-row structures don't need forks
+      (let ((original-multi-cell-p (some (lambda (row) (> (length row) 1)) original-matrix))
+            (new-multi-cell-p (some (lambda (row) (> (length row) 1)) new-matrix))
+            (add-forks nil))
+
+        ;; Add forks only when both have multi-cell rows (actual parallel branches)
+        (when (and original-multi-cell-p new-multi-cell-p)
+          (setf add-forks t)))
 
       ;; If heights differ, pad the shorter matrix with nil rows to match
       (cond
@@ -550,12 +561,14 @@
             (dotimes (i (- max-width row-width))
               (nconc row (list (make-hbar-cell)))))))
 
-      ;; Now add fork connector at fork-col for each row of original
-      (dotimes (row-idx original-height)
-        (let ((row (nth row-idx original-matrix)))
-          ;; Replace the hbar at fork-col with a branch connector
-          (when (and (< fork-col (length row)) (nth fork-col row))
-            (setf (nth fork-col row) (make-branch-tr-cell :row row-idx :col fork-col)))))
+      ;; Add fork connectors ONLY when both matrices have multi-cell rows
+      (when (and (some (lambda (row) (> (length row) 1)) original-matrix)
+               (some (lambda (row) (> (length row) 1)) new-matrix))
+        (dotimes (row-idx original-height)
+          (let ((row (nth row-idx original-matrix)))
+            ;; Replace the hbar at fork-col with a branch connector
+            (when (and (< fork-col (length row)) (nth fork-col row))
+              (setf (nth fork-col row) (make-branch-tr-cell :row row-idx :col fork-col))))))
 
       ;; Horizontal merge: extend each original row with corresponding new row
       (loop for orig-row in original-matrix
