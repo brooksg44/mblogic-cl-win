@@ -38,7 +38,10 @@
       "mcp__lisp__quickload",
       "mcp__lisp__describe-last-error",
       "mcp__lisp__validate-syntax",
-      "Bash(python3 -m json.tool:*)"
+      "Bash(python3 -m json.tool:*)",
+      "Bash(grep:*)",
+      "Bash(tr:*)",
+      "Bash(git checkout:*)"
     ]
   }
 }
