@@ -3216,6 +3216,36 @@ function MBEdit_pageinit() {
 		</g>
 
 
+		<g id="branchttl">
+			<!-- This is the top-left corner of a branch fork. -->
+		 	<rect x="2px" y="-35px" width="70px" height="70px" stroke="none"/> 
+		 	<line x1="37px" y1="0px" x2="75px" y2="0px" />
+			<line x1="37px" y1="0px" x2="37px" y2="37px" />
+			<line x1="0px" y1="0px" x2="37px" y2="0px" />
+			<circle cx="37px" cy="0px" r="3px" stroke-width="5px" />
+		</g>
+
+		<g id="branchttr">
+			<!-- This is the top-right corner of a branch fork. -->
+		 	<rect x="2px" y="-35px" width="70px" height="70px" stroke="none"/> 
+		 	<line x1="0px" y1="0px" x2="37px" y2="0px" />
+			<line x1="37px" y1="0px" x2="37px" y2="37px" />
+			<line x1="37px" y1="0px" x2="75px" y2="0px" />
+			<circle cx="37px" cy="0px" r="3px" stroke-width="5px" />
+		</g>
+
+		<g id="vbarl">
+			<!-- This is vertical bar on the left side. -->
+		 	<rect x="2px" y="-35px" width="70px" height="70px" stroke="none"/> 
+			<line x1="20px" y1="-37px" x2="20px" y2="37px" />
+		</g>
+
+		<g id="vbarr">
+			<!-- This is vertical bar on the right side. -->
+		 	<rect x="2px" y="-35px" width="70px" height="70px" stroke="none"/> 
+			<line x1="55px" y1="-37px" x2="55px" y2="37px" />
+		</g>
+
 		<g id="vbar">
 			<!-- This is vertical bar (wire). -->
 		 	<rect x="2px" y="-35px" width="70px" height="70px" stroke="none"/> 
@@ -4345,7 +4375,45 @@ function MBEdit_pageinit() {
 		MatrixParams: window.MatrixParams,
 		RungHeightPad: window.RungHeightPad
 	});
-	SubrControl.CreateRungList(SubrData.GetSubrData());
+	
+	// Debug: Log which symbols are missing
+	console.log('=== Checking for missing symbols ===');
+	var subrdata = SubrData.GetSubrData();
+	if (subrdata && subrdata.rungdata) {
+		var usedSymbols = {};
+		for (var r = 0; r < subrdata.rungdata.length; r++) {
+			var rung = subrdata.rungdata[r];
+			if (rung.matrixdata) {
+				for (var cellKey in rung.matrixdata) {
+					var cellValue = rung.matrixdata[cellKey]["value"];
+					if (cellValue) {
+						usedSymbols[cellValue] = true;
+					}
+				}
+			}
+		}
+		console.log('Used symbols:', Object.keys(usedSymbols).sort().join(', '));
+		
+		var missingSymbols = [];
+		for (var sym in usedSymbols) {
+			if (!window.LadSymbols[sym]) {
+				missingSymbols.push(sym);
+			}
+		}
+		if (missingSymbols.length > 0) {
+			console.error('MISSING SYMBOLS:', missingSymbols.join(', '));
+		} else {
+			console.log('All symbols found in LadSymbols');
+		}
+	}
+	
+	try {
+		SubrControl.CreateRungList(SubrData.GetSubrData());
+	} catch (e) {
+		console.error('Error in CreateRungList:', e.message);
+		console.error('Stack:', e.stack);
+		throw e;
+	}
 
 	// Editing of overall subroutine features.
 	var SubrEdit = new SubrEditLib(document, SubrData.GetSubrData());
