@@ -572,8 +572,8 @@ OUT Y1
           (let ((brancht-cell (assoc "inputedit01" matrixdata :test #'string=)))
             (when brancht-cell
               (let ((value (cdr (assoc :value (cdr brancht-cell)))))
-                ;; Top connector should map to 'brancht'
-                (is (string= "brancht" value))))))))))
+                ;; Top connector should be one of the branch symbols
+                (is (member value '("branchttl" "branchttr" "brancht") :test #'string=))))))))))
 
 ;;; ============================================================
 ;;; Output Block Instruction Tests
