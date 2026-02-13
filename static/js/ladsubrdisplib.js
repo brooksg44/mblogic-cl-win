@@ -174,6 +174,12 @@ function SubrDispControl(docref, ladsymbols) {
 		var outputxpos = this.AllMatrixParams[rungtype]["outputxpos"];
 		var inputvert = this.AllMatrixParams[rungtype]["inputvert"];
 		var vertpitch = this.AllMatrixParams[rungtype]["vertpitch"];
+		
+		// DEBUG: Log rung parameters
+		console.log('CreateStaticRung rungtype=' + rungtype + ' ref=' + instrlist["reference"]);
+		console.log('  MaxParams: inputrow=' + maxinputrow + ' inputcol=' + maxinputcol + ' outputrow=' + maxoutputrow);
+		console.log('  Pitch: inputpitch=' + inputpitch + ' inputvert=' + inputvert + ' vertpitch=' + vertpitch + ' outputxpos=' + outputxpos);
+		console.log('  Instr count: ' + Object.keys(instrmatrix).length);
 
 		// Create the SVG container.
 		var container = this.svgcontainer.cloneNode(true);
@@ -188,15 +194,18 @@ function SubrDispControl(docref, ladsymbols) {
 
 
 		// Create the instruction matrix.
+		var instrCount = 0;
 		for (var i in instrmatrix) {
+			instrCount++;
 			// Get the ladder symbol.
-			var ladsym = this.ladsymbols[instrmatrix[i]["value"]]["symbolref"];
+			var symbolType = instrmatrix[i]["value"];
+			var ladsym = this.ladsymbols[symbolType]["symbolref"];
 			var instrsymb = ladsym.cloneNode(true);
 			instrsymb.removeAttribute("id");
 
 			// Insert the addresses.
 			var addrlist = instrmatrix[i]["addr"];
-			var svglist = this.ladsymbols[instrmatrix[i]["value"]]["addrref"];
+			var svglist = this.ladsymbols[symbolType]["addrref"];
 			var instr = this.DisplayAddresses(instrsymb, addrlist, svglist);
 
 			// Row we are currently working on.
@@ -225,6 +234,13 @@ function SubrDispControl(docref, ladsymbols) {
 			}
 			var y = rungdata[i]["row"] * inputvert;
 
+			// DEBUG: Log first few symbols
+			if (instrCount <= 3) {
+				console.log('  Instr ' + instrCount + ' key=' + i + ' type=' + symbolType + ' addr=' + addrlist.join(','));
+				console.log('    rungdata[' + i + ']=' + JSON.stringify(rungdata[i]));
+				console.log('    row=' + currentrow + ' col=' + (rungdata[i]["col"]||'N/A') + ' x=' + x + ' y=' + y);
+			}
+
 			// Set the coordinates. 
 			instr.setAttribute("transform", "translate(" + x + "," + y + ")");
 			ladcontainer.appendChild(instr);
@@ -233,6 +249,7 @@ function SubrDispControl(docref, ladsymbols) {
 			}
 
 		}
+		console.log('  Total instructions placed: ' + instrCount + ' maxrow=' + maxrow + ' maxinpcol=' + maxinpcol);
 
 		// Add the joining power rails.
 		var inprail = this.svginprail.cloneNode(true);
@@ -288,6 +305,11 @@ function SubrDispControl(docref, ladsymbols) {
 		} else {
 			var svgheight = (Math.max(inpheight, outpheight) + this.RungHeightPad)
 		}
+		
+		console.log('  Height calc: maxrow=' + maxrow + ' maxoutprow=' + maxoutprow);
+		console.log('    inpheight=' + inpheight + ' outpheight=' + outpheight + ' RungHeightPad=' + this.RungHeightPad);
+		console.log('    final svgheight=' + svgheight + ' viewBox=0 0 1000 ' + Math.max(svgheight, 200));
+		
 		container.setAttribute("height", svgheight + "px");
 		
 		// Set viewBox to match the height so content scales properly
