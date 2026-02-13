@@ -161,6 +161,37 @@ body {
 	max-width: 1000px;
 	margin: 10px 0;
 	border: 1px solid #ccc;
+	background-color: white;
+}
+
+/* SVG elements styling */
+#staticrunglist svg line {
+	stroke: black;
+	stroke-width: 2;
+}
+
+#staticrunglist svg circle {
+	stroke: black;
+	stroke-width: 2;
+	fill: black;
+}
+
+#staticrunglist svg rect {
+	stroke: black;
+	stroke-width: 1;
+	fill: none;
+}
+
+#staticrunglist svg ellipse {
+	stroke: black;
+	stroke-width: 2;
+	fill: none;
+}
+
+#staticrunglist svg text {
+	font-family: Arial, sans-serif;
+	font-size: 12px;
+	fill: black;
 }
 
 /* This is for the rung edit buttons. */
