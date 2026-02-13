@@ -162,11 +162,9 @@ function MBEdit_pageinit() {
                 return;
             }
             
-            // Create the display controller
-            var dispControl = new SubrDispControl(document, {
-                LadSymbols: window.LadSymbols,
-                subroutinename: rungdata.subroutinename,
-                subrcomments: rungdata.subrcomments,
+            // Note: dispControl is now created in InitializeEditingController (called at end of this function)
+            // We store references to the SVG elements in window for use by that function
+            window.svgElements = {
                 svgcontainer: svgcontainer,
                 laddercontainer: laddercontainer,
                 staticladderlist: rungList,
@@ -174,10 +172,8 @@ function MBEdit_pageinit() {
                 svginprail2: svginprail2,
                 svginprail3: svginprail3,
                 svgoutprail: svgoutprail,
-                svgoutpraildec: svgoutpraildec,
-                MatrixParams: window.MatrixParams,
-                RungHeightPad: window.RungHeightPad
-            });
+                svgoutpraildec: svgoutpraildec
+            };
             
             // Display each rung
             console.log('Starting rung rendering...');
@@ -185,42 +181,8 @@ function MBEdit_pageinit() {
             console.log('Is array:', Array.isArray(rungdata.rungdata));
             console.log('rungdata.rungdata length:', rungdata.rungdata ? rungdata.rungdata.length : 'N/A');
             
-            if (rungdata.rungdata && Array.isArray(rungdata.rungdata)) {
-                console.log('Rendering ' + rungdata.rungdata.length + ' rungs');
-                console.log('staticrunglist element:', rungList);
-                console.log('dispControl object:', dispControl);
-                console.log('dispControl.CreateStaticRung:', dispControl.CreateStaticRung);
-                
-                var successCount = 0;
-                var errorCount = 0;
-                
-                rungdata.rungdata.forEach(function(rung, index) {
-                    try {
-                        if (index < 3 || index === rungdata.rungdata.length - 1) {
-                            console.log('Rendering rung ' + index + ', type: ' + rung.rungtype + ', cells: ' + Object.keys(rung.matrixdata).length);
-                        }
-                        var rungDiv = dispControl.CreateStaticRung(rung);
-                        if (rungDiv) {
-                            console.log('Rung ' + index + ' created, tag: ' + rungDiv.tagName);
-                            rungList.appendChild(rungDiv);
-                            successCount++;
-                        } else {
-                            console.warn('CreateStaticRung returned null for rung ' + index);
-                            errorCount++;
-                        }
-                    } catch (e) {
-                        console.error('Error displaying rung ' + index + ':', e.message);
-                        console.error('Stack:', e.stack);
-                        errorCount++;
-                    }
-                });
-                console.log('Rendering complete: ' + successCount + ' success, ' + errorCount + ' errors');
-                console.log('Total rungs appended:', rungList.children.length);
-                console.log('First child:', rungList.firstChild);
-            } else {
-                console.error('rungdata.rungdata is not an array or is missing');
-                console.error('rungdata:', rungdata);
-            }
+            // Note: Rung rendering is now done in InitializeEditingController using the properly initialized SubrControl
+            console.log('Ladder data loaded, rungs will be rendered by InitializeEditingController')
          } catch (e) {
              console.error('Error initializing ladder display:', e);
          }
@@ -4396,13 +4358,44 @@ function MBEdit_pageinit() {
 		});
 		
 		try {
-			SubrControl.CreateRungList(SubrData.GetSubrData());
+			// Render the static rungs using SubrControl
+			if (rungdata && rungdata.rungdata && Array.isArray(rungdata.rungdata)) {
+				console.log('Rendering ' + rungdata.rungdata.length + ' rungs via SubrControl');
+				
+				var rungList = document.getElementById('staticrunglist');
+				var successCount = 0;
+				var errorCount = 0;
+				
+				rungdata.rungdata.forEach(function(rung, index) {
+					try {
+						if (index < 3 || index === rungdata.rungdata.length - 1) {
+							console.log('Rendering rung ' + index + ', type: ' + rung.rungtype + ', cells: ' + Object.keys(rung.matrixdata).length);
+						}
+						var rungDiv = SubrControl.CreateStaticRung(rung);
+						if (rungDiv) {
+							console.log('Rung ' + index + ' created, tag: ' + rungDiv.tagName);
+							rungList.appendChild(rungDiv);
+							successCount++;
+						} else {
+							console.warn('CreateStaticRung returned null for rung ' + index);
+							errorCount++;
+						}
+					} catch (e) {
+						console.error('Error displaying rung ' + index + ':', e.message);
+						console.error('Stack:', e.stack);
+						errorCount++;
+					}
+				});
+				console.log('Rendering complete: ' + successCount + ' success, ' + errorCount + ' errors');
+				console.log('Total rungs appended:', rungList.children.length);
+			}
+			
 			console.log('Editing controller initialized successfully');
 			
 			// Initialize editing features now that SubrData is ready
 			InitializeEditingFeatures();
 		} catch (e) {
-			console.error('Error in CreateRungList:', e.message);
+			console.error('Error in rendering:', e.message);
 			console.error('Stack:', e.stack);
 			throw e;
 		}
