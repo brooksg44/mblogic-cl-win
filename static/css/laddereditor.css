@@ -149,6 +149,15 @@ body {
 .rungshow {display: block;}
 .runghide {display: none;}
 
+/* SVG ladder diagrams */
+#staticrunglist svg {
+	display: block;
+	width: 100%;
+	max-width: 1000px;
+	margin: 10px 0;
+	border: 1px solid #ccc;
+}
+
 /* This is for the rung edit buttons. */
 .rungeditbuttons {float:left;}
 
