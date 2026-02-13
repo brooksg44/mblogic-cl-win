@@ -542,11 +542,12 @@ OUT Y1
       (let ((branch-cells (remove-if-not
                            (lambda (c)
                              (member (mblogic-cl-web::ladder-cell-symbol c)
-                                     '("branchttr" "branchtr" "branchr" "brancht")
+                                     '("branchttr" "branchtr" "branchr" "brancht"
+                                       "branchttl" "branchtl" "branchl" "vbarl" "vbarr" "hbar")
                                      :test #'string-equal))
                            cells)))
-        ;; Should have branch connectors
-        (is (>= (length branch-cells) 1))))))
+        ;; Should have branch connectors (at least 2 from close-branch-block)
+        (is (>= (length branch-cells) 2))))))
 
 (test branch-rung-js-format
   "Test that branch rung produces correct JS format"
