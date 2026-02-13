@@ -57,6 +57,17 @@ function loadLadderData(subrname) {
 var currentSubrname = getUrlParam('subrname') || 'LadderDemo';
 loadLadderData(currentSubrname);
 
+// Initialize global symbol definitions
+try {
+    var ladsymdefsinstance = new LadSymDefs(document);
+    window.LadSymbols = ladsymdefsinstance.LadSymbols;
+    window.MatrixParams = ladsymdefsinstance.MatrixParams;
+    window.RungHeightPad = ladsymdefsinstance.RungHeightPad;
+    console.log('LadSymbols initialized successfully');
+} catch (e) {
+    console.error('Error initializing LadSymbols:', e);
+}
+
 // Function to change subroutine
 function changeSubroutine() {
     var select = document.getElementById('subrSelect');
@@ -84,6 +95,64 @@ function loadSubroutineList() {
                 }
                 select.appendChild(option);
             });
+        }
+    }
+}
+
+// Initialize page and display ladder
+function MBEdit_pageinit() {
+    if (!rungdata || !rungdata.rungdata) {
+        console.error('No rungdata available');
+        return;
+    }
+    
+    // Update subroutine name and comments
+    var subrNameElem = document.getElementById('subroutinename');
+    if (subrNameElem) {
+        subrNameElem.textContent = rungdata.subroutinename || 'Unknown';
+    }
+    
+    var subrCommentElem = document.getElementById('subrcomments');
+    if (subrCommentElem) {
+        subrCommentElem.textContent = rungdata.subrcomments || '';
+    }
+    
+    // Create ladder display
+    var rungList = document.getElementById('staticrunglist');
+    if (rungList && window.SubrDispControl) {
+        try {
+            // Create the display controller
+            var dispControl = new SubrDispControl(document, {
+                LadSymbols: window.LadSymbols || {},
+                subroutinename: rungdata.subroutinename,
+                subrcomments: rungdata.subrcomments,
+                svgcontainer: document.getElementById('svgcontainer'),
+                laddercontainer: document.getElementById('laddercontainer'),
+                staticladderlist: rungList,
+                svginprail: document.getElementById('svginprail'),
+                svginprail2: document.getElementById('svginprail2'),
+                svginprail3: document.getElementById('svginprail3'),
+                svgoutprail: document.getElementById('svgoutprail'),
+                svgoutpraildec: document.getElementById('svgoutpraildec'),
+                MatrixParams: window.MatrixParams || {},
+                RungHeightPad: window.RungHeightPad || 15
+            });
+            
+            // Display each rung
+            if (rungdata.rungdata && Array.isArray(rungdata.rungdata)) {
+                rungdata.rungdata.forEach(function(rung, index) {
+                    try {
+                        var rungDiv = dispControl.CreateStaticRung(rung);
+                        if (rungDiv) {
+                            rungList.appendChild(rungDiv);
+                        }
+                    } catch (e) {
+                        console.error('Error displaying rung ' + index + ':', e);
+                    }
+                });
+            }
+        } catch (e) {
+            console.error('Error initializing ladder display:', e);
         }
     }
 }
@@ -4135,8 +4204,34 @@ function loadSubroutineList() {
 
 	<!-- ################################################################ -->
 
+	<!-- SVG Template Container for Static Ladder Display -->
+	<!-- This is the outer SVG container that gets cloned for each rung -->
+	<svg id="svgcontainer" xmlns="http://www.w3.org/2000/svg" 
+		xmlns:html="http://www.w3.org/1999/xhtml"
+		xmlns:xlink="http://www.w3.org/1999/xlink"
+		version="1.1" baseProfile="full" width="1000px" height="0px"
+		style="display:none;">
+		
+		<!-- This is a container to give a display offset to the ladder rung -->
+		<g id="laddercontainer" transform="translate(0,50)">
+		</g>
+		
+		<!-- Power rails -->
+		<!-- Join inputs to outputs (first rail) -->
+		<line id="svginprail" x1="610" y1="0px" x2="610" y2="0px" stroke="black" stroke-width="2px" />
+		<!-- Join inputs to outputs (second optional rail) -->
+		<line id="svginprail2" x1="610" y1="75px" x2="610" y2="75px" stroke="black" stroke-width="2px" />
+		<!-- Join inputs to outputs (third optional rail) -->
+		<line id="svginprail3" x1="610" y1="150px" x2="610" y2="150px" stroke="black" stroke-width="2px" />
+		
+		<!-- Joining rail for outputs -->
+		<line id="svgoutprail" x1="610" y1="0px" x2="610" y2="0px" stroke="black" stroke-width="2px" />
+		
+		<!-- Decoration for output rail (small circle) -->
+		<circle id="svgoutpraildec" cx="610px" cy="0px" r="3px" stroke-width="2px" fill="black" />
+	</svg>
 
-	<!-- This is a container for holding a complete rung of SVG. -->
+	<!-- This is a container for holding a complete rung of SVG (for editing) -->
 	<svg id="ladderdispprototype" xmlns="http://www.w3.org/2000/svg" 
 		xmlns:html="http://www.w3.org/1999/xhtml"
 		xmlns:xlink="http://www.w3.org/1999/xlink"
