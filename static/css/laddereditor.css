@@ -149,9 +149,14 @@ body {
 .rungshow {display: block;}
 .runghide {display: none;}
 
-/* SVG ladder diagrams */
+/* SVG template (hidden) */
+#svgcontainer {
+	display: none !important;
+}
+
+/* SVG ladder diagrams in the rung list */
 #staticrunglist svg {
-	display: block;
+	display: block !important;
 	width: 100%;
 	max-width: 1000px;
 	margin: 10px 0;
