@@ -4381,8 +4381,8 @@ function MBEdit_pageinit() {
 		// Initialise the master edit controller using the already-initialized global symbols
 		SubrControl = new SubrDispControl(document, {
 			LadSymbols: window.LadSymbols,
-			subroutinename: rungdata.subroutinename,
-			subrcomments: rungdata.subrcomments,
+			subroutinename: document.getElementById('subroutinename'),
+			subrcomments: document.getElementById('subrcomments'),
 			svgcontainer: document.getElementById('svgcontainer'),
 			laddercontainer: document.getElementById('laddercontainer'),
 			staticladderlist: document.getElementById('staticrunglist'),
