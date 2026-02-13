@@ -4375,7 +4375,7 @@ function MBEdit_pageinit() {
 						}
 						var rungDiv = SubrControl.CreateStaticRung(rung);
 						if (rungDiv) {
-							console.log('Rung ' + index + ' created, tag: ' + rungDiv.tagName);
+							console.log('Rung ' + index + ' created, tag: ' + rungDiv.tagName + ', width=' + rungDiv.getAttribute('width') + ', height=' + rungDiv.getAttribute('height') + ', viewBox=' + rungDiv.getAttribute('viewBox'));
 							rungList.appendChild(rungDiv);
 							successCount++;
 						} else {
