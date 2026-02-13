@@ -221,11 +221,14 @@ function MBEdit_pageinit() {
                 console.error('rungdata.rungdata is not an array or is missing');
                 console.error('rungdata:', rungdata);
             }
-        } catch (e) {
-            console.error('Error initializing ladder display:', e);
-        }
-    }
-}
+         } catch (e) {
+             console.error('Error initializing ladder display:', e);
+         }
+         
+         // Now initialize the editing controller (which relies on window.LadSymbols)
+         InitializeEditingController();
+     }
+ }
 //]]>
 </script>
 
@@ -4359,112 +4362,47 @@ function MBEdit_pageinit() {
 
 </body>
 
-<!-- This is the code for editing the page. -->
+<!-- This is the code for editing the page - moved to be called AFTER page initialization -->
 
 	<script>
 	<![CDATA[
 
+	// Define global SubrData and SubrControl so they can be used throughout the page
+	var SubrData = null;
+	var SubrControl = null;
 
-	// The subroutine data handler.
-	var SubrData = new LadSubrData();
-	// Import the ladder data from the API into SubrData
-	SubrData.ImportData(rungdata);
+	// Initialize the editing controller AFTER page load (called from MBEdit_pageinit)
+	function InitializeEditingController() {
+		// The subroutine data handler.
+		SubrData = new LadSubrData();
+		// Import the ladder data from the API into SubrData
+		SubrData.ImportData(rungdata);
 
-	// Initialise the master edit controller using the already-initialized global symbols
-	var SubrControl = new SubrDispControl(document, {
-		LadSymbols: window.LadSymbols,
-		subroutinename: rungdata.subroutinename,
-		subrcomments: rungdata.subrcomments,
-		svgcontainer: document.getElementById('svgcontainer'),
-		laddercontainer: document.getElementById('laddercontainer'),
-		staticladderlist: document.getElementById('staticrunglist'),
-		svginprail: document.getElementById('svginprail'),
-		svginprail2: document.getElementById('svginprail2'),
-		svginprail3: document.getElementById('svginprail3'),
-		svgoutprail: document.getElementById('svgoutprail'),
-		svgoutpraildec: document.getElementById('svgoutpraildec'),
-		MatrixParams: window.MatrixParams,
-		RungHeightPad: window.RungHeightPad
-	});
-	
-	// Debug: Log which symbols are missing (only if LadSymbols has been initialized)
-	console.log('window.LadSymbols type:', typeof window.LadSymbols);
-	console.log('window.LadSymbols value:', window.LadSymbols);
-	
-	if (window.LadSymbols && typeof window.LadSymbols === 'object') {
-		console.log('=== Checking for missing symbols ===');
-		var subrdata = SubrData.GetSubrData();
-		if (subrdata && subrdata.rungdata) {
-			var usedSymbols = {};
-			for (var r = 0; r < subrdata.rungdata.length; r++) {
-				var rung = subrdata.rungdata[r];
-				if (rung.matrixdata) {
-					for (var cellKey in rung.matrixdata) {
-						var cellValue = rung.matrixdata[cellKey]["value"];
-						if (cellValue) {
-							usedSymbols[cellValue] = true;
-						}
-					}
-				}
-			}
-			console.log('Used symbols:', Object.keys(usedSymbols).sort().join(', '));
-			
-			var missingSymbols = [];
-			for (var sym in usedSymbols) {
-				if (!window.LadSymbols[sym]) {
-					missingSymbols.push(sym);
-				}
-			}
-			if (missingSymbols.length > 0) {
-				console.error('MISSING SYMBOLS:', missingSymbols.join(', '));
-			} else {
-				console.log('All symbols found in LadSymbols');
-			}
-		}
+		// Initialise the master edit controller using the already-initialized global symbols
+		SubrControl = new SubrDispControl(document, {
+			LadSymbols: window.LadSymbols,
+			subroutinename: rungdata.subroutinename,
+			subrcomments: rungdata.subrcomments,
+			svgcontainer: document.getElementById('svgcontainer'),
+			laddercontainer: document.getElementById('laddercontainer'),
+			staticladderlist: document.getElementById('staticrunglist'),
+			svginprail: document.getElementById('svginprail'),
+			svginprail2: document.getElementById('svginprail2'),
+			svginprail3: document.getElementById('svginprail3'),
+			svgoutprail: document.getElementById('svgoutprail'),
+			svgoutpraildec: document.getElementById('svgoutpraildec'),
+			MatrixParams: window.MatrixParams,
+			RungHeightPad: window.RungHeightPad
+		});
 		
-		// Check which symbols have null symbolref
-		console.log('=== Checking LadSymbols for null entries ===');
-		var nullSymbols = [];
-		for (var symKey in window.LadSymbols) {
-			if (window.LadSymbols[symKey] && window.LadSymbols[symKey].symbolref === null) {
-				nullSymbols.push(symKey);
-			}
+		try {
+			SubrControl.CreateRungList(SubrData.GetSubrData());
+			console.log('Editing controller initialized successfully');
+		} catch (e) {
+			console.error('Error in CreateRungList:', e.message);
+			console.error('Stack:', e.stack);
+			throw e;
 		}
-		if (nullSymbols.length > 0) {
-			console.error('SYMBOLS WITH NULL SYMBOLREF:', nullSymbols.join(', '));
-		} else {
-			console.log('All symbols have valid symbolref');
-		}
-	} else {
-		console.log('LadSymbols not yet initialized (will be set up on page load)');
-	}
-	
-	try {
-		SubrControl.CreateRungList(SubrData.GetSubrData());
-	} catch (e) {
-		console.error('Error in CreateRungList:', e.message);
-		console.error('Stack:', e.stack);
-		
-		// Extract which symbol failed
-		var failedSymbol = null;
-		var rungData = SubrData.GetSubrData();
-		if (rungData && rungData.rungdata && rungData.rungdata.length > 0) {
-			var firstRung = rungData.rungdata[0];
-			if (firstRung.matrixdata) {
-				for (var cellKey in firstRung.matrixdata) {
-					var cellValue = firstRung.matrixdata[cellKey].value;
-					if (!window.LadSymbols[cellValue]) {
-						failedSymbol = cellValue;
-						break;
-					}
-				}
-			}
-		}
-		
-		if (failedSymbol) {
-			console.error('FIRST MISSING SYMBOL:', failedSymbol);
-		}
-		throw e;
 	}
 
 	// Editing of overall subroutine features.
