@@ -126,6 +126,9 @@ function MBEdit_pageinit() {
     
     // Create ladder display
     var rungList = document.getElementById('staticrunglist');
+    console.log('staticrunglist element found:', rungList ? 'YES' : 'NO');
+    console.log('window.SubrDispControl available:', window.SubrDispControl ? 'YES' : 'NO');
+    
     if (rungList && window.SubrDispControl) {
         try {
             // Get all required elements
@@ -137,10 +140,16 @@ function MBEdit_pageinit() {
             var svgoutprail = document.getElementById('svgoutprail');
             var svgoutpraildec = document.getElementById('svgoutpraildec');
             
-            console.log('svgcontainer:', svgcontainer ? 'found' : 'NOT FOUND');
-            console.log('laddercontainer:', laddercontainer ? 'found' : 'NOT FOUND');
-            console.log('svginprail:', svginprail ? 'found' : 'NOT FOUND');
-            console.log('svgoutprail:', svgoutprail ? 'found' : 'NOT FOUND');
+            console.log('=== SVG Elements Check ===');
+            console.log('svgcontainer:', svgcontainer ? 'found (' + svgcontainer.tagName + ')' : 'NOT FOUND');
+            console.log('laddercontainer:', laddercontainer ? 'found (' + laddercontainer.tagName + ')' : 'NOT FOUND');
+            console.log('svginprail:', svginprail ? 'found (' + svginprail.tagName + ')' : 'NOT FOUND');
+            console.log('svgoutprail:', svgoutprail ? 'found (' + svgoutprail.tagName + ')' : 'NOT FOUND');
+            
+            if (!svgcontainer || !laddercontainer || !svginprail) {
+                console.error('CRITICAL: Missing required SVG template elements!');
+                return;
+            }
             
             // Create the display controller
             var dispControl = new SubrDispControl(document, {
@@ -160,25 +169,46 @@ function MBEdit_pageinit() {
             });
             
             // Display each rung
+            console.log('Starting rung rendering...');
+            console.log('rungdata.rungdata type:', typeof rungdata.rungdata);
+            console.log('Is array:', Array.isArray(rungdata.rungdata));
+            console.log('rungdata.rungdata length:', rungdata.rungdata ? rungdata.rungdata.length : 'N/A');
+            
             if (rungdata.rungdata && Array.isArray(rungdata.rungdata)) {
                 console.log('Rendering ' + rungdata.rungdata.length + ' rungs');
+                console.log('staticrunglist element:', rungList);
+                console.log('dispControl object:', dispControl);
+                console.log('dispControl.CreateStaticRung:', dispControl.CreateStaticRung);
+                
+                var successCount = 0;
+                var errorCount = 0;
+                
                 rungdata.rungdata.forEach(function(rung, index) {
                     try {
-                        console.log('Rendering rung ' + index + ', type: ' + rung.rungtype);
+                        if (index < 3 || index === rungdata.rungdata.length - 1) {
+                            console.log('Rendering rung ' + index + ', type: ' + rung.rungtype + ', cells: ' + Object.keys(rung.matrixdata).length);
+                        }
                         var rungDiv = dispControl.CreateStaticRung(rung);
                         if (rungDiv) {
-                            console.log('Rung ' + index + ' rendered successfully');
+                            console.log('Rung ' + index + ' created, tag: ' + rungDiv.tagName);
                             rungList.appendChild(rungDiv);
+                            successCount++;
                         } else {
                             console.warn('CreateStaticRung returned null for rung ' + index);
+                            errorCount++;
                         }
                     } catch (e) {
-                        console.error('Error displaying rung ' + index + ':', e.message, e.stack);
+                        console.error('Error displaying rung ' + index + ':', e.message);
+                        console.error('Stack:', e.stack);
+                        errorCount++;
                     }
                 });
+                console.log('Rendering complete: ' + successCount + ' success, ' + errorCount + ' errors');
                 console.log('Total rungs appended:', rungList.children.length);
+                console.log('First child:', rungList.firstChild);
             } else {
                 console.error('rungdata.rungdata is not an array or is missing');
+                console.error('rungdata:', rungdata);
             }
         } catch (e) {
             console.error('Error initializing ladder display:', e);
@@ -4296,16 +4326,26 @@ function MBEdit_pageinit() {
 
 	// The subroutine data handler.
 	var SubrData = new LadSubrData();
-	// NOTE: SubrData import and old editing code disabled - using new static display renderer instead
-	// SubrData.ImportData(rungdata);
-	// //SubrData.ImportData(rungdata1000);
+	// Import the ladder data from the API into SubrData
+	SubrData.ImportData(rungdata);
 
-	// Ladder symbol definitions.
-	// var LadSymbols = new LadSymDefs(document);
-
-	// Initialise the master edit controller.
-	// var SubrControl = new SubrDispControl(document, LadSymbols);
-	// SubrControl.CreateRungList(SubrData.GetSubrData());
+	// Initialise the master edit controller using the already-initialized global symbols
+	var SubrControl = new SubrDispControl(document, {
+		LadSymbols: window.LadSymbols,
+		subroutinename: rungdata.subroutinename,
+		subrcomments: rungdata.subrcomments,
+		svgcontainer: document.getElementById('svgcontainer'),
+		laddercontainer: document.getElementById('laddercontainer'),
+		staticladderlist: document.getElementById('staticrunglist'),
+		svginprail: document.getElementById('svginprail'),
+		svginprail2: document.getElementById('svginprail2'),
+		svginprail3: document.getElementById('svginprail3'),
+		svgoutprail: document.getElementById('svgoutprail'),
+		svgoutpraildec: document.getElementById('svgoutpraildec'),
+		MatrixParams: window.MatrixParams,
+		RungHeightPad: window.RungHeightPad
+	});
+	SubrControl.CreateRungList(SubrData.GetSubrData());
 
 	// Editing of overall subroutine features.
 	var SubrEdit = new SubrEditLib(document, SubrData.GetSubrData());
