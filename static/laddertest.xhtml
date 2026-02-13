@@ -4296,15 +4296,16 @@ function MBEdit_pageinit() {
 
 	// The subroutine data handler.
 	var SubrData = new LadSubrData();
-	SubrData.ImportData(rungdata);
-	//SubrData.ImportData(rungdata1000);
+	// NOTE: SubrData import and old editing code disabled - using new static display renderer instead
+	// SubrData.ImportData(rungdata);
+	// //SubrData.ImportData(rungdata1000);
 
 	// Ladder symbol definitions.
-	var LadSymbols = new LadSymDefs(document);
+	// var LadSymbols = new LadSymDefs(document);
 
 	// Initialise the master edit controller.
-	var SubrControl = new SubrDispControl(document, LadSymbols);
-	SubrControl.CreateRungList(SubrData.GetSubrData());
+	// var SubrControl = new SubrDispControl(document, LadSymbols);
+	// SubrControl.CreateRungList(SubrData.GetSubrData());
 
 	// Editing of overall subroutine features.
 	var SubrEdit = new SubrEditLib(document, SubrData.GetSubrData());
