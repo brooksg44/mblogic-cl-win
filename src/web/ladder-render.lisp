@@ -1107,7 +1107,7 @@
 
 (defun cell-to-js-format (cell)
   "Convert ladder cell to JS format as alist: ((value . \"noc\") (addr . (\"X1\")))"
-  (let ((symbol (cl-symbol-to-js-symbol (ladder-cell-symbol cell)))
+  (let ((symbol (ladder-cell-symbol cell))  ; Use symbol directly - all symbols now defined in JS ladsymbols.js
         (addrs (ladder-cell-addresses cell)))
     (list (cons :value symbol)
           (cons :addr (if addrs addrs (list ""))))))  ; Branch symbols get [""]

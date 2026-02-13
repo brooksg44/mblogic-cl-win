@@ -179,22 +179,39 @@ function LadSymDefs(docref) {
 
 
 		// Input branches.
-		"brancht" : {"symbolref" : this.docref.getElementById("brancht"),
+		// Top corners (fork start or merge end)
+		"branchttl" : {"symbolref" : this.docref.getElementById("branchttl"),
 				"addredit" : "addresseditnone",  
 				"defaultaddr" : [], "addrref" : [], "type" : "input"},
+		"branchttr" : {"symbolref" : this.docref.getElementById("branchttr"),
+				"addredit" : "addresseditnone",  
+				"defaultaddr" : [], "addrref" : [], "type" : "input"},
+		// Middle T-junctions
+		"branchtl" : {"symbolref" : this.docref.getElementById("branchtl"),
+				"addredit" : "addresseditnone", 
+				"defaultaddr" : [], "addrref" : [], "type" : "input"},
+		"branchtr" : {"symbolref" : this.docref.getElementById("branchtr"),
+				"addredit" : "addresseditnone", 
+				"defaultaddr" : [], "addrref" : [], "type" : "input"},
+		// Bottom corners (fork end or merge start)
 		"branchl" : {"symbolref" : this.docref.getElementById("branchl"),
 				"addredit" : "addresseditnone", 
 				"defaultaddr" : [], "addrref" : [], "type" : "input"},
 		"branchr" : {"symbolref" : this.docref.getElementById("branchr"),
 				"addredit" : "addresseditnone", 
 				"defaultaddr" : [], "addrref" : [], "type" : "input"},
+		// Vertical bars (no junction)
+		"vbarr" : {"symbolref" : this.docref.getElementById("vbarr"),
+				"addredit" : "addresseditnone", 
+				"defaultaddr" : [], "addrref" : [], "type" : "input"},
+		"vbarl" : {"symbolref" : this.docref.getElementById("vbarl"),
+				"addredit" : "addresseditnone", 
+				"defaultaddr" : [], "addrref" : [], "type" : "input"},
+		// Special/legacy symbols
+		"brancht" : {"symbolref" : this.docref.getElementById("brancht"),
+				"addredit" : "addresseditnone",  
+				"defaultaddr" : [], "addrref" : [], "type" : "input"},
 		"branchx" : {"symbolref" : this.docref.getElementById("branchx"),
-				"addredit" : "addresseditnone", 
-				"defaultaddr" : [], "addrref" : [], "type" : "input"},
-		"branchtl" : {"symbolref" : this.docref.getElementById("branchtl"),
-				"addredit" : "addresseditnone", 
-				"defaultaddr" : [], "addrref" : [], "type" : "input"},
-		"branchtr" : {"symbolref" : this.docref.getElementById("branchtr"),
 				"addredit" : "addresseditnone", 
 				"defaultaddr" : [], "addrref" : [], "type" : "input"},
 		"branchtu" : {"symbolref" : this.docref.getElementById("branchtu"),
