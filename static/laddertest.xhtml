@@ -4387,49 +4387,53 @@ function MBEdit_pageinit() {
 		RungHeightPad: window.RungHeightPad
 	});
 	
-	// Debug: Log which symbols are missing
-	console.log('=== Checking for missing symbols ===');
-	var subrdata = SubrData.GetSubrData();
-	if (subrdata && subrdata.rungdata) {
-		var usedSymbols = {};
-		for (var r = 0; r < subrdata.rungdata.length; r++) {
-			var rung = subrdata.rungdata[r];
-			if (rung.matrixdata) {
-				for (var cellKey in rung.matrixdata) {
-					var cellValue = rung.matrixdata[cellKey]["value"];
-					if (cellValue) {
-						usedSymbols[cellValue] = true;
+	// Debug: Log which symbols are missing (only if LadSymbols has been initialized)
+	if (window.LadSymbols) {
+		console.log('=== Checking for missing symbols ===');
+		var subrdata = SubrData.GetSubrData();
+		if (subrdata && subrdata.rungdata) {
+			var usedSymbols = {};
+			for (var r = 0; r < subrdata.rungdata.length; r++) {
+				var rung = subrdata.rungdata[r];
+				if (rung.matrixdata) {
+					for (var cellKey in rung.matrixdata) {
+						var cellValue = rung.matrixdata[cellKey]["value"];
+						if (cellValue) {
+							usedSymbols[cellValue] = true;
+						}
 					}
 				}
 			}
-		}
-		console.log('Used symbols:', Object.keys(usedSymbols).sort().join(', '));
-		
-		var missingSymbols = [];
-		for (var sym in usedSymbols) {
-			if (!window.LadSymbols[sym]) {
-				missingSymbols.push(sym);
+			console.log('Used symbols:', Object.keys(usedSymbols).sort().join(', '));
+			
+			var missingSymbols = [];
+			for (var sym in usedSymbols) {
+				if (!window.LadSymbols[sym]) {
+					missingSymbols.push(sym);
+				}
+			}
+			if (missingSymbols.length > 0) {
+				console.error('MISSING SYMBOLS:', missingSymbols.join(', '));
+			} else {
+				console.log('All symbols found in LadSymbols');
 			}
 		}
-		if (missingSymbols.length > 0) {
-			console.error('MISSING SYMBOLS:', missingSymbols.join(', '));
+		
+		// Check which symbols have null symbolref
+		console.log('=== Checking LadSymbols for null entries ===');
+		var nullSymbols = [];
+		for (var symKey in window.LadSymbols) {
+			if (window.LadSymbols[symKey] && window.LadSymbols[symKey].symbolref === null) {
+				nullSymbols.push(symKey);
+			}
+		}
+		if (nullSymbols.length > 0) {
+			console.error('SYMBOLS WITH NULL SYMBOLREF:', nullSymbols.join(', '));
 		} else {
-			console.log('All symbols found in LadSymbols');
+			console.log('All symbols have valid symbolref');
 		}
-	}
-	
-	// Check which symbols have null symbolref
-	console.log('=== Checking LadSymbols for null entries ===');
-	var nullSymbols = [];
-	for (var symKey in window.LadSymbols) {
-		if (window.LadSymbols[symKey] && window.LadSymbols[symKey].symbolref === null) {
-			nullSymbols.push(symKey);
-		}
-	}
-	if (nullSymbols.length > 0) {
-		console.error('SYMBOLS WITH NULL SYMBOLREF:', nullSymbols.join(', '));
 	} else {
-		console.log('All symbols have valid symbolref');
+		console.log('LadSymbols not yet initialized (will be set up on page load)');
 	}
 	
 	try {
