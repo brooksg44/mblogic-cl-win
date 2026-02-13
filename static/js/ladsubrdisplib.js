@@ -195,10 +195,19 @@ function SubrDispControl(docref, ladsymbols) {
 
 		// Create the instruction matrix.
 		var instrCount = 0;
+		var symbolNotFound = [];
 		for (var i in instrmatrix) {
 			instrCount++;
 			// Get the ladder symbol.
 			var symbolType = instrmatrix[i]["value"];
+			
+			// DEBUG: Check if symbol exists
+			if (!this.ladsymbols[symbolType]) {
+				console.log('  WARNING: Symbol not found: ' + symbolType);
+				symbolNotFound.push(symbolType);
+				continue;  // Skip this symbol
+			}
+			
 			var ladsym = this.ladsymbols[symbolType]["symbolref"];
 			var instrsymb = ladsym.cloneNode(true);
 			instrsymb.removeAttribute("id");
@@ -250,6 +259,9 @@ function SubrDispControl(docref, ladsymbols) {
 
 		}
 		console.log('  Total instructions placed: ' + instrCount + ' maxrow=' + maxrow + ' maxinpcol=' + maxinpcol);
+		if (symbolNotFound.length > 0) {
+			console.log('  Symbols not found: ' + symbolNotFound.join(', '));
+		}
 
 		// Add the joining power rails.
 		var inprail = this.svginprail.cloneNode(true);
