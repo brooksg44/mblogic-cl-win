@@ -543,7 +543,8 @@ function LadSymDefs(docref) {
 	this.staticladderlist = this.docref.getElementById("staticrunglist");
 
 	// Power rail to join inputs to outputs.
-	this.svginprail = this.docref.getElementById("svginprail1");
+	// Try new template names first, fall back to old names for backward compatibility
+	this.svginprail = this.docref.getElementById("svginprail") || this.docref.getElementById("svginprail1");
 	// Power rail to join inputs to outputs (second optional rail).
 	this.svginprail2 = this.docref.getElementById("svginprail2");
 	// Power rail to join inputs to outputs (third optional rail).
@@ -553,7 +554,7 @@ function LadSymDefs(docref) {
 	this.svgoutprail = this.docref.getElementById("svgoutprail");
 	
 	// Decoration for output rail.
-	this.svgoutpraildec = this.docref.getElementById("svgoutraildecoration");
+	this.svgoutpraildec = this.docref.getElementById("svgoutpraildec") || this.docref.getElementById("svgoutraildecoration");
 
 	// ##################################################################
 
