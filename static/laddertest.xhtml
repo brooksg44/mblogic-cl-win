@@ -4407,11 +4407,45 @@ function MBEdit_pageinit() {
 		}
 	}
 	
+	// Check which symbols have null symbolref
+	console.log('=== Checking LadSymbols for null entries ===');
+	var nullSymbols = [];
+	for (var symKey in window.LadSymbols) {
+		if (window.LadSymbols[symKey] && window.LadSymbols[symKey].symbolref === null) {
+			nullSymbols.push(symKey);
+		}
+	}
+	if (nullSymbols.length > 0) {
+		console.error('SYMBOLS WITH NULL SYMBOLREF:', nullSymbols.join(', '));
+	} else {
+		console.log('All symbols have valid symbolref');
+	}
+	
 	try {
 		SubrControl.CreateRungList(SubrData.GetSubrData());
 	} catch (e) {
 		console.error('Error in CreateRungList:', e.message);
 		console.error('Stack:', e.stack);
+		
+		// Extract which symbol failed
+		var failedSymbol = null;
+		var rungData = SubrData.GetSubrData();
+		if (rungData && rungData.rungdata && rungData.rungdata.length > 0) {
+			var firstRung = rungData.rungdata[0];
+			if (firstRung.matrixdata) {
+				for (var cellKey in firstRung.matrixdata) {
+					var cellValue = firstRung.matrixdata[cellKey].value;
+					if (!window.LadSymbols[cellValue]) {
+						failedSymbol = cellValue;
+						break;
+					}
+				}
+			}
+		}
+		
+		if (failedSymbol) {
+			console.error('FIRST MISSING SYMBOL:', failedSymbol);
+		}
 		throw e;
 	}
 
