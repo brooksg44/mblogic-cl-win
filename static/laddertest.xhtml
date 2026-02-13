@@ -94,17 +94,28 @@ function MBEdit_pageinit() {
     try {
         if (!window.LadSymbols) {
             console.log('Initializing LadSymDefs...');
+            console.log('LadSymDefs constructor:', typeof LadSymDefs);
+            
             var ladsymdefsinstance = new LadSymDefs(document);
+            console.log('LadSymDefs instance created:', typeof ladsymdefsinstance);
+            console.log('instance.LadSymbols type:', typeof ladsymdefsinstance.LadSymbols);
+            console.log('instance.LadSymbols keys:', Object.keys(ladsymdefsinstance.LadSymbols || {}).length);
+            
             window.LadSymbols = ladsymdefsinstance.LadSymbols;
             window.MatrixParams = ladsymdefsinstance.MatrixParams;
             window.RungHeightPad = ladsymdefsinstance.RungHeightPad;
+            
+            console.log('window.LadSymbols assigned:', typeof window.LadSymbols);
             console.log('LadSymbols initialized successfully');
-            console.log('Available symbols:', Object.keys(window.LadSymbols).length);
-            console.log('Sample symbols:', Object.keys(window.LadSymbols).slice(0, 5).join(', '));
+            console.log('Available symbols:', Object.keys(window.LadSymbols || {}).length);
+            console.log('Sample symbols:', Object.keys(window.LadSymbols || {}).slice(0, 5).join(', '));
+        } else {
+            console.log('window.LadSymbols already initialized, symbols:', Object.keys(window.LadSymbols).length);
         }
     } catch (e) {
         console.error('Error initializing LadSymbols:', e.message);
         console.error('Stack:', e.stack);
+        console.error('LadSymDefs available:', typeof LadSymDefs);
         return;
     }
     
