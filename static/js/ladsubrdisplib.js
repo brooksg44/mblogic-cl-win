@@ -289,6 +289,10 @@ function SubrDispControl(docref, ladsymbols) {
 			var svgheight = (Math.max(inpheight, outpheight) + this.RungHeightPad)
 		}
 		container.setAttribute("height", svgheight + "px");
+		
+		// Set viewBox to match the height so content scales properly
+		container.setAttribute("viewBox", "0 0 1000 " + Math.max(svgheight, 200));
+		container.setAttribute("preserveAspectRatio", "xMidYMid meet");
 
 		// Add the rung to the SVG container. 
 		container.appendChild(ladcontainer);
