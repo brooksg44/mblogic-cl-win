@@ -4398,6 +4398,9 @@ function MBEdit_pageinit() {
 		try {
 			SubrControl.CreateRungList(SubrData.GetSubrData());
 			console.log('Editing controller initialized successfully');
+			
+			// Initialize editing features now that SubrData is ready
+			InitializeEditingFeatures();
 		} catch (e) {
 			console.error('Error in CreateRungList:', e.message);
 			console.error('Stack:', e.stack);
@@ -4405,11 +4408,16 @@ function MBEdit_pageinit() {
 		}
 	}
 
-	// Editing of overall subroutine features.
-	var SubrEdit = new SubrEditLib(document, SubrData.GetSubrData());
-
-	// The current rung being edited. 
+	// Editing of overall subroutine features - initialized only if editing mode is enabled
+	var SubrEdit = null;
 	var CurrentRung = null;
+	
+	// Function to initialize editing features (called after InitializeEditingController)
+	function InitializeEditingFeatures() {
+		if (SubrData) {
+			SubrEdit = new SubrEditLib(document, SubrData.GetSubrData());
+		}
+	}
 
 
 	// Enter the new subroutine comments which the user has
