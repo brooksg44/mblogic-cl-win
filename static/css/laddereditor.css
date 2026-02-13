@@ -177,8 +177,7 @@ body {
 }
 
 #staticrunglist svg rect {
-	stroke: black;
-	stroke-width: 1;
+	stroke: none;
 	fill: none;
 }
 
