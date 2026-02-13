@@ -4388,7 +4388,10 @@ function MBEdit_pageinit() {
 	});
 	
 	// Debug: Log which symbols are missing (only if LadSymbols has been initialized)
-	if (window.LadSymbols) {
+	console.log('window.LadSymbols type:', typeof window.LadSymbols);
+	console.log('window.LadSymbols value:', window.LadSymbols);
+	
+	if (window.LadSymbols && typeof window.LadSymbols === 'object') {
 		console.log('=== Checking for missing symbols ===');
 		var subrdata = SubrData.GetSubrData();
 		if (subrdata && subrdata.rungdata) {
