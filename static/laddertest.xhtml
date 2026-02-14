@@ -100,7 +100,9 @@ function MBEdit_pageinit() {
             console.log('LadSymDefs instance created:', typeof ladsymdefsinstance);
             console.log('instance.LadSymbols type:', typeof ladsymdefsinstance.LadSymbols);
             console.log('instance.LadSymbols keys:', Object.keys(ladsymdefsinstance.LadSymbols || {}).length);
-            
+
+            // Store the full ladsymbols instance for use by LadderEditor
+            window.LadSymbolsInstance = ladsymdefsinstance;
             window.LadSymbols = ladsymdefsinstance.LadSymbols;
             window.MatrixParams = ladsymdefsinstance.MatrixParams;
             window.RungHeightPad = ladsymdefsinstance.RungHeightPad;
@@ -4432,16 +4434,8 @@ function MBEdit_pageinit() {
 
 		// Ladder editor. This needs to be a global variable so it
 		// can be called by other editing functions.
-	 	// Create a complete ladsymbols object for LadderEditor with all required properties
-	var completeSymbols = {
-		LadSymbols: window.LadSymbols,
-		MatrixParams: window.MatrixParams,
-		RungHeightPad: window.RungHeightPad,
-		RungOutputTypes: [],
-		InstructionMasks: {},
-		addressinputs: {}
-	};
- 	LadEditor = new LadderEditor(document, completeSymbols, rung, SubrData.GetRungData(rung));
+	 	// Use the full LadSymbolsInstance which has all required properties for LadderEditor
+ 	LadEditor = new LadderEditor(document, window.LadSymbolsInstance, rung, SubrData.GetRungData(rung));
 		// Editor initialisation.
 	 	LadEditor.InitEditRung();
 
