@@ -8,22 +8,27 @@ var CurrentSubroutine = "main";
 // Initialize on page load
 document.addEventListener("DOMContentLoaded", function() {
     console.log("Ladder Monitor: Initializing...");
-    
+
     // Initialize the display library
-    LadDisplay = new LadSubrDisp(document);
-    
+    // First create the symbols definitions from the document
+    var ladsymbols = new LadSymDefs(document);
+    // Then create the display control with the symbols
+    LadDisplay = new SubrDispControl(document, ladsymbols);
+
+    console.log("Display control initialized");
+
     // Load subroutine list
     loadSubroutineList();
-    
+
     // Load initial ladder diagram
     loadLadderDiagram("main");
-    
+
     // Setup event handlers
     document.getElementById("subr-select").addEventListener("change", function(e) {
         CurrentSubroutine = e.target.value;
         loadLadderDiagram(CurrentSubroutine);
     });
-    
+
     document.getElementById("btn-start").addEventListener("click", startPLC);
     document.getElementById("btn-stop").addEventListener("click", stopPLC);
     document.getElementById("btn-step").addEventListener("click", stepPLC);
