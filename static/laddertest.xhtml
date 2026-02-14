@@ -4373,15 +4373,8 @@ function MBEdit_pageinit() {
 						if (index < 3 || index === rungdata.rungdata.length - 1) {
 							console.log('Rendering rung ' + index + ', type: ' + rung.rungtype + ', cells: ' + Object.keys(rung.matrixdata).length);
 						}
-						var rungDiv = SubrControl.CreateStaticRung(rung);
-						if (rungDiv) {
-							console.log('Rung ' + index + ' created, tag: ' + rungDiv.tagName + ', width=' + rungDiv.getAttribute('width') + ', height=' + rungDiv.getAttribute('height') + ', viewBox=' + rungDiv.getAttribute('viewBox'));
-							rungList.appendChild(rungDiv);
-							successCount++;
-						} else {
-							console.warn('CreateStaticRung returned null for rung ' + index);
-							errorCount++;
-						}
+						// Use CreateSingleRung instead of CreateStaticRung to get full HTML with rung numbers
+						SubrControl.CreateSingleRung(rung, index, false, 0);
 					} catch (e) {
 						console.error('Error displaying rung ' + index + ':', e.message);
 						console.error('Stack:', e.stack);
