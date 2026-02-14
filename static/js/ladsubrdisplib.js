@@ -550,12 +550,20 @@ function SubrDispControl(docref, ladsymbols) {
 	function _HideStaticRung(rungref) {
 		// Hide the static rung data.
 		var rung = this.docref.getElementById("staticrung" + rungref);
-		// We have to do this via a class for some reason.
-		rung.setAttribute("class", "runghide");
+		if (rung) {
+			// We have to do this via a class for some reason.
+			rung.setAttribute("class", "runghide");
+		} else {
+			console.warn('_HideStaticRung: Could not find element with id="staticrung' + rungref + '"');
+		}
 
 		// Show the address edit area.
 		var addredit = this.docref.getElementById("rungaddredit" + rungref);
-		addredit.setAttribute("class", "rungshow");
+		if (addredit) {
+			addredit.setAttribute("class", "rungshow");
+		} else {
+			console.warn('_HideStaticRung: Could not find element with id="rungaddredit' + rungref + '"');
+		}
 	}
 	this.HideStaticRung = _HideStaticRung;
 
@@ -567,11 +575,19 @@ function SubrDispControl(docref, ladsymbols) {
 	function _ShowStaticRung(rungref) {
 		// Show the static rung data.
 		var staticrung = this.docref.getElementById("staticrung" + rungref);
-		staticrung.setAttribute("class", "rungshow");
+		if (staticrung) {
+			staticrung.setAttribute("class", "rungshow");
+		} else {
+			console.warn('_ShowStaticRung: Could not find element with id="staticrung' + rungref + '"');
+		}
 
 		// Hide the address edit area.
 		var addredit = this.docref.getElementById("rungaddredit" + rungref);
-		addredit.setAttribute("class", "runghide");
+		if (addredit) {
+			addredit.setAttribute("class", "runghide");
+		} else {
+			console.warn('_ShowStaticRung: Could not find element with id="rungaddredit' + rungref + '"');
+		}
 	}
 	this.ShowStaticRung = _ShowStaticRung;
 
@@ -583,11 +599,13 @@ function SubrDispControl(docref, ladsymbols) {
 	function _DeleteRung(rungref) {
 		var rung = this.docref.getElementById("rung" + rungref);
 		// If there are any existing elements.
-		if (rung.hasChildNodes()) {
+		if (rung && rung.hasChildNodes()) {
 			while (rung.firstChild) {
 				rung.removeChild(rung.firstChild);
 			}
-		} 
+		} else if (!rung) {
+			console.warn('_DeleteRung: Could not find element with id="rung' + rungref + '"');
+		}
 	}
 	this.DeleteRung = _DeleteRung;
 
