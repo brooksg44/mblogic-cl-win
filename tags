@@ -4,496 +4,506 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
-"AND"	src\instructions.lisp	/^(define-instruction "AND"$/;"	f
-"ANDE"	src\instructions.lisp	/^(define-instruction "ANDE"$/;"	f
-"ANDGE"	src\instructions.lisp	/^(define-instruction "ANDGE"$/;"	f
-"ANDGT"	src\instructions.lisp	/^(define-instruction "ANDGT"$/;"	f
-"ANDLE"	src\instructions.lisp	/^(define-instruction "ANDLE"$/;"	f
-"ANDLT"	src\instructions.lisp	/^(define-instruction "ANDLT"$/;"	f
-"ANDN"	src\instructions.lisp	/^(define-instruction "ANDN"$/;"	f
-"ANDND"	src\instructions.lisp	/^(define-instruction "ANDND"$/;"	f
-"ANDNE"	src\instructions.lisp	/^(define-instruction "ANDNE"$/;"	f
-"ANDPD"	src\instructions.lisp	/^(define-instruction "ANDPD"$/;"	f
-"ANDSTR"	src\instructions.lisp	/^(define-instruction "ANDSTR"$/;"	f
-"CALL"	src\instructions.lisp	/^(define-instruction "CALL"$/;"	f
-"CNTD"	src\instructions.lisp	/^(define-instruction "CNTD"$/;"	f
-"CNTU"	src\instructions.lisp	/^(define-instruction "CNTU"$/;"	f
-"COPY"	src\instructions.lisp	/^(define-instruction "COPY"$/;"	f
-"CPYBLK"	src\instructions.lisp	/^(define-instruction "CPYBLK"$/;"	f
-"END"	src\instructions.lisp	/^(define-instruction "END"$/;"	f
-"ENDC"	src\instructions.lisp	/^(define-instruction "ENDC"$/;"	f
-"FILL"	src\instructions.lisp	/^(define-instruction "FILL"$/;"	f
-"FINDEQ"	src\instructions.lisp	/^(define-instruction "FINDEQ"$/;"	f
-"FINDGE"	src\instructions.lisp	/^(define-instruction "FINDGE"$/;"	f
-"FINDGT"	src\instructions.lisp	/^(define-instruction "FINDGT"$/;"	f
-"FINDIEQ"	src\instructions.lisp	/^(define-instruction "FINDIEQ"$/;"	f
-"FINDIGE"	src\instructions.lisp	/^(define-instruction "FINDIGE"$/;"	f
-"FINDIGT"	src\instructions.lisp	/^(define-instruction "FINDIGT"$/;"	f
-"FINDILE"	src\instructions.lisp	/^(define-instruction "FINDILE"$/;"	f
-"FINDILT"	src\instructions.lisp	/^(define-instruction "FINDILT"$/;"	f
-"FINDINE"	src\instructions.lisp	/^(define-instruction "FINDINE"$/;"	f
-"FINDLE"	src\instructions.lisp	/^(define-instruction "FINDLE"$/;"	f
-"FINDLT"	src\instructions.lisp	/^(define-instruction "FINDLT"$/;"	f
-"FINDNE"	src\instructions.lisp	/^(define-instruction "FINDNE"$/;"	f
-"FOR"	src\instructions.lisp	/^(define-instruction "FOR"$/;"	f
-"MATHDEC"	src\instructions.lisp	/^(define-instruction "MATHDEC"$/;"	f
-"MATHHEX"	src\instructions.lisp	/^(define-instruction "MATHHEX"$/;"	f
-"NETWORK"	src\instructions.lisp	/^(define-instruction "NETWORK"$/;"	f
-"NEXT"	src\instructions.lisp	/^(define-instruction "NEXT"$/;"	f
-"OR"	src\instructions.lisp	/^(define-instruction "OR"$/;"	f
-"ORE"	src\instructions.lisp	/^(define-instruction "ORE"$/;"	f
-"ORGE"	src\instructions.lisp	/^(define-instruction "ORGE"$/;"	f
-"ORGT"	src\instructions.lisp	/^(define-instruction "ORGT"$/;"	f
-"ORLE"	src\instructions.lisp	/^(define-instruction "ORLE"$/;"	f
-"ORLT"	src\instructions.lisp	/^(define-instruction "ORLT"$/;"	f
-"ORN"	src\instructions.lisp	/^(define-instruction "ORN"$/;"	f
-"ORND"	src\instructions.lisp	/^(define-instruction "ORND"$/;"	f
-"ORNE"	src\instructions.lisp	/^(define-instruction "ORNE"$/;"	f
-"ORPD"	src\instructions.lisp	/^(define-instruction "ORPD"$/;"	f
-"ORSTR"	src\instructions.lisp	/^(define-instruction "ORSTR"$/;"	f
-"OUT"	src\instructions.lisp	/^(define-instruction "OUT"$/;"	f
-"PACK"	src\instructions.lisp	/^(define-instruction "PACK"$/;"	f
-"PD"	src\instructions.lisp	/^(define-instruction "PD"$/;"	f
-"RST"	src\instructions.lisp	/^(define-instruction "RST"$/;"	f
-"RT"	src\instructions.lisp	/^(define-instruction "RT"$/;"	f
-"RTC"	src\instructions.lisp	/^(define-instruction "RTC"$/;"	f
-"SBR"	src\instructions.lisp	/^(define-instruction "SBR"$/;"	f
-"SET"	src\instructions.lisp	/^(define-instruction "SET"$/;"	f
-"SHFRG"	src\instructions.lisp	/^(define-instruction "SHFRG"$/;"	f
-"STR"	src\instructions.lisp	/^(define-instruction "STR"$/;"	f
-"STRE"	src\instructions.lisp	/^(define-instruction "STRE"$/;"	f
-"STRGE"	src\instructions.lisp	/^(define-instruction "STRGE"$/;"	f
-"STRGT"	src\instructions.lisp	/^(define-instruction "STRGT"$/;"	f
-"STRLE"	src\instructions.lisp	/^(define-instruction "STRLE"$/;"	f
-"STRLT"	src\instructions.lisp	/^(define-instruction "STRLT"$/;"	f
-"STRN"	src\instructions.lisp	/^(define-instruction "STRN"$/;"	f
-"STRND"	src\instructions.lisp	/^(define-instruction "STRND"$/;"	f
-"STRNE"	src\instructions.lisp	/^(define-instruction "STRNE"$/;"	f
-"STRPD"	src\instructions.lisp	/^(define-instruction "STRPD"$/;"	f
-"SUM"	src\instructions.lisp	/^(define-instruction "SUM"$/;"	f
-"TMR"	src\instructions.lisp	/^(define-instruction "TMR"$/;"	f
-"TMRA"	src\instructions.lisp	/^(define-instruction "TMRA"$/;"	f
-"TMROFF"	src\instructions.lisp	/^(define-instruction "TMROFF"$/;"	f
-"UDC"	src\instructions.lisp	/^(define-instruction "UDC"$/;"	f
-"UNPACK"	src\instructions.lisp	/^(define-instruction "UNPACK"$/;"	f
-#:mblogic-cl	src\package.lisp	/^(defpackage #:mblogic-cl$/;"	f
-#:mblogic-cl-test	test\test-suite.lisp	/^(defpackage #:mblogic-cl-test$/;"	f
-#:mblogic-cl-web	src\web\package.lisp	/^(defpackage #:mblogic-cl-web$/;"	f
-*any-addr-pattern*	src\instructions.lisp	/^(defparameter *any-addr-pattern*$/;"	f
-*bool-addr-pattern*	src\instructions.lisp	/^(defparameter *bool-addr-pattern*$/;"	f
-*branch-l*	src\web\ladder-render.lisp	/^(defparameter *branch-l*   "branchl"     "Bottom-left corner: └ - bottom of merge")$/;"	f
-*branch-r*	src\web\ladder-render.lisp	/^(defparameter *branch-r*   "branchr"     "Bottom-right corner: ┘ - bottom of branch fork")$/;"	f
-*branch-symbols*	src\web\ladder-render.lisp	/^(defparameter *branch-symbols*$/;"	f
-*branch-tl*	src\web\ladder-render.lisp	/^(defparameter *branch-tl*  "branchtl"    "Middle-left T: ├ - middle rows of merge")$/;"	f
-*branch-tr*	src\web\ladder-render.lisp	/^(defparameter *branch-tr*  "branchtr"    "Middle-right T: ┤ - middle rows of branch fork")$/;"	f
-*branch-ttl*	src\web\ladder-render.lisp	/^(defparameter *branch-ttl* "branchttl"   "Top-left corner: ┌ - top of merge")$/;"	f
-*branch-ttr*	src\web\ladder-render.lisp	/^(defparameter *branch-ttr* "branchttr"   "Top-right corner: ┐ - top of branch fork")$/;"	f
-*float-addr-pattern*	src\instructions.lisp	/^(defparameter *float-addr-pattern*$/;"	f
-*hbar*	src\web\ladder-render.lisp	/^(defparameter *hbar*       "hbar"        "Horizontal bar: ─ - wire segment")$/;"	f
-*hex-constant-pattern*	src\instructions.lisp	/^(defparameter *hex-constant-pattern*$/;"	f
-*instruction-set*	src\instructions.lisp	/^(defvar *instruction-set* (make-hash-table :test 'equal)$/;"	f
-*ladsymb-to-svg*	src\web\ladder-render.lisp	/^(defparameter *ladsymb-to-svg*$/;"	f
-*math-data-table*	src\math-lib.lisp	/^(defvar *math-data-table* nil "Current data table for variable lookup")$/;"	f
-*math-hex-mode*	src\math-lib.lisp	/^(defvar *math-hex-mode* nil "If T, use hex\/bitwise mode")$/;"	f
-*math-tokens*	src\math-lib.lisp	/^(defvar *math-tokens* nil "Current token stream")$/;"	f
-*numeric-pattern*	src\instructions.lisp	/^(defparameter *numeric-pattern*$/;"	f
-*plc-interpreter*	src\web\server.lisp	/^(defvar *plc-interpreter* nil$/;"	f
-*plc-lock*	src\web\server.lisp	/^(defvar *plc-lock* (bt:make-lock "plc-lock")$/;"	f
-*plc-thread*	src\web\server.lisp	/^(defvar *plc-thread* nil$/;"	f
-*static-directory*	src\web\server.lisp	/^(defvar *static-directory* nil$/;"	f
-*string-addr-pattern*	src\instructions.lisp	/^(defparameter *string-addr-pattern*$/;"	f
-*vbar-l*	src\web\ladder-render.lisp	/^(defparameter *vbar-l*     "vbarl"       "Vertical bar left: │ - no junction (left side)")$/;"	f
-*vbar-r*	src\web\ladder-render.lisp	/^(defparameter *vbar-r*     "vbarr"       "Vertical bar right: │ - no junction (right side)")$/;"	f
-*vertical-branch-symbols*	src\web\ladder-render.lisp	/^(defparameter *vertical-branch-symbols*$/;"	f
-*web-acceptor*	src\web\server.lisp	/^(defvar *web-acceptor* nil$/;"	f
-*word-addr-pattern*	src\instructions.lisp	/^(defparameter *word-addr-pattern*$/;"	f
-add-error	src\parser.lisp	/^(defmethod add-error ((parser il-parser) message &optional line-text)$/;"	f
-add-warning	src\parser.lisp	/^(defmethod add-warning ((parser il-parser) message)$/;"	f
-address-count	src\table-ops.lisp	/^(defun address-count (start-addr end-addr)$/;"	f
-address-index	src\table-ops.lisp	/^(defun address-index (addr)$/;"	f
-address-prefix	src\table-ops.lisp	/^(defun address-prefix (addr)$/;"	f
-alist-to-json	src\web\json-api.lisp	/^(defun alist-to-json (alist)$/;"	f
-all-tests	test\test-suite.lisp	/^(def-suite all-tests$/;"	f
-and-instruction-p	src\web\ladder-render.lisp	/^(defun and-instruction-p (opcode)$/;"	f
-andstr-instruction-p	src\web\ladder-render.lisp	/^(defun andstr-instruction-p (opcode)$/;"	f
-any-addr-p	src\instructions.lisp	/^(defun any-addr-p (str)$/;"	f
-append-cell-to-matrix	src\web\ladder-render.lisp	/^(defun append-cell-to-matrix (cell matrix)$/;"	f
-assert-bool-equal	test\test-suite.lisp	/^(defun assert-bool-equal (interp addr expected &optional message)$/;"	f
-assert-float-near	test\test-suite.lisp	/^(defun assert-float-near (interp addr expected &optional (tolerance 0.001) message)$/;"	f
-assert-word-equal	test\test-suite.lisp	/^(defun assert-word-equal (interp addr expected &optional message)$/;"	f
-average-scan-time	src\interpreter.lisp	/^(defmethod average-scan-time ((stats scan-statistics))$/;"	f
-bcd-to-int	src\math-lib.lisp	/^(defun bcd-to-int (bcd)$/;"	f
-blank-line-p	src\parser.lisp	/^(defun blank-line-p (line)$/;"	f
-block-instruction-p	src\web\ladder-render.lisp	/^(defun block-instruction-p (opcode)$/;"	f
-bool-addr-p	src\instructions.lisp	/^(defun bool-addr-p (str)$/;"	f
-branch-end-p	src\web\ladder-render.lisp	/^(defun branch-end-p (opcode)$/;"	f
-branch-start-p	src\web\ladder-render.lisp	/^(defun branch-start-p (opcode)$/;"	f
-branch-symbol-p	src\web\ladder-render.lisp	/^(defun branch-symbol-p (symbol)$/;"	f
-call-frame	src\interpreter.lisp	/^(defclass call-frame ()$/;"	f
-cell-to-js-format	src\web\ladder-render.lisp	/^(defun cell-to-js-format (cell)$/;"	f
-cell-to-matrixdata	src\web\ladder-render.lisp	/^(defun cell-to-matrixdata (cell)$/;"	f
-cell-to-plist	src\web\ladder-render.lisp	/^(defun cell-to-plist (cell)$/;"	f
-cl-symbol-to-js-symbol	src\web\ladder-render.lisp	/^(defun cl-symbol-to-js-symbol (symbol)$/;"	f
-close-branch-block	src\web\ladder-render.lisp	/^(defun close-branch-block (matrix)$/;"	f
-cntd-execute	src\timer-counter.lisp	/^(defun cntd-execute (data-table counter-addr count-input reset preset)$/;"	f
-cntu-execute	src\timer-counter.lisp	/^(defun cntu-execute (data-table counter-addr count-input reset preset)$/;"	f
-coil-instruction-p	src\web\ladder-render.lisp	/^(defun coil-instruction-p (opcode)$/;"	f
-collect-comments	src\parser.lisp	/^(defmethod collect-comments ((parser il-parser))$/;"	f
-comment-line-p	src\parser.lisp	/^(defun comment-line-p (line)$/;"	f
-compile-and	src\compiler.lisp	/^(defun compile-and (params)$/;"	f
-compile-ande	src\compiler.lisp	/^(defun compile-ande (params) (compile-compare :eq params :and))$/;"	f
-compile-andge	src\compiler.lisp	/^(defun compile-andge (params) (compile-compare :ge params :and))$/;"	f
-compile-andgt	src\compiler.lisp	/^(defun compile-andgt (params) (compile-compare :gt params :and))$/;"	f
-compile-andle	src\compiler.lisp	/^(defun compile-andle (params) (compile-compare :le params :and))$/;"	f
-compile-andlt	src\compiler.lisp	/^(defun compile-andlt (params) (compile-compare :lt params :and))$/;"	f
-compile-andn	src\compiler.lisp	/^(defun compile-andn (params)$/;"	f
-compile-andnd	src\compiler.lisp	/^(defun compile-andnd (params)$/;"	f
-compile-andne	src\compiler.lisp	/^(defun compile-andne (params) (compile-compare :ne params :and))$/;"	f
-compile-andpd	src\compiler.lisp	/^(defun compile-andpd (params)$/;"	f
-compile-andstr	src\compiler.lisp	/^(defun compile-andstr (params)$/;"	f
-compile-call	src\compiler.lisp	/^(defun compile-call (params subroutines)$/;"	f
-compile-cntd	src\compiler.lisp	/^(defun compile-cntd (params)$/;"	f
-compile-cntu	src\compiler.lisp	/^(defun compile-cntu (params)$/;"	f
-compile-compare	src\compiler.lisp	/^(defun compile-compare (op params stack-op)$/;"	f
-compile-copy	src\compiler.lisp	/^(defun compile-copy (params)$/;"	f
-compile-cpyblk	src\compiler.lisp	/^(defun compile-cpyblk (params)$/;"	f
-compile-end	src\compiler.lisp	/^(defun compile-end (params)$/;"	f
-compile-endc	src\compiler.lisp	/^(defun compile-endc (params)$/;"	f
-compile-fill	src\compiler.lisp	/^(defun compile-fill (params)$/;"	f
-compile-find	src\compiler.lisp	/^(defun compile-find (find-fn params)$/;"	f
-compile-findeq	src\compiler.lisp	/^(defun compile-findeq (params) (compile-find 'find-equal params))$/;"	f
-compile-findge	src\compiler.lisp	/^(defun compile-findge (params) (compile-find 'find-greater-equal params))$/;"	f
-compile-findgt	src\compiler.lisp	/^(defun compile-findgt (params) (compile-find 'find-greater params))$/;"	f
-compile-findieq	src\compiler.lisp	/^(defun compile-findieq (params) (compile-find 'findi-equal params))$/;"	f
-compile-findige	src\compiler.lisp	/^(defun compile-findige (params) (compile-find 'findi-greater-equal params))$/;"	f
-compile-findigt	src\compiler.lisp	/^(defun compile-findigt (params) (compile-find 'findi-greater params))$/;"	f
-compile-findile	src\compiler.lisp	/^(defun compile-findile (params) (compile-find 'findi-less-equal params))$/;"	f
-compile-findilt	src\compiler.lisp	/^(defun compile-findilt (params) (compile-find 'findi-less params))$/;"	f
-compile-findine	src\compiler.lisp	/^(defun compile-findine (params) (compile-find 'findi-not-equal params))$/;"	f
-compile-findle	src\compiler.lisp	/^(defun compile-findle (params) (compile-find 'find-less-equal params))$/;"	f
-compile-findlt	src\compiler.lisp	/^(defun compile-findlt (params) (compile-find 'find-less params))$/;"	f
-compile-findne	src\compiler.lisp	/^(defun compile-findne (params) (compile-find 'find-not-equal params))$/;"	f
-compile-for	src\compiler.lisp	/^(defun compile-for (params)$/;"	f
-compile-il-file	src\compiler.lisp	/^(defun compile-il-file (pathname)$/;"	f
-compile-il-string	src\compiler.lisp	/^(defun compile-il-string (source)$/;"	f
-compile-instruction	src\compiler.lisp	/^(defun compile-instruction (instr subroutines)$/;"	f
-compile-mathdec	src\compiler.lisp	/^(defun compile-mathdec (params)$/;"	f
-compile-mathhex	src\compiler.lisp	/^(defun compile-mathhex (params)$/;"	f
-compile-network	src\compiler.lisp	/^(defmethod compile-network ((compiler il-compiler) network subroutines-var)$/;"	f
-compile-networks	src\compiler.lisp	/^(defmethod compile-networks ((compiler il-compiler) networks subroutines-var)$/;"	f
-compile-next	src\compiler.lisp	/^(defun compile-next (params)$/;"	f
-compile-or	src\compiler.lisp	/^(defun compile-or (params)$/;"	f
-compile-ore	src\compiler.lisp	/^(defun compile-ore (params) (compile-compare :eq params :or))$/;"	f
-compile-orge	src\compiler.lisp	/^(defun compile-orge (params) (compile-compare :ge params :or))$/;"	f
-compile-orgt	src\compiler.lisp	/^(defun compile-orgt (params) (compile-compare :gt params :or))$/;"	f
-compile-orle	src\compiler.lisp	/^(defun compile-orle (params) (compile-compare :le params :or))$/;"	f
-compile-orlt	src\compiler.lisp	/^(defun compile-orlt (params) (compile-compare :lt params :or))$/;"	f
-compile-orn	src\compiler.lisp	/^(defun compile-orn (params)$/;"	f
-compile-ornd	src\compiler.lisp	/^(defun compile-ornd (params)$/;"	f
-compile-orne	src\compiler.lisp	/^(defun compile-orne (params) (compile-compare :ne params :or))$/;"	f
-compile-orpd	src\compiler.lisp	/^(defun compile-orpd (params)$/;"	f
-compile-orstr	src\compiler.lisp	/^(defun compile-orstr (params)$/;"	f
-compile-out	src\compiler.lisp	/^(defun compile-out (params)$/;"	f
-compile-pack	src\compiler.lisp	/^(defun compile-pack (params)$/;"	f
-compile-pd	src\compiler.lisp	/^(defun compile-pd (params)$/;"	f
-compile-program	src\compiler.lisp	/^(defmethod compile-program ((compiler il-compiler) parsed-program)$/;"	f
-compile-rst	src\compiler.lisp	/^(defun compile-rst (params)$/;"	f
-compile-rt	src\compiler.lisp	/^(defun compile-rt (params)$/;"	f
-compile-rtc	src\compiler.lisp	/^(defun compile-rtc (params)$/;"	f
-compile-set	src\compiler.lisp	/^(defun compile-set (params)$/;"	f
-compile-shfrg	src\compiler.lisp	/^(defun compile-shfrg (params)$/;"	f
-compile-str	src\compiler.lisp	/^(defun compile-str (params)$/;"	f
-compile-stre	src\compiler.lisp	/^(defun compile-stre (params) (compile-compare :eq params :str))$/;"	f
-compile-strge	src\compiler.lisp	/^(defun compile-strge (params) (compile-compare :ge params :str))$/;"	f
-compile-strgt	src\compiler.lisp	/^(defun compile-strgt (params) (compile-compare :gt params :str))$/;"	f
-compile-strle	src\compiler.lisp	/^(defun compile-strle (params) (compile-compare :le params :str))$/;"	f
-compile-strlt	src\compiler.lisp	/^(defun compile-strlt (params) (compile-compare :lt params :str))$/;"	f
-compile-strn	src\compiler.lisp	/^(defun compile-strn (params)$/;"	f
-compile-strnd	src\compiler.lisp	/^(defun compile-strnd (params)$/;"	f
-compile-strne	src\compiler.lisp	/^(defun compile-strne (params) (compile-compare :ne params :str))$/;"	f
-compile-strpd	src\compiler.lisp	/^(defun compile-strpd (params)$/;"	f
-compile-subroutine	src\compiler.lisp	/^(defmethod compile-subroutine ((compiler il-compiler) subroutine subroutines-var)$/;"	f
-compile-sum	src\compiler.lisp	/^(defun compile-sum (params)$/;"	f
-compile-test-program	test\test-suite.lisp	/^(defun compile-test-program (source-string)$/;"	f
-compile-tmr	src\compiler.lisp	/^(defun compile-tmr (params)$/;"	f
-compile-tmra	src\compiler.lisp	/^(defun compile-tmra (params)$/;"	f
-compile-tmroff	src\compiler.lisp	/^(defun compile-tmroff (params)$/;"	f
-compile-udc	src\compiler.lisp	/^(defun compile-udc (params)$/;"	f
-compile-unpack	src\compiler.lisp	/^(defun compile-unpack (params)$/;"	f
-compiled-program	src\compiler.lisp	/^(defclass compiled-program ()$/;"	f
-compiler-tests	test\test-suite.lisp	/^(def-suite compiler-tests$/;"	f
-contact-instruction-p	src\web\ladder-render.lisp	/^(defun contact-instruction-p (opcode)$/;"	f
-control-instruction-p	src\web\ladder-render.lisp	/^(defun control-instruction-p (opcode)$/;"	f
-control-response	src\web\json-api.lisp	/^(defun control-response (action success &optional message)$/;"	f
-convert-value-for-json	src\web\json-api.lisp	/^(defun convert-value-for-json (value)$/;"	f
-copy-block	src\table-ops.lisp	/^(defun copy-block (data-table source-start source-end dest-start)$/;"	f
-copy-cell	src\web\ladder-render.lisp	/^(defun copy-cell (cell)$/;"	f
-copy-single	src\table-ops.lisp	/^(defun copy-single (data-table source dest)$/;"	f
-count-instructions	src\parser.lisp	/^(defun count-instructions (program)$/;"	f
-counter-data-addr	src\timer-counter.lisp	/^(defun counter-data-addr (counter-addr)$/;"	f
-counter-key	src\timer-counter.lisp	/^(defun counter-key (counter-addr suffix)$/;"	f
-create-dispatch-table	src\web\server.lisp	/^(defun create-dispatch-table ()$/;"	f
-current-line-number	src\parser.lisp	/^(defmethod current-line-number ((parser il-parser))$/;"	f
-data-response	src\web\json-api.lisp	/^(defun data-response (interpreter addresses)$/;"	f
-data-table	src\data-table.lisp	/^(defclass data-table ()$/;"	f
-data-table-tests	test\test-suite.lisp	/^(def-suite data-table-tests$/;"	f
-define-instruction	src\instructions.lisp	/^(defmacro define-instruction (opcode &key description type class$/;"	f
-determine-rungtype	src\web\ladder-render.lisp	/^(defun determine-rungtype (rung)$/;"	f
-error-response	src\web\json-api.lisp	/^(defun error-response (message &optional (code 400))$/;"	f
-expect-token	src\math-lib.lisp	/^(defun expect-token (expected)$/;"	f
-extract-addresses	src\web\ladder-render.lisp	/^(defun extract-addresses (instruction)$/;"	f
-extract-comment	src\parser.lisp	/^(defun extract-comment (line)$/;"	f
-fill-range	src\table-ops.lisp	/^(defun fill-range (data-table value dest-start dest-end)$/;"	f
-finalize-system-bits	src\interpreter.lisp	/^(defmethod finalize-system-bits ((interp plc-interpreter))$/;"	f
-find-equal	src\table-ops.lisp	/^(defun find-equal (data-table search-value search-start search-end result-addr result-flag)$/;"	f
-find-equal-inc	src\table-ops.lisp	/^(defun find-equal-inc (data-table search-value search-start search-end result-addr result-flag)$/;"	f
-find-greater	src\table-ops.lisp	/^(defun find-greater (data-table search-value search-start search-end result-addr result-flag)$/;"	f
-find-greater-equal	src\table-ops.lisp	/^(defun find-greater-equal (data-table search-value search-start search-end result-addr result-flag)$/;"	f
-find-greater-equal-inc	src\table-ops.lisp	/^(defun find-greater-equal-inc (data-table search-value search-start search-end result-addr result-flag)$/;"	f
-find-greater-inc	src\table-ops.lisp	/^(defun find-greater-inc (data-table search-value search-start search-end result-addr result-flag)$/;"	f
-find-instruction	src\instructions.lisp	/^(defun find-instruction (opcode)$/;"	f
-find-less	src\table-ops.lisp	/^(defun find-less (data-table search-value search-start search-end result-addr result-flag)$/;"	f
-find-less-equal	src\table-ops.lisp	/^(defun find-less-equal (data-table search-value search-start search-end result-addr result-flag)$/;"	f
-find-less-equal-inc	src\table-ops.lisp	/^(defun find-less-equal-inc (data-table search-value search-start search-end result-addr result-flag)$/;"	f
-find-less-inc	src\table-ops.lisp	/^(defun find-less-inc (data-table search-value search-start search-end result-addr result-flag)$/;"	f
-find-not-equal	src\table-ops.lisp	/^(defun find-not-equal (data-table search-value search-start search-end result-addr result-flag)$/;"	f
-find-not-equal-inc	src\table-ops.lisp	/^(defun find-not-equal-inc (data-table search-value search-start search-end result-addr result-flag)$/;"	f
-find-static-directory	src\web\server.lisp	/^(defun find-static-directory ()$/;"	f
-findi-equal	src\table-ops.lisp	/^(defun findi-equal (data-table search-value search-start search-end result-addr result-flag)$/;"	f
-findi-greater	src\table-ops.lisp	/^(defun findi-greater (data-table search-value search-start search-end result-addr result-flag)$/;"	f
-findi-greater-equal	src\table-ops.lisp	/^(defun findi-greater-equal (data-table search-value search-start search-end result-addr result-flag)$/;"	f
-findi-less	src\table-ops.lisp	/^(defun findi-less (data-table search-value search-start search-end result-addr result-flag)$/;"	f
-findi-less-equal	src\table-ops.lisp	/^(defun findi-less-equal (data-table search-value search-start search-end result-addr result-flag)$/;"	f
-findi-not-equal	src\table-ops.lisp	/^(defun findi-not-equal (data-table search-value search-start search-end result-addr result-flag)$/;"	f
-float-addr-p	src\instructions.lisp	/^(defun float-addr-p (str)$/;"	f
-format-json-value	src\web\json-api.lisp	/^(defun format-json-value (value type)$/;"	f
-format-monitor-info	src\web\ladder-render.lisp	/^(defun format-monitor-info (cell)$/;"	f
-gen-get-bool	src\compiler.lisp	/^(defun gen-get-bool (addr)$/;"	f
-gen-get-float	src\compiler.lisp	/^(defun gen-get-float (addr)$/;"	f
-gen-get-string	src\compiler.lisp	/^(defun gen-get-string (addr)$/;"	f
-gen-get-value	src\compiler.lisp	/^(defun gen-get-value (addr)$/;"	f
-gen-get-word	src\compiler.lisp	/^(defun gen-get-word (addr)$/;"	f
-gen-set-bool	src\compiler.lisp	/^(defun gen-set-bool (addr value)$/;"	f
-gen-set-float	src\compiler.lisp	/^(defun gen-set-float (addr value)$/;"	f
-gen-set-string	src\compiler.lisp	/^(defun gen-set-string (addr value)$/;"	f
-gen-set-value	src\compiler.lisp	/^(defun gen-set-value (addr value)$/;"	f
-gen-set-word	src\compiler.lisp	/^(defun gen-set-word (addr value)$/;"	f
-generate-address-range	src\table-ops.lisp	/^(defun generate-address-range (start-addr end-addr)$/;"	f
-generate-addresses	src\data-table.lisp	/^(defun generate-addresses (prefix start end)$/;"	f
-get-address-value	src\web\json-api.lisp	/^(defun get-address-value (interpreter address)$/;"	f
-get-all-monitored-addresses	src\web\json-api.lisp	/^(defun get-all-monitored-addresses (interpreter subrname)$/;"	f
-get-bool	src\data-table.lisp	/^(defun get-bool (dt address)$/;"	f
-get-bool-value	src\interpreter.lisp	/^(defmethod get-bool-value ((interp plc-interpreter) address)$/;"	f
-get-float	src\data-table.lisp	/^(defun get-float (dt address)$/;"	f
-get-float-value	src\interpreter.lisp	/^(defmethod get-float-value ((interp plc-interpreter) address)$/;"	f
-get-monitor-type	src\web\ladder-render.lisp	/^(defun get-monitor-type (instruction)$/;"	f
-get-string	src\data-table.lisp	/^(defun get-string (dt address)$/;"	f
-get-value	src\table-ops.lisp	/^(defun get-value (data-table addr)$/;"	f
-get-word	src\data-table.lisp	/^(defun get-word (dt address)$/;"	f
-get-word-value	src\interpreter.lisp	/^(defmethod get-word-value ((interp plc-interpreter) address)$/;"	f
-handle-api-control-start	src\web\server.lisp	/^(defun handle-api-control-start ()$/;"	f
-handle-api-control-step	src\web\server.lisp	/^(defun handle-api-control-step ()$/;"	f
-handle-api-control-stop	src\web\server.lisp	/^(defun handle-api-control-stop ()$/;"	f
-handle-api-data	src\web\server.lisp	/^(defun handle-api-data ()$/;"	f
-handle-api-ladder-js	src\web\server.lisp	/^(defun handle-api-ladder-js ()$/;"	f
-handle-api-program	src\web\server.lisp	/^(defun handle-api-program ()$/;"	f
-handle-api-statistics	src\web\server.lisp	/^(defun handle-api-statistics ()$/;"	f
-handle-api-subroutines	src\web\server.lisp	/^(defun handle-api-subroutines ()$/;"	f
-handle-runtime-error	src\interpreter.lisp	/^(defmethod handle-runtime-error ((interp plc-interpreter) error)$/;"	f
-has-fork-column-p	src\web\ladder-render.lisp	/^(defun has-fork-column-p (matrix)$/;"	f
-hash-key-exists-p	test\test-data-table.lisp	/^(defun hash-key-exists-p (key hash-table)$/;"	f
-hex-constant-p	src\instructions.lisp	/^(defun hex-constant-p (str)$/;"	f
-il-compiler	src\compiler.lisp	/^(defclass il-compiler ()$/;"	f
-il-parser	src\parser.lisp	/^(defclass il-parser ()$/;"	f
-init-boolean-addresses	src\data-table.lisp	/^(defun init-boolean-addresses (dt)$/;"	f
-init-data-table	src\data-table.lisp	/^(defun init-data-table (dt)$/;"	f
-init-float-addresses	src\data-table.lisp	/^(defun init-float-addresses (dt)$/;"	f
-init-string-addresses	src\data-table.lisp	/^(defun init-string-addresses (dt)$/;"	f
-init-word-addresses	src\data-table.lisp	/^(defun init-word-addresses (dt)$/;"	f
-initialize-parser	src\parser.lisp	/^(defmethod initialize-parser ((parser il-parser))$/;"	f
-initialize-static-directory	src\web\server.lisp	/^(defun initialize-static-directory ()$/;"	f
-install-dispatch-table	src\web\server.lisp	/^(defun install-dispatch-table ()$/;"	f
-instruction-class	src\instructions.lisp	/^(deftype instruction-class ()$/;"	f
-instruction-count	src\instructions.lisp	/^(defun instruction-count ()$/;"	f
-instruction-to-cell	src\web\ladder-render.lisp	/^(defun instruction-to-cell (instruction col)$/;"	f
-instruction-type	src\instructions.lisp	/^(deftype instruction-type ()$/;"	f
-int-to-bcd	src\math-lib.lisp	/^(defun int-to-bcd (int)$/;"	f
-integration-tests	test\test-suite.lisp	/^(def-suite integration-tests$/;"	f
-interpreter-running-p	src\interpreter.lisp	/^(defmethod interpreter-running-p ((interp plc-interpreter))$/;"	f
-interpreter-tests	test\test-suite.lisp	/^(def-suite interpreter-tests$/;"	f
-ladder-cell	src\web\ladder-render.lisp	/^(defstruct ladder-cell$/;"	f
-ladder-program	src\web\ladder-render.lisp	/^(defstruct ladder-program$/;"	f
-ladder-program-to-js-format	src\web\ladder-render.lisp	/^(defun ladder-program-to-js-format (ladder-prog)$/;"	f
-ladder-program-to-matrixdata	src\web\ladder-render.lisp	/^(defun ladder-program-to-matrixdata (ladder-prog)$/;"	f
-ladder-program-to-plist	src\web\ladder-render.lisp	/^(defun ladder-program-to-plist (ladder-prog)$/;"	f
-ladder-rung	src\web\ladder-render.lisp	/^(defstruct ladder-rung$/;"	f
-ladsymb-to-svg-symbol	src\web\ladder-render.lisp	/^(defun ladsymb-to-svg-symbol (ladsymb opcode)$/;"	f
-ld-visualization-tests	test\test-ld-visualization.lisp	/^(def-suite ld-visualization-tests$/;"	f
-library-tests	test\test-suite.lisp	/^(def-suite library-tests$/;"	f
-list-instructions	src\instructions.lisp	/^(defun list-instructions ()$/;"	f
-list-instructions-by-class	src\instructions.lisp	/^(defun list-instructions-by-class (class)$/;"	f
-list-of-plists-p	src\web\json-api.lisp	/^(defun list-of-plists-p (value)$/;"	f
-list-subroutine-names	src\web\ladder-render.lisp	/^(defun list-subroutine-names (parsed-program)$/;"	f
-list-to-json	src\web\json-api.lisp	/^(defun list-to-json (list)$/;"	f
-make-address	src\table-ops.lisp	/^(defun make-address (prefix index)$/;"	f
-make-branch-cell	src\web\ladder-render.lisp	/^(defun make-branch-cell (symbol &key (row 0) (col 0))$/;"	f
-make-branch-l-cell	src\web\ladder-render.lisp	/^(defun make-branch-l-cell (&key (row 0) (col 0))$/;"	f
-make-branch-r-cell	src\web\ladder-render.lisp	/^(defun make-branch-r-cell (&key (row 0) (col 0))$/;"	f
-make-branch-tl-cell	src\web\ladder-render.lisp	/^(defun make-branch-tl-cell (&key (row 0) (col 0))$/;"	f
-make-branch-tr-cell	src\web\ladder-render.lisp	/^(defun make-branch-tr-cell (&key (row 0) (col 0))$/;"	f
-make-branch-ttl-cell	src\web\ladder-render.lisp	/^(defun make-branch-ttl-cell (&key (row 0) (col 0))$/;"	f
-make-branch-ttr-cell	src\web\ladder-render.lisp	/^(defun make-branch-ttr-cell (&key (row 0) (col 0))$/;"	f
-make-coil-cell	src\web\ladder-render.lisp	/^(defun make-coil-cell (opcode addr col row &optional is-range)$/;"	f
-make-data-table	src\data-table.lisp	/^(defun make-data-table ()$/;"	f
-make-hbar-cell	src\web\ladder-render.lisp	/^(defun make-hbar-cell (&key (row 0) (col 0))$/;"	f
-make-il-compiler	src\compiler.lisp	/^(defun make-il-compiler ()$/;"	f
-make-il-parser	src\parser.lisp	/^(defun make-il-parser (&key source)$/;"	f
-make-instruction-set	src\instructions.lisp	/^(defun make-instruction-set ()$/;"	f
-make-plc-interpreter	src\interpreter.lisp	/^(defun make-plc-interpreter (&key program data-table error-handler)$/;"	f
-make-scan-statistics	src\interpreter.lisp	/^(defun make-scan-statistics ()$/;"	f
-make-test-data-table	test\test-suite.lisp	/^(defun make-test-data-table ()$/;"	f
-make-test-instruction	test\test-ld-visualization.lisp	/^(defun make-test-instruction (opcode &rest params)$/;"	f
-make-vbar-l-cell	src\web\ladder-render.lisp	/^(defun make-vbar-l-cell (&key (row 0) (col 0))$/;"	f
-mathdec	src\math-lib.lisp	/^(defun mathdec (data-table dest-addr flags expression)$/;"	f
-mathhex	src\math-lib.lisp	/^(defun mathhex (data-table dest-addr flags expression)$/;"	f
-matrix-height	src\web\ladder-render.lisp	/^(defun matrix-height (matrix)$/;"	f
-matrix-width	src\web\ladder-render.lisp	/^(defun matrix-width (matrix)$/;"	f
-merge-matrix-below	src\web\ladder-render.lisp	/^(defun merge-matrix-below (original-matrix new-matrix)$/;"	f
-merge-matrix-right	src\web\ladder-render.lisp	/^(defun merge-matrix-right (original-matrix new-matrix)$/;"	f
-multi-address-coil-p	src\web\ladder-render.lisp	/^(defun multi-address-coil-p (opcode params)$/;"	f
-network-to-ladder-rung	src\web\ladder-render.lisp	/^(defun network-to-ladder-rung (network)$/;"	f
-networks-to-ladder	src\web\ladder-render.lisp	/^(defun networks-to-ladder (networks name)$/;"	f
-next-line	src\parser.lisp	/^(defmethod next-line ((parser il-parser))$/;"	f
-next-token	src\math-lib.lisp	/^(defun next-token ()$/;"	f
-numeric-p	src\instructions.lisp	/^(defun numeric-p (str)$/;"	f
-or-instruction-p	src\web\ladder-render.lisp	/^(defun or-instruction-p (opcode)$/;"	f
-orstr-instruction-p	src\web\ladder-render.lisp	/^(defun orstr-instruction-p (opcode)$/;"	f
-pack-bits	src\table-ops.lisp	/^(defun pack-bits (data-table source-start source-end dest)$/;"	f
-parse-additive	src\math-lib.lisp	/^(defun parse-additive ()$/;"	f
-parse-address	src\table-ops.lisp	/^(defun parse-address (addr)$/;"	f
-parse-address-list	src\web\json-api.lisp	/^(defun parse-address-list (addr-string)$/;"	f
-parse-bitwise-and	src\math-lib.lisp	/^(defun parse-bitwise-and ()$/;"	f
-parse-bitwise-or	src\math-lib.lisp	/^(defun parse-bitwise-or ()$/;"	f
-parse-bitwise-xor	src\math-lib.lisp	/^(defun parse-bitwise-xor ()$/;"	f
-parse-comparison	src\math-lib.lisp	/^(defun parse-comparison ()$/;"	f
-parse-expression	src\math-lib.lisp	/^(defun parse-expression ()$/;"	f
-parse-factor	src\math-lib.lisp	/^(defun parse-factor ()$/;"	f
-parse-function-call	src\math-lib.lisp	/^(defun parse-function-call (name args)$/;"	f
-parse-il-file	src\parser.lisp	/^(defun parse-il-file (pathname)$/;"	f
-parse-il-string	src\parser.lisp	/^(defun parse-il-string (source)$/;"	f
-parse-instruction-line	src\parser.lisp	/^(defun parse-instruction-line (line line-number)$/;"	f
-parse-math-expression	src\parser.lisp	/^(defun parse-math-expression (tokens)$/;"	f
-parse-network	src\parser.lisp	/^(defmethod parse-network ((parser il-parser) network-number)$/;"	f
-parse-number-literal	src\math-lib.lisp	/^(defun parse-number-literal (tok)$/;"	f
-parse-power	src\math-lib.lisp	/^(defun parse-power ()$/;"	f
-parse-primary	src\math-lib.lisp	/^(defun parse-primary ()$/;"	f
-parse-program	src\parser.lisp	/^(defmethod parse-program ((parser il-parser))$/;"	f
-parse-subroutine	src\parser.lisp	/^(defmethod parse-subroutine ((parser il-parser) name line-number)$/;"	f
-parse-term	src\math-lib.lisp	/^(defun parse-term ()$/;"	f
-parse-test-il	test\test-ld-visualization.lisp	/^(defun parse-test-il (source)$/;"	f
-parse-time-value	src\compiler.lisp	/^(defun parse-time-value (value unit)$/;"	f
-parse-value	src\compiler.lisp	/^(defun parse-value (param)$/;"	f
-parse-variable-ref	src\math-lib.lisp	/^(defun parse-variable-ref (name)$/;"	f
-parsed-instruction	src\parser.lisp	/^(defclass parsed-instruction ()$/;"	f
-parsed-network	src\parser.lisp	/^(defclass parsed-network ()$/;"	f
-parsed-program	src\parser.lisp	/^(defclass parsed-program ()$/;"	f
-parsed-subroutine	src\parser.lisp	/^(defclass parsed-subroutine ()$/;"	f
-parser-networks	src\parser.lisp	/^(defun parser-networks (parser)$/;"	f
-parser-subroutines	src\parser.lisp	/^(defun parser-subroutines (parser)$/;"	f
-parser-tests	test\test-suite.lisp	/^(def-suite parser-tests$/;"	f
-peek-line	src\parser.lisp	/^(defmethod peek-line ((parser il-parser))$/;"	f
-peek-token	src\math-lib.lisp	/^(defun peek-token ()$/;"	f
-performance-tests	test\test-suite.lisp	/^(def-suite performance-tests$/;"	f
-plc-compile-error	src\compiler.lisp	/^(define-condition plc-compile-error (error)$/;"	f
-plc-end-condition	src\compiler.lisp	/^(define-condition plc-end-condition (condition)$/;"	f
-plc-instruction	src\instructions.lisp	/^(defclass plc-instruction ()$/;"	f
-plc-interpreter	src\interpreter.lisp	/^(defclass plc-interpreter ()$/;"	f
-plc-parse-error	src\parser.lisp	/^(define-condition plc-parse-error (error)$/;"	f
-plc-return-condition	src\compiler.lisp	/^(define-condition plc-return-condition (condition)$/;"	f
-plc-runtime-error	src\interpreter.lisp	/^(define-condition plc-runtime-error (error)$/;"	f
-plc-thread-running-p	src\web\server.lisp	/^(defun plc-thread-running-p ()$/;"	f
-plist-p	src\web\json-api.lisp	/^(defun plist-p (value)$/;"	f
-plist-to-alist	src\web\json-api.lisp	/^(defun plist-to-alist (plist)$/;"	f
-plist-to-json	src\web\json-api.lisp	/^(defun plist-to-json (plist)$/;"	f
-print-instruction-summary	src\instructions.lisp	/^(defun print-instruction-summary ()$/;"	f
-print-interpreter-status	src\interpreter.lisp	/^(defmethod print-interpreter-status ((interp plc-interpreter) &optional (stream t))$/;"	f
-print-network-detail	src\parser.lisp	/^(defun print-network-detail (network &optional (stream t))$/;"	f
-print-object	src\instructions.lisp	/^(defmethod print-object ((instr plc-instruction) stream)$/;"	f
-print-object	src\interpreter.lisp	/^(defmethod print-object ((frame call-frame) stream)$/;"	f
-print-object	src\parser.lisp	/^(defmethod print-object ((net parsed-network) stream)$/;"	f
-print-object	src\parser.lisp	/^(defmethod print-object ((pinstr parsed-instruction) stream)$/;"	f
-print-object	src\parser.lisp	/^(defmethod print-object ((sbr parsed-subroutine) stream)$/;"	f
-print-parsed-program	src\parser.lisp	/^(defun print-parsed-program (program &optional (stream t))$/;"	f
-program-js-response	src\web\json-api.lisp	/^(defun program-js-response (interpreter subrname)$/;"	f
-program-response	src\web\json-api.lisp	/^(defun program-response (interpreter subrname &key (format :matrixdata))$/;"	f
-program-to-ladder	src\web\ladder-render.lisp	/^(defun program-to-ladder (parsed-program &optional (name "main"))$/;"	f
-quick-start	src\web\server.lisp	/^(defun quick-start (il-source &key (port 8080))$/;"	f
-quick-test	src\interpreter.lisp	/^(defun quick-test (source inputs expected-outputs)$/;"	f
-read-test-file	test\test-suite.lisp	/^(defun read-test-file (filename)$/;"	f
-register-instruction	src\instructions.lisp	/^(defun register-instruction (instr)$/;"	f
-run-continuous	src\interpreter.lisp	/^(defmethod run-continuous ((interp plc-interpreter) &key (max-scans nil) (target-scan-time nil))$/;"	f
-run-il-file	src\interpreter.lisp	/^(defun run-il-file (pathname &key (max-scans 1) data-table)$/;"	f
-run-il-string	src\interpreter.lisp	/^(defun run-il-string (source &key (max-scans 1) data-table)$/;"	f
-run-integration-tests	test\test-suite.lisp	/^(defun run-integration-tests ()$/;"	f
-run-performance-tests	test\test-suite.lisp	/^(defun run-performance-tests ()$/;"	f
-run-quick-tests	test\test-suite.lisp	/^(defun run-quick-tests ()$/;"	f
-run-scan	src\interpreter.lisp	/^(defmethod run-scan ((interp plc-interpreter))$/;"	f
-run-test-program	test\test-suite.lisp	/^(defun run-test-program (source-string &key (max-scans 1) inputs)$/;"	f
-run-tests	test\test-suite.lisp	/^(defun run-tests ()$/;"	f
-run-web-tests	test\test-suite.lisp	/^(defun run-web-tests ()$/;"	f
-rung-to-js-format	src\web\ladder-render.lisp	/^(defun rung-to-js-format (rung rung-index)$/;"	f
-rung-to-matrixdata	src\web\ladder-render.lisp	/^(defun rung-to-matrixdata (rung)$/;"	f
-rung-to-plist	src\web\ladder-render.lisp	/^(defun rung-to-plist (rung)$/;"	f
-scan-statistics	src\interpreter.lisp	/^(defclass scan-statistics ()$/;"	f
-search-compare	src\table-ops.lisp	/^(defun search-compare (compare-type value1 value2)$/;"	f
-search-table	src\table-ops.lisp	/^(defun search-table (data-table search-value search-start search-end$/;"	f
-serve-static-file	src\web\server.lisp	/^(defun serve-static-file (path)$/;"	f
-set-bits	src\table-ops.lisp	/^(defun set-bits (data-table value start-addr end-addr)$/;"	f
-set-bool	src\data-table.lisp	/^(defun set-bool (dt address value)$/;"	f
-set-bool-value	src\interpreter.lisp	/^(defmethod set-bool-value ((interp plc-interpreter) address value)$/;"	f
-set-float	src\data-table.lisp	/^(defun set-float (dt address value)$/;"	f
-set-float-value	src\interpreter.lisp	/^(defmethod set-float-value ((interp plc-interpreter) address value)$/;"	f
-set-string	src\data-table.lisp	/^(defun set-string (dt address value)$/;"	f
-set-value	src\table-ops.lisp	/^(defun set-value (data-table addr value)$/;"	f
-set-word	src\data-table.lisp	/^(defun set-word (dt address value)$/;"	f
-set-word-value	src\interpreter.lisp	/^(defmethod set-word-value ((interp plc-interpreter) address value)$/;"	f
-shfrg-execute	src\table-ops.lisp	/^(defun shfrg-execute (data-table start-addr end-addr reset clock data-in)$/;"	f
-shift-register	src\table-ops.lisp	/^(defun shift-register (data-table data-in clock last-clock reset start-addr end-addr)$/;"	f
-show-generated-code	src\compiler.lisp	/^(defun show-generated-code (source)$/;"	f
-skip-blank-lines	src\parser.lisp	/^(defmethod skip-blank-lines ((parser il-parser))$/;"	f
-split-into-lines	src\parser.lisp	/^(defun split-into-lines (source)$/;"	f
-start-plc-thread	src\web\server.lisp	/^(defun start-plc-thread ()$/;"	f
-start-web-server	src\web\server.lisp	/^(defun start-web-server (&key (port 8080) interpreter)$/;"	f
-statistics-response	src\web\json-api.lisp	/^(defun statistics-response (interpreter)$/;"	f
-step-plc	src\web\server.lisp	/^(defun step-plc ()$/;"	f
-step-scan	src\interpreter.lisp	/^(defmethod step-scan ((interp plc-interpreter))$/;"	f
-stop-interpreter	src\interpreter.lisp	/^(defmethod stop-interpreter ((interp plc-interpreter))$/;"	f
-stop-plc-thread	src\web\server.lisp	/^(defun stop-plc-thread ()$/;"	f
-stop-web-server	src\web\server.lisp	/^(defun stop-web-server ()$/;"	f
-store-instruction-p	src\web\ladder-render.lisp	/^(defun store-instruction-p (opcode)$/;"	f
-string-addr-p	src\instructions.lisp	/^(defun string-addr-p (str)$/;"	f
-string-keyed-alist-p	src\web\json-api.lisp	/^(defun string-keyed-alist-p (value)$/;"	f
-subroutine-list-response	src\web\json-api.lisp	/^(defun subroutine-list-response (interpreter)$/;"	f
-substitute-data-table	src\compiler.lisp	/^(defun substitute-data-table (code)$/;"	f
-sum-range	src\math-lib.lisp	/^(defun sum-range (data-table start-addr end-addr dest-addr flags)$/;"	f
-sum-table	src\table-ops.lisp	/^(defun sum-table (data-table source-start source-end dest)$/;"	f
-test-program	src\interpreter.lisp	/^(defun test-program (source &key (scans 1) inputs)$/;"	f
-time-unit-p	src\instructions.lisp	/^(defun time-unit-p (str)$/;"	f
-timer-data-addr	src\timer-counter.lisp	/^(defun timer-data-addr (timer-addr)$/;"	f
-timer-key	src\timer-counter.lisp	/^(defun timer-key (timer-addr suffix)$/;"	f
-tmr-execute	src\timer-counter.lisp	/^(defun tmr-execute (data-table timer-addr enable preset scan-time)$/;"	f
-tmra-execute	src\timer-counter.lisp	/^(defun tmra-execute (data-table timer-addr enable reset preset scan-time)$/;"	f
-tmroff-execute	src\timer-counter.lisp	/^(defun tmroff-execute (data-table timer-addr enable preset scan-time)$/;"	f
-tokenize-line	src\parser.lisp	/^(defun tokenize-line (line)$/;"	f
-tokenize-math-expr	src\math-lib.lisp	/^(defun tokenize-math-expr (expr)$/;"	f
-trim-whitespace	src\parser.lisp	/^(defun trim-whitespace (str)$/;"	f
-udc-execute	src\timer-counter.lisp	/^(defun udc-execute (data-table counter-addr up-input down-input reset preset)$/;"	f
-unpack-bits	src\table-ops.lisp	/^(defun unpack-bits (data-table source dest-start dest-end)$/;"	f
-update-statistics	src\interpreter.lisp	/^(defmethod update-statistics ((stats scan-statistics) scan-time-ms)$/;"	f
-update-system-bits	src\interpreter.lisp	/^(defmethod update-system-bits ((interp plc-interpreter))$/;"	f
-validate-instruction	src\instructions.lisp	/^(defgeneric validate-instruction (instr params)$/;"	f
-validate-instruction	src\instructions.lisp	/^(defmethod validate-instruction ((instr plc-instruction) params)$/;"	f
-vertical-branch-symbol-p	src\web\ladder-render.lisp	/^(defun vertical-branch-symbol-p (symbol)$/;"	f
-web-server-running-p	src\web\server.lisp	/^(defun web-server-running-p ()$/;"	f
-with-test-data-table	test\test-suite.lisp	/^(defmacro with-test-data-table ((var) &body body)$/;"	f
-word-addr-p	src\instructions.lisp	/^(defun word-addr-p (str)$/;"	f
+"AND"	src/instructions.lisp	/^(define-instruction "AND"$/;"	f
+"ANDE"	src/instructions.lisp	/^(define-instruction "ANDE"$/;"	f
+"ANDGE"	src/instructions.lisp	/^(define-instruction "ANDGE"$/;"	f
+"ANDGT"	src/instructions.lisp	/^(define-instruction "ANDGT"$/;"	f
+"ANDLE"	src/instructions.lisp	/^(define-instruction "ANDLE"$/;"	f
+"ANDLT"	src/instructions.lisp	/^(define-instruction "ANDLT"$/;"	f
+"ANDN"	src/instructions.lisp	/^(define-instruction "ANDN"$/;"	f
+"ANDND"	src/instructions.lisp	/^(define-instruction "ANDND"$/;"	f
+"ANDNE"	src/instructions.lisp	/^(define-instruction "ANDNE"$/;"	f
+"ANDPD"	src/instructions.lisp	/^(define-instruction "ANDPD"$/;"	f
+"ANDSTR"	src/instructions.lisp	/^(define-instruction "ANDSTR"$/;"	f
+"CALL"	src/instructions.lisp	/^(define-instruction "CALL"$/;"	f
+"CNTD"	src/instructions.lisp	/^(define-instruction "CNTD"$/;"	f
+"CNTU"	src/instructions.lisp	/^(define-instruction "CNTU"$/;"	f
+"COPY"	src/instructions.lisp	/^(define-instruction "COPY"$/;"	f
+"CPYBLK"	src/instructions.lisp	/^(define-instruction "CPYBLK"$/;"	f
+"END"	src/instructions.lisp	/^(define-instruction "END"$/;"	f
+"ENDC"	src/instructions.lisp	/^(define-instruction "ENDC"$/;"	f
+"FILL"	src/instructions.lisp	/^(define-instruction "FILL"$/;"	f
+"FINDEQ"	src/instructions.lisp	/^(define-instruction "FINDEQ"$/;"	f
+"FINDGE"	src/instructions.lisp	/^(define-instruction "FINDGE"$/;"	f
+"FINDGT"	src/instructions.lisp	/^(define-instruction "FINDGT"$/;"	f
+"FINDIEQ"	src/instructions.lisp	/^(define-instruction "FINDIEQ"$/;"	f
+"FINDIGE"	src/instructions.lisp	/^(define-instruction "FINDIGE"$/;"	f
+"FINDIGT"	src/instructions.lisp	/^(define-instruction "FINDIGT"$/;"	f
+"FINDILE"	src/instructions.lisp	/^(define-instruction "FINDILE"$/;"	f
+"FINDILT"	src/instructions.lisp	/^(define-instruction "FINDILT"$/;"	f
+"FINDINE"	src/instructions.lisp	/^(define-instruction "FINDINE"$/;"	f
+"FINDLE"	src/instructions.lisp	/^(define-instruction "FINDLE"$/;"	f
+"FINDLT"	src/instructions.lisp	/^(define-instruction "FINDLT"$/;"	f
+"FINDNE"	src/instructions.lisp	/^(define-instruction "FINDNE"$/;"	f
+"FOR"	src/instructions.lisp	/^(define-instruction "FOR"$/;"	f
+"MATHDEC"	src/instructions.lisp	/^(define-instruction "MATHDEC"$/;"	f
+"MATHHEX"	src/instructions.lisp	/^(define-instruction "MATHHEX"$/;"	f
+"NETWORK"	src/instructions.lisp	/^(define-instruction "NETWORK"$/;"	f
+"NEXT"	src/instructions.lisp	/^(define-instruction "NEXT"$/;"	f
+"OR"	src/instructions.lisp	/^(define-instruction "OR"$/;"	f
+"ORE"	src/instructions.lisp	/^(define-instruction "ORE"$/;"	f
+"ORGE"	src/instructions.lisp	/^(define-instruction "ORGE"$/;"	f
+"ORGT"	src/instructions.lisp	/^(define-instruction "ORGT"$/;"	f
+"ORLE"	src/instructions.lisp	/^(define-instruction "ORLE"$/;"	f
+"ORLT"	src/instructions.lisp	/^(define-instruction "ORLT"$/;"	f
+"ORN"	src/instructions.lisp	/^(define-instruction "ORN"$/;"	f
+"ORND"	src/instructions.lisp	/^(define-instruction "ORND"$/;"	f
+"ORNE"	src/instructions.lisp	/^(define-instruction "ORNE"$/;"	f
+"ORPD"	src/instructions.lisp	/^(define-instruction "ORPD"$/;"	f
+"ORSTR"	src/instructions.lisp	/^(define-instruction "ORSTR"$/;"	f
+"OUT"	src/instructions.lisp	/^(define-instruction "OUT"$/;"	f
+"PACK"	src/instructions.lisp	/^(define-instruction "PACK"$/;"	f
+"PD"	src/instructions.lisp	/^(define-instruction "PD"$/;"	f
+"RST"	src/instructions.lisp	/^(define-instruction "RST"$/;"	f
+"RT"	src/instructions.lisp	/^(define-instruction "RT"$/;"	f
+"RTC"	src/instructions.lisp	/^(define-instruction "RTC"$/;"	f
+"SBR"	src/instructions.lisp	/^(define-instruction "SBR"$/;"	f
+"SET"	src/instructions.lisp	/^(define-instruction "SET"$/;"	f
+"SHFRG"	src/instructions.lisp	/^(define-instruction "SHFRG"$/;"	f
+"STR"	src/instructions.lisp	/^(define-instruction "STR"$/;"	f
+"STRE"	src/instructions.lisp	/^(define-instruction "STRE"$/;"	f
+"STRGE"	src/instructions.lisp	/^(define-instruction "STRGE"$/;"	f
+"STRGT"	src/instructions.lisp	/^(define-instruction "STRGT"$/;"	f
+"STRLE"	src/instructions.lisp	/^(define-instruction "STRLE"$/;"	f
+"STRLT"	src/instructions.lisp	/^(define-instruction "STRLT"$/;"	f
+"STRN"	src/instructions.lisp	/^(define-instruction "STRN"$/;"	f
+"STRND"	src/instructions.lisp	/^(define-instruction "STRND"$/;"	f
+"STRNE"	src/instructions.lisp	/^(define-instruction "STRNE"$/;"	f
+"STRPD"	src/instructions.lisp	/^(define-instruction "STRPD"$/;"	f
+"SUM"	src/instructions.lisp	/^(define-instruction "SUM"$/;"	f
+"TMR"	src/instructions.lisp	/^(define-instruction "TMR"$/;"	f
+"TMRA"	src/instructions.lisp	/^(define-instruction "TMRA"$/;"	f
+"TMROFF"	src/instructions.lisp	/^(define-instruction "TMROFF"$/;"	f
+"UDC"	src/instructions.lisp	/^(define-instruction "UDC"$/;"	f
+"UNPACK"	src/instructions.lisp	/^(define-instruction "UNPACK"$/;"	f
+#:mblogic-cl	src/package.lisp	/^(defpackage #:mblogic-cl$/;"	f
+#:mblogic-cl-test	test/test-suite.lisp	/^(defpackage #:mblogic-cl-test$/;"	f
+#:mblogic-cl-web	src/web/package.lisp	/^(defpackage #:mblogic-cl-web$/;"	f
+*any-addr-pattern*	src/instructions.lisp	/^(defparameter *any-addr-pattern*$/;"	f
+*bool-addr-pattern*	src/instructions.lisp	/^(defparameter *bool-addr-pattern*$/;"	f
+*branch-l*	src/web/ladder-render.lisp	/^(defparameter *branch-l* "branchl" "Bottom-left corner: └ - bottom of merge\/close")$/;"	f
+*branch-r*	src/web/ladder-render.lisp	/^(defparameter *branch-r* "branchr" "Bottom-right corner: ┘ - bottom of branch fork")$/;"	f
+*branch-symbols*	src/web/ladder-render.lisp	/^(defparameter *branch-symbols*$/;"	f
+*branch-tl*	src/web/ladder-render.lisp	/^(defparameter *branch-tl* "branchtl" "Middle-left T: ├ - middle rows of merge")$/;"	f
+*branch-tr*	src/web/ladder-render.lisp	/^(defparameter *branch-tr* "branchtr" "Middle-right T: ┤ - middle rows of branch fork")$/;"	f
+*branch-ttl*	src/web/ladder-render.lisp	/^(defparameter *branch-ttl* "branchttl" "Top-left corner: ┌ - top of merge\/close")$/;"	f
+*branch-ttr*	src/web/ladder-render.lisp	/^(defparameter *branch-ttr* "branchttr" "Top-right corner: ┐ - top of branch fork")$/;"	f
+*float-addr-pattern*	src/instructions.lisp	/^(defparameter *float-addr-pattern*$/;"	f
+*hbar*	src/web/ladder-render.lisp	/^(defparameter *hbar* "hbar" "Horizontal bar: ─ - wire segment")$/;"	f
+*hex-constant-pattern*	src/instructions.lisp	/^(defparameter *hex-constant-pattern*$/;"	f
+*instruction-set*	src/instructions.lisp	/^(defvar *instruction-set* (make-hash-table :test 'equal)$/;"	f
+*ladsymb-to-svg*	src/web/ladder-render.lisp	/^(defparameter *ladsymb-to-svg*$/;"	f
+*math-data-table*	src/math-lib.lisp	/^(defvar *math-data-table* nil "Current data table for variable lookup")$/;"	f
+*math-hex-mode*	src/math-lib.lisp	/^(defvar *math-hex-mode* nil "If T, use hex\/bitwise mode")$/;"	f
+*math-tokens*	src/math-lib.lisp	/^(defvar *math-tokens* nil "Current token stream")$/;"	f
+*numeric-pattern*	src/instructions.lisp	/^(defparameter *numeric-pattern*$/;"	f
+*plc-interpreter*	src/web/server.lisp	/^(defvar *plc-interpreter* nil$/;"	f
+*plc-lock*	src/web/server.lisp	/^(defvar *plc-lock* (bt:make-lock "plc-lock")$/;"	f
+*plc-thread*	src/web/server.lisp	/^(defvar *plc-thread* nil$/;"	f
+*static-directory*	src/web/server.lisp	/^(defvar *static-directory* nil$/;"	f
+*string-addr-pattern*	src/instructions.lisp	/^(defparameter *string-addr-pattern*$/;"	f
+*vbar-l*	src/web/ladder-render.lisp	/^(defparameter *vbar-l* "vbarl" "Vertical bar left: │ - no junction (left side)")$/;"	f
+*vbar-r*	src/web/ladder-render.lisp	/^(defparameter *vbar-r* "vbarr" "Vertical bar right: │ - no junction (right side)")$/;"	f
+*vertical-branch-symbols*	src/web/ladder-render.lisp	/^(defparameter *vertical-branch-symbols*$/;"	f
+*web-acceptor*	src/web/server.lisp	/^(defvar *web-acceptor* nil$/;"	f
+*word-addr-pattern*	src/instructions.lisp	/^(defparameter *word-addr-pattern*$/;"	f
+add-error	src/parser.lisp	/^(defmethod add-error ((parser il-parser) message &optional line-text)$/;"	f
+add-orstr-junction	src/web/ladder-render.lisp	/^(defun add-orstr-junction (matrix top-height)$/;"	f
+add-warning	src/parser.lisp	/^(defmethod add-warning ((parser il-parser) message)$/;"	f
+address-count	src/table-ops.lisp	/^(defun address-count (start-addr end-addr)$/;"	f
+address-index	src/table-ops.lisp	/^(defun address-index (addr)$/;"	f
+address-prefix	src/table-ops.lisp	/^(defun address-prefix (addr)$/;"	f
+alist-to-json	src/web/json-api.lisp	/^(defun alist-to-json (alist)$/;"	f
+all-tests	test/test-suite.lisp	/^(def-suite all-tests$/;"	f
+and-instruction-p	src/web/ladder-render.lisp	/^(defun and-instruction-p (opcode)$/;"	f
+andstr-instruction-p	src/web/ladder-render.lisp	/^(defun andstr-instruction-p (opcode)$/;"	f
+any-addr-p	src/instructions.lisp	/^(defun any-addr-p (str)$/;"	f
+append-cell-to-last-row	src/web/ladder-render.lisp	/^(defun append-cell-to-last-row (cell matrix)$/;"	f
+append-cell-to-matrix	src/web/ladder-render.lisp	/^(defun append-cell-to-matrix (cell matrix)$/;"	f
+append-cell-to-row	src/web/ladder-render.lisp	/^(defun append-cell-to-row (cell matrix target-row)$/;"	f
+assert-bool-equal	test/test-suite.lisp	/^(defun assert-bool-equal (interp addr expected &optional message)$/;"	f
+assert-float-near	test/test-suite.lisp	/^(defun assert-float-near (interp addr expected &optional (tolerance 0.001) message)$/;"	f
+assert-word-equal	test/test-suite.lisp	/^(defun assert-word-equal (interp addr expected &optional message)$/;"	f
+average-scan-time	src/interpreter.lisp	/^(defmethod average-scan-time ((stats scan-statistics))$/;"	f
+bcd-to-int	src/math-lib.lisp	/^(defun bcd-to-int (bcd)$/;"	f
+blank-line-p	src/parser.lisp	/^(defun blank-line-p (line)$/;"	f
+block-instruction-p	src/web/ladder-render.lisp	/^(defun block-instruction-p (opcode)$/;"	f
+bool-addr-p	src/instructions.lisp	/^(defun bool-addr-p (str)$/;"	f
+branch-end-p	src/web/ladder-render.lisp	/^(defun branch-end-p (opcode)$/;"	f
+branch-start-p	src/web/ladder-render.lisp	/^(defun branch-start-p (opcode)$/;"	f
+branch-symbol-p	src/web/ladder-render.lisp	/^(defun branch-symbol-p (symbol)$/;"	f
+call-frame	src/interpreter.lisp	/^(defclass call-frame ()$/;"	f
+cell-to-js-format	src/web/ladder-render.lisp	/^(defun cell-to-js-format (cell)$/;"	f
+cell-to-matrixdata	src/web/ladder-render.lisp	/^(defun cell-to-matrixdata (cell)$/;"	f
+cell-to-plist	src/web/ladder-render.lisp	/^(defun cell-to-plist (cell)$/;"	f
+cl-symbol-to-js-symbol	src/web/ladder-render.lisp	/^(defun cl-symbol-to-js-symbol (symbol)$/;"	f
+close-branch-block	src/web/ladder-render.lisp	/^(defun close-branch-block (matrix)$/;"	f
+cntd-execute	src/timer-counter.lisp	/^(defun cntd-execute (data-table counter-addr count-input reset preset)$/;"	f
+cntu-execute	src/timer-counter.lisp	/^(defun cntu-execute (data-table counter-addr count-input reset preset)$/;"	f
+coil-instruction-p	src/web/ladder-render.lisp	/^(defun coil-instruction-p (opcode)$/;"	f
+collect-comments	src/parser.lisp	/^(defmethod collect-comments ((parser il-parser))$/;"	f
+comment-line-p	src/parser.lisp	/^(defun comment-line-p (line)$/;"	f
+compile-and	src/compiler.lisp	/^(defun compile-and (params)$/;"	f
+compile-ande	src/compiler.lisp	/^(defun compile-ande (params) (compile-compare :eq params :and))$/;"	f
+compile-andge	src/compiler.lisp	/^(defun compile-andge (params) (compile-compare :ge params :and))$/;"	f
+compile-andgt	src/compiler.lisp	/^(defun compile-andgt (params) (compile-compare :gt params :and))$/;"	f
+compile-andle	src/compiler.lisp	/^(defun compile-andle (params) (compile-compare :le params :and))$/;"	f
+compile-andlt	src/compiler.lisp	/^(defun compile-andlt (params) (compile-compare :lt params :and))$/;"	f
+compile-andn	src/compiler.lisp	/^(defun compile-andn (params)$/;"	f
+compile-andnd	src/compiler.lisp	/^(defun compile-andnd (params)$/;"	f
+compile-andne	src/compiler.lisp	/^(defun compile-andne (params) (compile-compare :ne params :and))$/;"	f
+compile-andpd	src/compiler.lisp	/^(defun compile-andpd (params)$/;"	f
+compile-andstr	src/compiler.lisp	/^(defun compile-andstr (params)$/;"	f
+compile-call	src/compiler.lisp	/^(defun compile-call (params subroutines)$/;"	f
+compile-cntd	src/compiler.lisp	/^(defun compile-cntd (params)$/;"	f
+compile-cntu	src/compiler.lisp	/^(defun compile-cntu (params)$/;"	f
+compile-compare	src/compiler.lisp	/^(defun compile-compare (op params stack-op)$/;"	f
+compile-copy	src/compiler.lisp	/^(defun compile-copy (params)$/;"	f
+compile-cpyblk	src/compiler.lisp	/^(defun compile-cpyblk (params)$/;"	f
+compile-end	src/compiler.lisp	/^(defun compile-end (params)$/;"	f
+compile-endc	src/compiler.lisp	/^(defun compile-endc (params)$/;"	f
+compile-fill	src/compiler.lisp	/^(defun compile-fill (params)$/;"	f
+compile-find	src/compiler.lisp	/^(defun compile-find (find-fn params)$/;"	f
+compile-findeq	src/compiler.lisp	/^(defun compile-findeq (params) (compile-find 'find-equal params))$/;"	f
+compile-findge	src/compiler.lisp	/^(defun compile-findge (params) (compile-find 'find-greater-equal params))$/;"	f
+compile-findgt	src/compiler.lisp	/^(defun compile-findgt (params) (compile-find 'find-greater params))$/;"	f
+compile-findieq	src/compiler.lisp	/^(defun compile-findieq (params) (compile-find 'findi-equal params))$/;"	f
+compile-findige	src/compiler.lisp	/^(defun compile-findige (params) (compile-find 'findi-greater-equal params))$/;"	f
+compile-findigt	src/compiler.lisp	/^(defun compile-findigt (params) (compile-find 'findi-greater params))$/;"	f
+compile-findile	src/compiler.lisp	/^(defun compile-findile (params) (compile-find 'findi-less-equal params))$/;"	f
+compile-findilt	src/compiler.lisp	/^(defun compile-findilt (params) (compile-find 'findi-less params))$/;"	f
+compile-findine	src/compiler.lisp	/^(defun compile-findine (params) (compile-find 'findi-not-equal params))$/;"	f
+compile-findle	src/compiler.lisp	/^(defun compile-findle (params) (compile-find 'find-less-equal params))$/;"	f
+compile-findlt	src/compiler.lisp	/^(defun compile-findlt (params) (compile-find 'find-less params))$/;"	f
+compile-findne	src/compiler.lisp	/^(defun compile-findne (params) (compile-find 'find-not-equal params))$/;"	f
+compile-for	src/compiler.lisp	/^(defun compile-for (params)$/;"	f
+compile-il-file	src/compiler.lisp	/^(defun compile-il-file (pathname)$/;"	f
+compile-il-string	src/compiler.lisp	/^(defun compile-il-string (source)$/;"	f
+compile-instruction	src/compiler.lisp	/^(defun compile-instruction (instr subroutines)$/;"	f
+compile-mathdec	src/compiler.lisp	/^(defun compile-mathdec (params)$/;"	f
+compile-mathhex	src/compiler.lisp	/^(defun compile-mathhex (params)$/;"	f
+compile-network	src/compiler.lisp	/^(defmethod compile-network ((compiler il-compiler) network subroutines-var)$/;"	f
+compile-networks	src/compiler.lisp	/^(defmethod compile-networks ((compiler il-compiler) networks subroutines-var)$/;"	f
+compile-next	src/compiler.lisp	/^(defun compile-next (params)$/;"	f
+compile-or	src/compiler.lisp	/^(defun compile-or (params)$/;"	f
+compile-ore	src/compiler.lisp	/^(defun compile-ore (params) (compile-compare :eq params :or))$/;"	f
+compile-orge	src/compiler.lisp	/^(defun compile-orge (params) (compile-compare :ge params :or))$/;"	f
+compile-orgt	src/compiler.lisp	/^(defun compile-orgt (params) (compile-compare :gt params :or))$/;"	f
+compile-orle	src/compiler.lisp	/^(defun compile-orle (params) (compile-compare :le params :or))$/;"	f
+compile-orlt	src/compiler.lisp	/^(defun compile-orlt (params) (compile-compare :lt params :or))$/;"	f
+compile-orn	src/compiler.lisp	/^(defun compile-orn (params)$/;"	f
+compile-ornd	src/compiler.lisp	/^(defun compile-ornd (params)$/;"	f
+compile-orne	src/compiler.lisp	/^(defun compile-orne (params) (compile-compare :ne params :or))$/;"	f
+compile-orpd	src/compiler.lisp	/^(defun compile-orpd (params)$/;"	f
+compile-orstr	src/compiler.lisp	/^(defun compile-orstr (params)$/;"	f
+compile-out	src/compiler.lisp	/^(defun compile-out (params)$/;"	f
+compile-pack	src/compiler.lisp	/^(defun compile-pack (params)$/;"	f
+compile-pd	src/compiler.lisp	/^(defun compile-pd (params)$/;"	f
+compile-program	src/compiler.lisp	/^(defmethod compile-program ((compiler il-compiler) parsed-program)$/;"	f
+compile-rst	src/compiler.lisp	/^(defun compile-rst (params)$/;"	f
+compile-rt	src/compiler.lisp	/^(defun compile-rt (params)$/;"	f
+compile-rtc	src/compiler.lisp	/^(defun compile-rtc (params)$/;"	f
+compile-set	src/compiler.lisp	/^(defun compile-set (params)$/;"	f
+compile-shfrg	src/compiler.lisp	/^(defun compile-shfrg (params)$/;"	f
+compile-str	src/compiler.lisp	/^(defun compile-str (params)$/;"	f
+compile-stre	src/compiler.lisp	/^(defun compile-stre (params) (compile-compare :eq params :str))$/;"	f
+compile-strge	src/compiler.lisp	/^(defun compile-strge (params) (compile-compare :ge params :str))$/;"	f
+compile-strgt	src/compiler.lisp	/^(defun compile-strgt (params) (compile-compare :gt params :str))$/;"	f
+compile-strle	src/compiler.lisp	/^(defun compile-strle (params) (compile-compare :le params :str))$/;"	f
+compile-strlt	src/compiler.lisp	/^(defun compile-strlt (params) (compile-compare :lt params :str))$/;"	f
+compile-strn	src/compiler.lisp	/^(defun compile-strn (params)$/;"	f
+compile-strnd	src/compiler.lisp	/^(defun compile-strnd (params)$/;"	f
+compile-strne	src/compiler.lisp	/^(defun compile-strne (params) (compile-compare :ne params :str))$/;"	f
+compile-strpd	src/compiler.lisp	/^(defun compile-strpd (params)$/;"	f
+compile-subroutine	src/compiler.lisp	/^(defmethod compile-subroutine ((compiler il-compiler) subroutine subroutines-var)$/;"	f
+compile-sum	src/compiler.lisp	/^(defun compile-sum (params)$/;"	f
+compile-test-program	test/test-suite.lisp	/^(defun compile-test-program (source-string)$/;"	f
+compile-tmr	src/compiler.lisp	/^(defun compile-tmr (params)$/;"	f
+compile-tmra	src/compiler.lisp	/^(defun compile-tmra (params)$/;"	f
+compile-tmroff	src/compiler.lisp	/^(defun compile-tmroff (params)$/;"	f
+compile-udc	src/compiler.lisp	/^(defun compile-udc (params)$/;"	f
+compile-unpack	src/compiler.lisp	/^(defun compile-unpack (params)$/;"	f
+compiled-program	src/compiler.lisp	/^(defclass compiled-program ()$/;"	f
+compiler-tests	test/test-suite.lisp	/^(def-suite compiler-tests$/;"	f
+contact-instruction-p	src/web/ladder-render.lisp	/^(defun contact-instruction-p (opcode)$/;"	f
+continuation-instruction-p	src/web/ladder-render.lisp	/^(defun continuation-instruction-p (opcode)$/;"	f
+control-instruction-p	src/web/ladder-render.lisp	/^(defun control-instruction-p (opcode)$/;"	f
+control-response	src/web/json-api.lisp	/^(defun control-response (action success &optional message)$/;"	f
+convert-value-for-json	src/web/json-api.lisp	/^(defun convert-value-for-json (value)$/;"	f
+copy-block	src/table-ops.lisp	/^(defun copy-block (data-table source-start source-end dest-start)$/;"	f
+copy-cell	src/web/ladder-render.lisp	/^(defun copy-cell (cell)$/;"	f
+copy-single	src/table-ops.lisp	/^(defun copy-single (data-table source dest)$/;"	f
+count-instructions	src/parser.lisp	/^(defun count-instructions (program)$/;"	f
+counter-data-addr	src/timer-counter.lisp	/^(defun counter-data-addr (counter-addr)$/;"	f
+counter-key	src/timer-counter.lisp	/^(defun counter-key (counter-addr suffix)$/;"	f
+create-dispatch-table	src/web/server.lisp	/^(defun create-dispatch-table ()$/;"	f
+current-line-number	src/parser.lisp	/^(defmethod current-line-number ((parser il-parser))$/;"	f
+data-response	src/web/json-api.lisp	/^(defun data-response (interpreter addresses)$/;"	f
+data-table	src/data-table.lisp	/^(defclass data-table ()$/;"	f
+data-table-tests	test/test-suite.lisp	/^(def-suite data-table-tests$/;"	f
+define-instruction	src/instructions.lisp	/^(defmacro define-instruction (opcode &key description type class$/;"	f
+determine-rungtype	src/web/ladder-render.lisp	/^(defun determine-rungtype (rung)$/;"	f
+error-response	src/web/json-api.lisp	/^(defun error-response (message &optional (code 400))$/;"	f
+expect-token	src/math-lib.lisp	/^(defun expect-token (expected)$/;"	f
+extract-addresses	src/web/ladder-render.lisp	/^(defun extract-addresses (instruction)$/;"	f
+extract-comment	src/parser.lisp	/^(defun extract-comment (line)$/;"	f
+fill-range	src/table-ops.lisp	/^(defun fill-range (data-table value dest-start dest-end)$/;"	f
+finalize-system-bits	src/interpreter.lisp	/^(defmethod finalize-system-bits ((interp plc-interpreter))$/;"	f
+find-equal	src/table-ops.lisp	/^(defun find-equal (data-table search-value search-start search-end result-addr result-flag)$/;"	f
+find-equal-inc	src/table-ops.lisp	/^(defun find-equal-inc (data-table search-value search-start search-end result-addr result-flag)$/;"	f
+find-greater	src/table-ops.lisp	/^(defun find-greater (data-table search-value search-start search-end result-addr result-flag)$/;"	f
+find-greater-equal	src/table-ops.lisp	/^(defun find-greater-equal (data-table search-value search-start search-end result-addr result-flag)$/;"	f
+find-greater-equal-inc	src/table-ops.lisp	/^(defun find-greater-equal-inc (data-table search-value search-start search-end result-addr result-flag)$/;"	f
+find-greater-inc	src/table-ops.lisp	/^(defun find-greater-inc (data-table search-value search-start search-end result-addr result-flag)$/;"	f
+find-instruction	src/instructions.lisp	/^(defun find-instruction (opcode)$/;"	f
+find-less	src/table-ops.lisp	/^(defun find-less (data-table search-value search-start search-end result-addr result-flag)$/;"	f
+find-less-equal	src/table-ops.lisp	/^(defun find-less-equal (data-table search-value search-start search-end result-addr result-flag)$/;"	f
+find-less-equal-inc	src/table-ops.lisp	/^(defun find-less-equal-inc (data-table search-value search-start search-end result-addr result-flag)$/;"	f
+find-less-inc	src/table-ops.lisp	/^(defun find-less-inc (data-table search-value search-start search-end result-addr result-flag)$/;"	f
+find-not-equal	src/table-ops.lisp	/^(defun find-not-equal (data-table search-value search-start search-end result-addr result-flag)$/;"	f
+find-not-equal-inc	src/table-ops.lisp	/^(defun find-not-equal-inc (data-table search-value search-start search-end result-addr result-flag)$/;"	f
+find-static-directory	src/web/server.lisp	/^(defun find-static-directory ()$/;"	f
+findi-equal	src/table-ops.lisp	/^(defun findi-equal (data-table search-value search-start search-end result-addr result-flag)$/;"	f
+findi-greater	src/table-ops.lisp	/^(defun findi-greater (data-table search-value search-start search-end result-addr result-flag)$/;"	f
+findi-greater-equal	src/table-ops.lisp	/^(defun findi-greater-equal (data-table search-value search-start search-end result-addr result-flag)$/;"	f
+findi-less	src/table-ops.lisp	/^(defun findi-less (data-table search-value search-start search-end result-addr result-flag)$/;"	f
+findi-less-equal	src/table-ops.lisp	/^(defun findi-less-equal (data-table search-value search-start search-end result-addr result-flag)$/;"	f
+findi-not-equal	src/table-ops.lisp	/^(defun findi-not-equal (data-table search-value search-start search-end result-addr result-flag)$/;"	f
+fix-orphaned-fork-connectors	src/web/ladder-render.lisp	/^(defun fix-orphaned-fork-connectors (matrix)$/;"	f
+float-addr-p	src/instructions.lisp	/^(defun float-addr-p (str)$/;"	f
+format-json-value	src/web/json-api.lisp	/^(defun format-json-value (value type)$/;"	f
+format-monitor-info	src/web/ladder-render.lisp	/^(defun format-monitor-info (cell)$/;"	f
+gen-get-bool	src/compiler.lisp	/^(defun gen-get-bool (addr)$/;"	f
+gen-get-float	src/compiler.lisp	/^(defun gen-get-float (addr)$/;"	f
+gen-get-string	src/compiler.lisp	/^(defun gen-get-string (addr)$/;"	f
+gen-get-value	src/compiler.lisp	/^(defun gen-get-value (addr)$/;"	f
+gen-get-word	src/compiler.lisp	/^(defun gen-get-word (addr)$/;"	f
+gen-set-bool	src/compiler.lisp	/^(defun gen-set-bool (addr value)$/;"	f
+gen-set-float	src/compiler.lisp	/^(defun gen-set-float (addr value)$/;"	f
+gen-set-string	src/compiler.lisp	/^(defun gen-set-string (addr value)$/;"	f
+gen-set-value	src/compiler.lisp	/^(defun gen-set-value (addr value)$/;"	f
+gen-set-word	src/compiler.lisp	/^(defun gen-set-word (addr value)$/;"	f
+generate-address-range	src/table-ops.lisp	/^(defun generate-address-range (start-addr end-addr)$/;"	f
+generate-addresses	src/data-table.lisp	/^(defun generate-addresses (prefix start end)$/;"	f
+get-address-value	src/web/json-api.lisp	/^(defun get-address-value (interpreter address)$/;"	f
+get-all-monitored-addresses	src/web/json-api.lisp	/^(defun get-all-monitored-addresses (interpreter subrname)$/;"	f
+get-bool	src/data-table.lisp	/^(defun get-bool (dt address)$/;"	f
+get-bool-value	src/interpreter.lisp	/^(defmethod get-bool-value ((interp plc-interpreter) address)$/;"	f
+get-float	src/data-table.lisp	/^(defun get-float (dt address)$/;"	f
+get-float-value	src/interpreter.lisp	/^(defmethod get-float-value ((interp plc-interpreter) address)$/;"	f
+get-monitor-type	src/web/ladder-render.lisp	/^(defun get-monitor-type (instruction)$/;"	f
+get-string	src/data-table.lisp	/^(defun get-string (dt address)$/;"	f
+get-value	src/table-ops.lisp	/^(defun get-value (data-table addr)$/;"	f
+get-word	src/data-table.lisp	/^(defun get-word (dt address)$/;"	f
+get-word-value	src/interpreter.lisp	/^(defmethod get-word-value ((interp plc-interpreter) address)$/;"	f
+handle-api-control-start	src/web/server.lisp	/^(defun handle-api-control-start ()$/;"	f
+handle-api-control-step	src/web/server.lisp	/^(defun handle-api-control-step ()$/;"	f
+handle-api-control-stop	src/web/server.lisp	/^(defun handle-api-control-stop ()$/;"	f
+handle-api-data	src/web/server.lisp	/^(defun handle-api-data ()$/;"	f
+handle-api-ladder-js	src/web/server.lisp	/^(defun handle-api-ladder-js ()$/;"	f
+handle-api-program	src/web/server.lisp	/^(defun handle-api-program ()$/;"	f
+handle-api-statistics	src/web/server.lisp	/^(defun handle-api-statistics ()$/;"	f
+handle-api-subroutines	src/web/server.lisp	/^(defun handle-api-subroutines ()$/;"	f
+handle-runtime-error	src/interpreter.lisp	/^(defmethod handle-runtime-error ((interp plc-interpreter) error)$/;"	f
+has-fork-column-p	src/web/ladder-render.lisp	/^(defun has-fork-column-p (matrix)$/;"	f
+hash-key-exists-p	test/test-data-table.lisp	/^(defun hash-key-exists-p (key hash-table)$/;"	f
+hex-constant-p	src/instructions.lisp	/^(defun hex-constant-p (str)$/;"	f
+il-compiler	src/compiler.lisp	/^(defclass il-compiler ()$/;"	f
+il-parser	src/parser.lisp	/^(defclass il-parser ()$/;"	f
+init-boolean-addresses	src/data-table.lisp	/^(defun init-boolean-addresses (dt)$/;"	f
+init-data-table	src/data-table.lisp	/^(defun init-data-table (dt)$/;"	f
+init-float-addresses	src/data-table.lisp	/^(defun init-float-addresses (dt)$/;"	f
+init-string-addresses	src/data-table.lisp	/^(defun init-string-addresses (dt)$/;"	f
+init-word-addresses	src/data-table.lisp	/^(defun init-word-addresses (dt)$/;"	f
+initialize-parser	src/parser.lisp	/^(defmethod initialize-parser ((parser il-parser))$/;"	f
+initialize-static-directory	src/web/server.lisp	/^(defun initialize-static-directory ()$/;"	f
+install-dispatch-table	src/web/server.lisp	/^(defun install-dispatch-table ()$/;"	f
+instruction-class	src/instructions.lisp	/^(deftype instruction-class ()$/;"	f
+instruction-count	src/instructions.lisp	/^(defun instruction-count ()$/;"	f
+instruction-to-cell	src/web/ladder-render.lisp	/^(defun instruction-to-cell (instruction col)$/;"	f
+instruction-type	src/instructions.lisp	/^(deftype instruction-type ()$/;"	f
+int-to-bcd	src/math-lib.lisp	/^(defun int-to-bcd (int)$/;"	f
+integration-tests	test/test-suite.lisp	/^(def-suite integration-tests$/;"	f
+interpreter-running-p	src/interpreter.lisp	/^(defmethod interpreter-running-p ((interp plc-interpreter))$/;"	f
+interpreter-tests	test/test-suite.lisp	/^(def-suite interpreter-tests$/;"	f
+ladder-cell	src/web/ladder-render.lisp	/^(defstruct ladder-cell$/;"	f
+ladder-program	src/web/ladder-render.lisp	/^(defstruct ladder-program$/;"	f
+ladder-program-to-js-format	src/web/ladder-render.lisp	/^(defun ladder-program-to-js-format (ladder-prog)$/;"	f
+ladder-program-to-matrixdata	src/web/ladder-render.lisp	/^(defun ladder-program-to-matrixdata (ladder-prog)$/;"	f
+ladder-program-to-plist	src/web/ladder-render.lisp	/^(defun ladder-program-to-plist (ladder-prog)$/;"	f
+ladder-rung	src/web/ladder-render.lisp	/^(defstruct ladder-rung$/;"	f
+ladsymb-to-svg-symbol	src/web/ladder-render.lisp	/^(defun ladsymb-to-svg-symbol (ladsymb opcode)$/;"	f
+ld-visualization-tests	test/test-ld-visualization.lisp	/^(def-suite ld-visualization-tests$/;"	f
+library-tests	test/test-suite.lisp	/^(def-suite library-tests$/;"	f
+list-instructions	src/instructions.lisp	/^(defun list-instructions ()$/;"	f
+list-instructions-by-class	src/instructions.lisp	/^(defun list-instructions-by-class (class)$/;"	f
+list-of-plists-p	src/web/json-api.lisp	/^(defun list-of-plists-p (value)$/;"	f
+list-subroutine-names	src/web/ladder-render.lisp	/^(defun list-subroutine-names (parsed-program)$/;"	f
+list-to-json	src/web/json-api.lisp	/^(defun list-to-json (list)$/;"	f
+make-address	src/table-ops.lisp	/^(defun make-address (prefix index)$/;"	f
+make-branch-cell	src/web/ladder-render.lisp	/^(defun make-branch-cell (symbol &key (row 0) (col 0))$/;"	f
+make-branch-l-cell	src/web/ladder-render.lisp	/^(defun make-branch-l-cell (&key (row 0) (col 0))$/;"	f
+make-branch-r-cell	src/web/ladder-render.lisp	/^(defun make-branch-r-cell (&key (row 0) (col 0))$/;"	f
+make-branch-tl-cell	src/web/ladder-render.lisp	/^(defun make-branch-tl-cell (&key (row 0) (col 0))$/;"	f
+make-branch-tr-cell	src/web/ladder-render.lisp	/^(defun make-branch-tr-cell (&key (row 0) (col 0))$/;"	f
+make-branch-ttl-cell	src/web/ladder-render.lisp	/^(defun make-branch-ttl-cell (&key (row 0) (col 0))$/;"	f
+make-branch-ttr-cell	src/web/ladder-render.lisp	/^(defun make-branch-ttr-cell (&key (row 0) (col 0))$/;"	f
+make-coil-cell	src/web/ladder-render.lisp	/^(defun make-coil-cell (opcode addr col row &optional is-range)$/;"	f
+make-data-table	src/data-table.lisp	/^(defun make-data-table ()$/;"	f
+make-hbar-cell	src/web/ladder-render.lisp	/^(defun make-hbar-cell (&key (row 0) (col 0))$/;"	f
+make-il-compiler	src/compiler.lisp	/^(defun make-il-compiler ()$/;"	f
+make-il-parser	src/parser.lisp	/^(defun make-il-parser (&key source)$/;"	f
+make-instruction-set	src/instructions.lisp	/^(defun make-instruction-set ()$/;"	f
+make-plc-interpreter	src/interpreter.lisp	/^(defun make-plc-interpreter (&key program data-table error-handler)$/;"	f
+make-scan-statistics	src/interpreter.lisp	/^(defun make-scan-statistics ()$/;"	f
+make-test-data-table	test/test-suite.lisp	/^(defun make-test-data-table ()$/;"	f
+make-test-instruction	test/test-ld-visualization.lisp	/^(defun make-test-instruction (opcode &rest params)$/;"	f
+make-vbar-l-cell	src/web/ladder-render.lisp	/^(defun make-vbar-l-cell (&key (row 0) (col 0))$/;"	f
+make-vbar-r-cell	src/web/ladder-render.lisp	/^(defun make-vbar-r-cell (&key (row 0) (col 0))$/;"	f
+mathdec	src/math-lib.lisp	/^(defun mathdec (data-table dest-addr flags expression)$/;"	f
+mathhex	src/math-lib.lisp	/^(defun mathhex (data-table dest-addr flags expression)$/;"	f
+matrix-height	src/web/ladder-render.lisp	/^(defun matrix-height (matrix)$/;"	f
+matrix-width	src/web/ladder-render.lisp	/^(defun matrix-width (matrix)$/;"	f
+merge-matrix-below	src/web/ladder-render.lisp	/^(defun merge-matrix-below (original-matrix new-matrix)$/;"	f
+merge-matrix-right	src/web/ladder-render.lisp	/^(defun merge-matrix-right (original-matrix new-matrix)$/;"	f
+multi-address-coil-p	src/web/ladder-render.lisp	/^(defun multi-address-coil-p (opcode params)$/;"	f
+network-to-ladder-rung	src/web/ladder-render.lisp	/^(defun network-to-ladder-rung (network)$/;"	f
+networks-to-ladder	src/web/ladder-render.lisp	/^(defun networks-to-ladder (networks name)$/;"	f
+next-line	src/parser.lisp	/^(defmethod next-line ((parser il-parser))$/;"	f
+next-token	src/math-lib.lisp	/^(defun next-token ()$/;"	f
+numeric-p	src/instructions.lisp	/^(defun numeric-p (str)$/;"	f
+or-instruction-p	src/web/ladder-render.lisp	/^(defun or-instruction-p (opcode)$/;"	f
+orstr-instruction-p	src/web/ladder-render.lisp	/^(defun orstr-instruction-p (opcode)$/;"	f
+output-block-instruction-p	src/web/ladder-render.lisp	/^(defun output-block-instruction-p (opcode)$/;"	f
+pack-bits	src/table-ops.lisp	/^(defun pack-bits (data-table source-start source-end dest)$/;"	f
+parse-additive	src/math-lib.lisp	/^(defun parse-additive ()$/;"	f
+parse-address	src/table-ops.lisp	/^(defun parse-address (addr)$/;"	f
+parse-address-list	src/web/json-api.lisp	/^(defun parse-address-list (addr-string)$/;"	f
+parse-bitwise-and	src/math-lib.lisp	/^(defun parse-bitwise-and ()$/;"	f
+parse-bitwise-or	src/math-lib.lisp	/^(defun parse-bitwise-or ()$/;"	f
+parse-bitwise-xor	src/math-lib.lisp	/^(defun parse-bitwise-xor ()$/;"	f
+parse-comparison	src/math-lib.lisp	/^(defun parse-comparison ()$/;"	f
+parse-expression	src/math-lib.lisp	/^(defun parse-expression ()$/;"	f
+parse-factor	src/math-lib.lisp	/^(defun parse-factor ()$/;"	f
+parse-function-call	src/math-lib.lisp	/^(defun parse-function-call (name args)$/;"	f
+parse-il-file	src/parser.lisp	/^(defun parse-il-file (pathname)$/;"	f
+parse-il-string	src/parser.lisp	/^(defun parse-il-string (source)$/;"	f
+parse-instruction-line	src/parser.lisp	/^(defun parse-instruction-line (line line-number)$/;"	f
+parse-math-expression	src/parser.lisp	/^(defun parse-math-expression (tokens)$/;"	f
+parse-network	src/parser.lisp	/^(defmethod parse-network ((parser il-parser) network-number)$/;"	f
+parse-number-literal	src/math-lib.lisp	/^(defun parse-number-literal (tok)$/;"	f
+parse-power	src/math-lib.lisp	/^(defun parse-power ()$/;"	f
+parse-primary	src/math-lib.lisp	/^(defun parse-primary ()$/;"	f
+parse-program	src/parser.lisp	/^(defmethod parse-program ((parser il-parser))$/;"	f
+parse-subroutine	src/parser.lisp	/^(defmethod parse-subroutine ((parser il-parser) name line-number)$/;"	f
+parse-term	src/math-lib.lisp	/^(defun parse-term ()$/;"	f
+parse-test-il	test/test-ld-visualization.lisp	/^(defun parse-test-il (source)$/;"	f
+parse-time-value	src/compiler.lisp	/^(defun parse-time-value (value unit)$/;"	f
+parse-value	src/compiler.lisp	/^(defun parse-value (param)$/;"	f
+parse-variable-ref	src/math-lib.lisp	/^(defun parse-variable-ref (name)$/;"	f
+parsed-instruction	src/parser.lisp	/^(defclass parsed-instruction ()$/;"	f
+parsed-network	src/parser.lisp	/^(defclass parsed-network ()$/;"	f
+parsed-program	src/parser.lisp	/^(defclass parsed-program ()$/;"	f
+parsed-subroutine	src/parser.lisp	/^(defclass parsed-subroutine ()$/;"	f
+parser-networks	src/parser.lisp	/^(defun parser-networks (parser)$/;"	f
+parser-subroutines	src/parser.lisp	/^(defun parser-subroutines (parser)$/;"	f
+parser-tests	test/test-suite.lisp	/^(def-suite parser-tests$/;"	f
+peek-line	src/parser.lisp	/^(defmethod peek-line ((parser il-parser))$/;"	f
+peek-token	src/math-lib.lisp	/^(defun peek-token ()$/;"	f
+performance-tests	test/test-suite.lisp	/^(def-suite performance-tests$/;"	f
+plc-compile-error	src/compiler.lisp	/^(define-condition plc-compile-error (error)$/;"	f
+plc-end-condition	src/compiler.lisp	/^(define-condition plc-end-condition (condition)$/;"	f
+plc-instruction	src/instructions.lisp	/^(defclass plc-instruction ()$/;"	f
+plc-interpreter	src/interpreter.lisp	/^(defclass plc-interpreter ()$/;"	f
+plc-parse-error	src/parser.lisp	/^(define-condition plc-parse-error (error)$/;"	f
+plc-return-condition	src/compiler.lisp	/^(define-condition plc-return-condition (condition)$/;"	f
+plc-runtime-error	src/interpreter.lisp	/^(define-condition plc-runtime-error (error)$/;"	f
+plc-thread-running-p	src/web/server.lisp	/^(defun plc-thread-running-p ()$/;"	f
+plist-p	src/web/json-api.lisp	/^(defun plist-p (value)$/;"	f
+plist-to-alist	src/web/json-api.lisp	/^(defun plist-to-alist (plist)$/;"	f
+plist-to-json	src/web/json-api.lisp	/^(defun plist-to-json (plist)$/;"	f
+print-instruction-summary	src/instructions.lisp	/^(defun print-instruction-summary ()$/;"	f
+print-interpreter-status	src/interpreter.lisp	/^(defmethod print-interpreter-status ((interp plc-interpreter) &optional (stream t))$/;"	f
+print-network-detail	src/parser.lisp	/^(defun print-network-detail (network &optional (stream t))$/;"	f
+print-object	src/instructions.lisp	/^(defmethod print-object ((instr plc-instruction) stream)$/;"	f
+print-object	src/interpreter.lisp	/^(defmethod print-object ((frame call-frame) stream)$/;"	f
+print-object	src/parser.lisp	/^(defmethod print-object ((net parsed-network) stream)$/;"	f
+print-object	src/parser.lisp	/^(defmethod print-object ((pinstr parsed-instruction) stream)$/;"	f
+print-object	src/parser.lisp	/^(defmethod print-object ((sbr parsed-subroutine) stream)$/;"	f
+print-parsed-program	src/parser.lisp	/^(defun print-parsed-program (program &optional (stream t))$/;"	f
+print-rung3-matrix	test/test-rung3-simple.lisp	/^(defun print-rung3-matrix ()$/;"	f
+program-js-response	src/web/json-api.lisp	/^(defun program-js-response (interpreter subrname)$/;"	f
+program-response	src/web/json-api.lisp	/^(defun program-response (interpreter subrname &key (format :matrixdata))$/;"	f
+program-to-ladder	src/web/ladder-render.lisp	/^(defun program-to-ladder (parsed-program &optional (name "main"))$/;"	f
+quick-start	src/web/server.lisp	/^(defun quick-start (il-source &key (port 8080))$/;"	f
+quick-test	src/interpreter.lisp	/^(defun quick-test (source inputs expected-outputs)$/;"	f
+read-test-file	test/test-suite.lisp	/^(defun read-test-file (filename)$/;"	f
+register-instruction	src/instructions.lisp	/^(defun register-instruction (instr)$/;"	f
+run-continuous	src/interpreter.lisp	/^(defmethod run-continuous ((interp plc-interpreter) &key (max-scans nil) (target-scan-time nil))$/;"	f
+run-il-file	src/interpreter.lisp	/^(defun run-il-file (pathname &key (max-scans 1) data-table)$/;"	f
+run-il-string	src/interpreter.lisp	/^(defun run-il-string (source &key (max-scans 1) data-table)$/;"	f
+run-integration-tests	test/test-suite.lisp	/^(defun run-integration-tests ()$/;"	f
+run-performance-tests	test/test-suite.lisp	/^(defun run-performance-tests ()$/;"	f
+run-quick-tests	test/test-suite.lisp	/^(defun run-quick-tests ()$/;"	f
+run-scan	src/interpreter.lisp	/^(defmethod run-scan ((interp plc-interpreter))$/;"	f
+run-test-program	test/test-suite.lisp	/^(defun run-test-program (source-string &key (max-scans 1) inputs)$/;"	f
+run-tests	test/test-suite.lisp	/^(defun run-tests ()$/;"	f
+run-web-tests	test/test-suite.lisp	/^(defun run-web-tests ()$/;"	f
+rung-to-js-format	src/web/ladder-render.lisp	/^(defun rung-to-js-format (rung rung-index)$/;"	f
+rung-to-matrixdata	src/web/ladder-render.lisp	/^(defun rung-to-matrixdata (rung)$/;"	f
+rung-to-plist	src/web/ladder-render.lisp	/^(defun rung-to-plist (rung)$/;"	f
+rung3-symbol-matrix	test/test-rung3-simple.lisp	/^(defun rung3-symbol-matrix ()$/;"	f
+rungtype-for-output	src/web/ladder-render.lisp	/^(defun rungtype-for-output (opcode)$/;"	f
+scan-statistics	src/interpreter.lisp	/^(defclass scan-statistics ()$/;"	f
+search-compare	src/table-ops.lisp	/^(defun search-compare (compare-type value1 value2)$/;"	f
+search-table	src/table-ops.lisp	/^(defun search-table (data-table search-value search-start search-end$/;"	f
+serve-static-file	src/web/server.lisp	/^(defun serve-static-file (path)$/;"	f
+set-bits	src/table-ops.lisp	/^(defun set-bits (data-table value start-addr end-addr)$/;"	f
+set-bool	src/data-table.lisp	/^(defun set-bool (dt address value)$/;"	f
+set-bool-value	src/interpreter.lisp	/^(defmethod set-bool-value ((interp plc-interpreter) address value)$/;"	f
+set-float	src/data-table.lisp	/^(defun set-float (dt address value)$/;"	f
+set-float-value	src/interpreter.lisp	/^(defmethod set-float-value ((interp plc-interpreter) address value)$/;"	f
+set-string	src/data-table.lisp	/^(defun set-string (dt address value)$/;"	f
+set-value	src/table-ops.lisp	/^(defun set-value (data-table addr value)$/;"	f
+set-word	src/data-table.lisp	/^(defun set-word (dt address value)$/;"	f
+set-word-value	src/interpreter.lisp	/^(defmethod set-word-value ((interp plc-interpreter) address value)$/;"	f
+shfrg-execute	src/table-ops.lisp	/^(defun shfrg-execute (data-table start-addr end-addr reset clock data-in)$/;"	f
+shift-register	src/table-ops.lisp	/^(defun shift-register (data-table data-in clock last-clock reset start-addr end-addr)$/;"	f
+show-generated-code	src/compiler.lisp	/^(defun show-generated-code (source)$/;"	f
+skip-blank-lines	src/parser.lisp	/^(defmethod skip-blank-lines ((parser il-parser))$/;"	f
+split-into-lines	src/parser.lisp	/^(defun split-into-lines (source)$/;"	f
+start-plc-thread	src/web/server.lisp	/^(defun start-plc-thread ()$/;"	f
+start-web-server	src/web/server.lisp	/^(defun start-web-server (&key (port 8080) interpreter)$/;"	f
+statistics-response	src/web/json-api.lisp	/^(defun statistics-response (interpreter)$/;"	f
+step-plc	src/web/server.lisp	/^(defun step-plc ()$/;"	f
+step-scan	src/interpreter.lisp	/^(defmethod step-scan ((interp plc-interpreter))$/;"	f
+stop-interpreter	src/interpreter.lisp	/^(defmethod stop-interpreter ((interp plc-interpreter))$/;"	f
+stop-plc-thread	src/web/server.lisp	/^(defun stop-plc-thread ()$/;"	f
+stop-web-server	src/web/server.lisp	/^(defun stop-web-server ()$/;"	f
+store-instruction-p	src/web/ladder-render.lisp	/^(defun store-instruction-p (opcode)$/;"	f
+string-addr-p	src/instructions.lisp	/^(defun string-addr-p (str)$/;"	f
+string-keyed-alist-p	src/web/json-api.lisp	/^(defun string-keyed-alist-p (value)$/;"	f
+subroutine-list-response	src/web/json-api.lisp	/^(defun subroutine-list-response (interpreter)$/;"	f
+substitute-data-table	src/compiler.lisp	/^(defun substitute-data-table (code)$/;"	f
+sum-range	src/math-lib.lisp	/^(defun sum-range (data-table start-addr end-addr dest-addr flags)$/;"	f
+sum-table	src/table-ops.lisp	/^(defun sum-table (data-table source-start source-end dest)$/;"	f
+test-program	src/interpreter.lisp	/^(defun test-program (source &key (scans 1) inputs)$/;"	f
+time-unit-p	src/instructions.lisp	/^(defun time-unit-p (str)$/;"	f
+timer-data-addr	src/timer-counter.lisp	/^(defun timer-data-addr (timer-addr)$/;"	f
+timer-key	src/timer-counter.lisp	/^(defun timer-key (timer-addr suffix)$/;"	f
+tmr-execute	src/timer-counter.lisp	/^(defun tmr-execute (data-table timer-addr enable preset scan-time)$/;"	f
+tmra-execute	src/timer-counter.lisp	/^(defun tmra-execute (data-table timer-addr enable reset preset scan-time)$/;"	f
+tmroff-execute	src/timer-counter.lisp	/^(defun tmroff-execute (data-table timer-addr enable preset scan-time)$/;"	f
+tokenize-line	src/parser.lisp	/^(defun tokenize-line (line)$/;"	f
+tokenize-math-expr	src/math-lib.lisp	/^(defun tokenize-math-expr (expr)$/;"	f
+trim-whitespace	src/parser.lisp	/^(defun trim-whitespace (str)$/;"	f
+udc-execute	src/timer-counter.lisp	/^(defun udc-execute (data-table counter-addr up-input down-input reset preset)$/;"	f
+unpack-bits	src/table-ops.lisp	/^(defun unpack-bits (data-table source dest-start dest-end)$/;"	f
+update-statistics	src/interpreter.lisp	/^(defmethod update-statistics ((stats scan-statistics) scan-time-ms)$/;"	f
+update-system-bits	src/interpreter.lisp	/^(defmethod update-system-bits ((interp plc-interpreter))$/;"	f
+validate-instruction	src/instructions.lisp	/^(defgeneric validate-instruction (instr params)$/;"	f
+validate-instruction	src/instructions.lisp	/^(defmethod validate-instruction ((instr plc-instruction) params)$/;"	f
+vertical-branch-symbol-p	src/web/ladder-render.lisp	/^(defun vertical-branch-symbol-p (symbol)$/;"	f
+web-server-running-p	src/web/server.lisp	/^(defun web-server-running-p ()$/;"	f
+with-test-data-table	test/test-suite.lisp	/^(defmacro with-test-data-table ((var) &body body)$/;"	f
+word-addr-p	src/instructions.lisp	/^(defun word-addr-p (str)$/;"	f

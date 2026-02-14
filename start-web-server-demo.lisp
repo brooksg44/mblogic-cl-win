@@ -63,4 +63,9 @@
 (format t "~%")
 
 ;; Keep server running
-(loop (sleep 1))
+(handler-case
+    (loop (sleep 1))
+  (sb-sys:interactive-interrupt ()
+    (format t "~&Stopping server...~%")
+    (uiop:quit)))
+
