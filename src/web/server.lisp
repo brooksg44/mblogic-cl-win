@@ -321,9 +321,14 @@
 
 (defun quick-start (il-source &key (port 8080))
   "Quickly start a web server with an IL program.
-   IL-SOURCE: IL program string or pathname"
-  (let* ((compiled (if (pathnamep il-source)
-                       (mblogic-cl:compile-il-file il-source)
+   IL-SOURCE: IL program string, pathname, or file path string"
+  (let* ((is-file (or (pathnamep il-source)
+                      (and (stringp il-source)
+                           (probe-file il-source))))
+         (compiled (if is-file
+                       (mblogic-cl:compile-il-file (if (stringp il-source)
+                                                        (pathname il-source)
+                                                        il-source))
                        (mblogic-cl:compile-il-string il-source)))
          (interp (mblogic-cl:make-plc-interpreter :program compiled)))
     (start-web-server :port port :interpreter interp)))
