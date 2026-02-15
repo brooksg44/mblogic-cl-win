@@ -24,15 +24,25 @@ document.addEventListener("DOMContentLoaded", function() {
     loadLadderDiagram("main");
 
     // Setup event handlers
-    document.getElementById("subr-select").addEventListener("change", function(e) {
-        CurrentSubroutine = e.target.value;
-        loadLadderDiagram(CurrentSubroutine);
-    });
+    var subrSelect = document.getElementById("subr-select");
+    if (subrSelect) {
+        subrSelect.addEventListener("change", function(e) {
+            CurrentSubroutine = e.target.value;
+            loadLadderDiagram(CurrentSubroutine);
+        });
+    }
 
-    document.getElementById("btn-start").addEventListener("click", startPLC);
-    document.getElementById("btn-stop").addEventListener("click", stopPLC);
-    document.getElementById("btn-step").addEventListener("click", stepPLC);
-    document.getElementById("btn-monitor").addEventListener("click", updateMonitor);
+    var btnStart = document.getElementById("btn-start");
+    if (btnStart) btnStart.addEventListener("click", startPLC);
+
+    var btnStop = document.getElementById("btn-stop");
+    if (btnStop) btnStop.addEventListener("click", stopPLC);
+
+    var btnStep = document.getElementById("btn-step");
+    if (btnStep) btnStep.addEventListener("click", stepPLC);
+
+    var btnMonitor = document.getElementById("btn-monitor");
+    if (btnMonitor) btnMonitor.addEventListener("click", updateMonitor);
 });
 
 function loadSubroutineList() {
