@@ -25,6 +25,9 @@
 <!-- Demo data. TODOL Remove. -->
 <script type="text/javascript" src="/js/demodata.js"></script>
 
+<!-- Ladder monitor - loads and displays ladder diagrams from API -->
+<script type="text/javascript" src="/js/ladmonitor.js"></script>
+
 <!-- <script type="text/javascript" src="demodata_3.js"></script>
  -->
 
@@ -56,9 +59,9 @@
 	<div id="datadisplay">
 	<h1>Ladder Editor Demo</h1>
 
-	<div style="margin: 10px 0;">
-		<label for="subr-select">Select Subroutine:</label>
-		<select id="subr-select">
+	<div style="margin: 15px 0; padding: 10px; background-color: #f5f5f5; border-radius: 4px;">
+		<label for="subr-select" style="font-weight: bold; margin-right: 10px;">Select Subroutine:</label>
+		<select id="subr-select" style="padding: 8px 12px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; background-color: white; cursor: pointer; min-width: 200px;">
 			<option value="main">main</option>
 		</select>
 	</div>
